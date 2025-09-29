@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "@/utils/supabase";
 import { ToolCard } from "@/components/tools/ToolCard";
 import {
@@ -32,24 +33,31 @@ const PRICE_OPTIONS = [
   { value: "paid", label: "Paid" },
 ];
 
+// Price values considered "free" for the filter
+const FREE_TIERS = ['Free', 'freemium', 'freeai', 'freetrial'];
+
+
 export default function AllToolsPage() {
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get("category");
+
   const [tools, setTools] = useState<Tool[]>([]);
   const [filteredTools, setFilteredTools] = useState<Tool[]>([]);
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] = useState(
+    categoryParam ? categoryParam : "all"
+  );
   const [priceFilter, setPriceFilter] = useState("all");
   const [categories, setCategories] = useState<string[]>([]);
 
   // Fetch tools and categories
   useEffect(() => {
     async function fetchTools() {
-      const { data, error } = (await supabase
+      // Fetch ALL tool data
+      const { data, error } = await supabase
         .from("tools")
-        .select("id,name,slug,one_line_description,price,url,category")
-        .order("name", { ascending: true })) as {
-        data: Tool[] | null;
-        error: any | null;
-      };
+        .select("id,name,slug,one_line_description,price,url,logo,category")
+        .order("name", { ascending: true }) as { data: Tool[] | null, error: any | null };
 
       if (error) {
         console.error("Supabase Fetch Error:", error);
@@ -58,7 +66,6 @@ export default function AllToolsPage() {
 
       const fetchedTools = data || [];
       setTools(fetchedTools);
-      setFilteredTools(fetchedTools);
 
       // Extract unique categories and sort alphabetically
       const uniqueCategories = Array.from(
@@ -66,10 +73,29 @@ export default function AllToolsPage() {
       ).sort((a, b) => a.localeCompare(b));
 
       setCategories(uniqueCategories);
+
+      // If we have a category from URL, convert from slug to actual category name
+      if (categoryParam) {
+        const formattedCategoryName = categoryParam
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+
+        // Check if this category exists in our data
+        if (
+          uniqueCategories.some(
+            (cat) => cat.toLowerCase() === formattedCategoryName.toLowerCase()
+          )
+        ) {
+          setCategory(formattedCategoryName);
+        }
+      }
+
+      setFilteredTools(fetchedTools);
     }
 
     fetchTools();
-  }, []);
+  }, [categoryParam]);
 
   // Filter tools based on search, category, and price
   useEffect(() => {
@@ -82,11 +108,17 @@ export default function AllToolsPage() {
     }
 
     if (category !== "all") {
-      filtered = filtered.filter((tool) => tool.category === category);
+      filtered = filtered.filter((tool) => {
+        if (!tool.category) return false;
+        return tool.category.toLowerCase() === category.toLowerCase();
+      });
     }
 
-    if (priceFilter !== "all") {
-      filtered = filtered.filter((tool) => tool.price === priceFilter);
+    // C. Price Filter (Uses the defined FREE_TIERS and checks for 'paid')
+    if (priceFilter === "free") {
+      filtered = filtered.filter((tool) => FREE_TIERS.includes(tool.price));
+    } else if (priceFilter === "paid") {
+      filtered = filtered.filter((tool) => tool.price === 'paid');
     }
 
     setFilteredTools(filtered);

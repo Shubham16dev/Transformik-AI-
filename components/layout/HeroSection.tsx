@@ -6,7 +6,7 @@ export function HeroSection() {
   return (
     <section className="relative bg-[#181828] text-white py-20 w-full overflow-hidden">
       {/* Background decorations */}
-      <div className="absolute inset-0 bg-gradient-to-r from-gray-800/20 to-gray-600/20" />
+      <div className="absolute inset-0 bg-gradient-to-r from-gray-800/20 to-purple-600/20" />
       <div className="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full blur-xl" />
       <div className="absolute bottom-10 left-10 w-24 h-24 bg-white/10 rounded-full blur-lg" />
 

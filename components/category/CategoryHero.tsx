@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 
-export function CategoriesHero() {
+export function CategoryHero() {
   return (
     <section className="relative bg-[#181828] text-white py-16 w-full overflow-hidden">
       {/* Background decorations */}

@@ -113,7 +113,7 @@ export default async function ToolDetailPage({
                   description: tool.one_line_description,
                   price: tool.price,
                   url: tool.url,
-                  logo: tool.logo,
+                  // logo: tool.logo,
                 }}
               />
             ))}

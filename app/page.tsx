@@ -1,6 +1,7 @@
 import { supabase } from "@/utils/supabase";
 import { ToolCard } from "@/components/tools/ToolCard";
 import { BlogCard } from "@/components/blog/BlogCard";
+import { SearchBar } from "@/components/layout/SearchBar";
 
 export default async function HomePage() {
   // Fetch Featured Tool (latest added)
@@ -26,6 +27,9 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-16">
+      {/* HeroSection goes here if you have it */}
+      <SearchBar />
+
       {/* ✅ Main content container */}
       <div className="px-6 py-8 max-w-7xl mx-auto space-y-16">
         {/* Featured + Latest Tools Section */}

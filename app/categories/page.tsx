@@ -6,6 +6,7 @@ import { supabase } from "@/utils/supabase";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { CategoriesHero } from "@/components/layout/CategoriesHero";
+import { ArrowDown01, ArrowUp10, ArrowDownAZ, ArrowUpAZ } from "lucide-react";
 
 interface Category {
   name: string;
@@ -95,13 +96,41 @@ export default function CategoriesPage() {
     <>
       <CategoriesHero />
       <div className="space-y-8 py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Sort dropdown */}
+        {!isLoading && categories.length > 0 && (
+          <div className="flex justify-end mb-4">
+            <div className="relative inline-block">
+              <select
+                value={sortMode}
+                onChange={(e) => setSortMode(e.target.value)}
+                className="block appearance-none bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                {sortOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <svg
+                  className="fill-current h-4 w-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        )}
+
         {isLoading ? (
           <div className="flex justify-center py-8">
             <p>Loading categories...</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {categories.map((category) => {
+            {sortedCategories.map((category) => {
               return (
                 <Link
                   key={category.slug}

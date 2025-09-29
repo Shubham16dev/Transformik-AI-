@@ -74,7 +74,7 @@ export default async function HomePage() {
         {/* Latest Blogs Section */}
         <section className="space-y-4">
           <h2 className="text-2xl font-bold">Latest Blogs</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {blogs?.map((blog) => (
               <BlogCard
                 key={blog.id}

@@ -12,8 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Pagination } from "@/components/Pagination";
 
-// Define Tool type
 interface Tool {
   id: string;
   name: string;
@@ -24,7 +24,6 @@ interface Tool {
   category: string | null;
 }
 
-// Price Filter Options
 const PRICE_OPTIONS = [
   { value: "all", label: "All Prices" },
   { value: "Free", label: "Free" },
@@ -33,10 +32,6 @@ const PRICE_OPTIONS = [
   { value: "paid", label: "Paid" },
 ];
 
-// Price values considered "free" for the filter
-const FREE_TIERS = ['Free', 'freemium', 'freeai', 'freetrial'];
-
-
 export default function AllToolsPage() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("category");
@@ -44,20 +39,23 @@ export default function AllToolsPage() {
   const [tools, setTools] = useState<Tool[]>([]);
   const [filteredTools, setFilteredTools] = useState<Tool[]>([]);
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState(
-    categoryParam ? categoryParam : "all"
-  );
+  const [category, setCategory] = useState(categoryParam || "all");
   const [priceFilter, setPriceFilter] = useState("all");
   const [categories, setCategories] = useState<string[]>([]);
 
-  // Fetch tools and categories
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(15);
+
   useEffect(() => {
     async function fetchTools() {
-      // Fetch ALL tool data
-      const { data, error } = await supabase
+      const { data, error } = (await supabase
         .from("tools")
         .select("id,name,slug,one_line_description,price,url,logo,category")
-        .order("name", { ascending: true }) as { data: Tool[] | null, error: any | null };
+        .order("name", { ascending: true })) as {
+        data: Tool[] | null;
+        error: any | null;
+      };
 
       if (error) {
         console.error("Supabase Fetch Error:", error);
@@ -67,21 +65,18 @@ export default function AllToolsPage() {
       const fetchedTools = data || [];
       setTools(fetchedTools);
 
-      // Extract unique categories and sort alphabetically
+      // Extract unique categories alphabetically
       const uniqueCategories = Array.from(
         new Set(fetchedTools.map((t) => t.category).filter(Boolean) as string[])
       ).sort((a, b) => a.localeCompare(b));
-
       setCategories(uniqueCategories);
 
-      // If we have a category from URL, convert from slug to actual category name
+      // Handle category URL param
       if (categoryParam) {
         const formattedCategoryName = categoryParam
           .split("-")
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
           .join(" ");
-
-        // Check if this category exists in our data
         if (
           uniqueCategories.some(
             (cat) => cat.toLowerCase() === formattedCategoryName.toLowerCase()
@@ -101,28 +96,39 @@ export default function AllToolsPage() {
   useEffect(() => {
     let filtered: Tool[] = tools;
 
+    // Search filter
     if (search) {
       filtered = filtered.filter((tool) =>
         tool.name.toLowerCase().includes(search.toLowerCase())
       );
     }
 
+    // Category filter
     if (category !== "all") {
-      filtered = filtered.filter((tool) => {
-        if (!tool.category) return false;
-        return tool.category.toLowerCase() === category.toLowerCase();
-      });
+      filtered = filtered.filter(
+        (tool) =>
+          tool.category &&
+          tool.category.toLowerCase() === category.toLowerCase()
+      );
     }
 
-    // C. Price Filter (Uses the defined FREE_TIERS and checks for 'paid')
-    if (priceFilter === "free") {
-      filtered = filtered.filter((tool) => FREE_TIERS.includes(tool.price));
-    } else if (priceFilter === "paid") {
-      filtered = filtered.filter((tool) => tool.price === 'paid');
+    // Price filter
+    if (priceFilter !== "all") {
+      filtered = filtered.filter(
+        (tool) => tool.price.toLowerCase() === priceFilter.toLowerCase()
+      );
     }
 
     setFilteredTools(filtered);
+    setCurrentPage(1); // Reset to first page whenever filters change
   }, [search, category, priceFilter, tools]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredTools.length / pageSize);
+  const paginatedTools = filteredTools.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   return (
     <div className="space-y-6">
@@ -139,8 +145,12 @@ export default function AllToolsPage() {
           className="w-full md:w-1/3"
         />
 
-        {/* Category Dropdown */}
-        <Select value={category} onValueChange={setCategory} className="w-full md:w-1/3">
+        {/* Category Filter */}
+        <Select
+          value={category}
+          onValueChange={setCategory}
+          className="w-full md:w-1/3"
+        >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
@@ -154,8 +164,12 @@ export default function AllToolsPage() {
           </SelectContent>
         </Select>
 
-        {/* Price Dropdown */}
-        <Select value={priceFilter} onValueChange={setPriceFilter} className="w-full md:w-1/3">
+        {/* Price Filter */}
+        <Select
+          value={priceFilter}
+          onValueChange={setPriceFilter}
+          className="w-full md:w-1/3"
+        >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="All Prices" />
           </SelectTrigger>
@@ -171,8 +185,8 @@ export default function AllToolsPage() {
 
       {/* Tools Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {filteredTools.length > 0 ? (
-          filteredTools.map((tool) => (
+        {paginatedTools.length > 0 ? (
+          paginatedTools.map((tool) => (
             <ToolCard
               key={tool.id}
               tool={{
@@ -189,6 +203,18 @@ export default function AllToolsPage() {
           <p className="text-gray-500">No tools found matching your filters.</p>
         )}
       </div>
+
+      {/* Pagination Controls */}
+      <Pagination
+        totalItems={filteredTools.length}
+        pageSize={pageSize}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setCurrentPage(1); // Reset to first page when page size changes
+        }}
+      />
     </div>
   );
 }

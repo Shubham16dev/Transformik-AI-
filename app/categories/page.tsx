@@ -1,9 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabase";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowUp10 } from "lucide-react";
 
 interface Category {
   name: string;
@@ -11,34 +20,40 @@ interface Category {
   slug: string;
 }
 
-// Color mapping for categories (similar to what's in ToolCard.tsx)
-function getCategoryColor(category: string) {
-  const colors: Record<string, string> = {
-    "AI Writing": "bg-blue-100 text-blue-800 border-blue-500",
-    "Image Generation": "bg-purple-100 text-purple-800 border-purple-500",
-    "Video Creation": "bg-red-100 text-red-800 border-red-500",
-    "Audio Tools": "bg-green-100 text-green-800 border-green-500",
-    Productivity: "bg-yellow-100 text-yellow-800 border-yellow-500",
-    Marketing: "bg-pink-100 text-pink-800 border-pink-500",
-    "Developer Tools": "bg-blue-100 text-blue-800 border-blue-500",
-    "Image editing": "bg-purple-100 text-purple-800 border-purple-500",
-    "Assistant Code": "bg-indigo-100 text-indigo-800 border-indigo-500",
-    Automation: "bg-teal-100 text-teal-800 border-teal-500",
-    // Add more categories as needed
-  };
-
-  return colors[category] || "bg-gray-100 text-gray-800 border-gray-500";
-}
+// Sort options with icons
+const sortOptions = [
+  {
+    value: "count-desc",
+    label: "Most Tools → Least Tools",
+    icon: <ArrowDown01 className="h-4 w-4 text-purple-600" />,
+  },
+  {
+    value: "count-asc",
+    label: "Least Tools → Most Tools",
+    icon: <ArrowUp10 className="h-4 w-4 text-purple-600" />,
+  },
+  {
+    value: "alpha-asc",
+    label: "Alphabetical (A → Z)",
+    icon: <ArrowDownAZ className="h-4 w-4 text-purple-600" />,
+  },
+  {
+    value: "alpha-desc",
+    label: "Alphabetical (Z → A)",
+    icon: <ArrowUpAZ className="h-4 w-4 text-purple-600" />,
+  },
+];
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [sortMode, setSortMode] = useState<string>("alpha-asc");
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchCategories() {
       setIsLoading(true);
 
-      // Fetch tools to extract categories
       const { data: toolsData, error } = await supabase
         .from("tools")
         .select("category");
@@ -49,7 +64,6 @@ export default function CategoriesPage() {
         return;
       }
 
-      // Process categories and count tools in each category
       const categoryCount: Record<string, number> = {};
 
       toolsData.forEach((tool) => {
@@ -57,18 +71,13 @@ export default function CategoriesPage() {
         categoryCount[category] = (categoryCount[category] || 0) + 1;
       });
 
-      // Convert to array of category objects
       const categoryArray: Category[] = Object.entries(categoryCount).map(
         ([name, count]) => ({
           name,
           count,
-          // Create a slug for potential future category pages
           slug: name.toLowerCase().replace(/\s+/g, "-"),
         })
       );
-
-      // Sort by tool count (descending)
-      categoryArray.sort((a, b) => b.count - a.count);
 
       setCategories(categoryArray);
       setIsLoading(false);
@@ -77,48 +86,88 @@ export default function CategoriesPage() {
     fetchCategories();
   }, []);
 
+  // Sorting logic
+  const sortedCategories = [...categories].sort((a, b) => {
+    if (sortMode === "alpha-asc") return a.name.localeCompare(b.name);
+    if (sortMode === "alpha-desc") return b.name.localeCompare(a.name);
+    if (sortMode === "count-asc") return a.count - b.count;
+    if (sortMode === "count-desc") return b.count - a.count;
+    return 0;
+  });
+
+  // Current selected option
+  const currentOption = sortOptions.find((o) => o.value === sortMode);
+
   return (
     <div className="space-y-8">
-      <div className="space-y-4">
-        <h1 className="text-4xl font-bold">AI Categories</h1>
-        <p className="text-gray-600">
-          Explore our comprehensive list of AI tools by category.
-        </p>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="space-y-4">
+          <h1 className="text-4xl font-bold">AI Categories</h1>
+          <p className="text-gray-600">
+            Explore our comprehensive list of AI tools by category.
+          </p>
+        </div>
+
+        {/* Sort Dropdown */}
+        <div className="flex flex-col items-start md:items-end space-y-2">
+          <label className="text-sm font-medium text-gray-700">
+            Sort Categories
+          </label>
+          <Select value={sortMode} onValueChange={setSortMode}>
+            <SelectTrigger className="w-[280px] rounded-xl border-gray-300 bg-white shadow-sm hover:border-purple-500 transition-all">
+              {currentOption ? (
+                <div className="flex items-center gap-2">
+                  {currentOption.icon}
+                  <span>{currentOption.label}</span>
+                </div>
+              ) : (
+                <SelectValue placeholder="Sort categories" />
+              )}
+            </SelectTrigger>
+            <SelectContent className="max-h-64 overflow-y-auto rounded-xl shadow-lg border border-gray-200">
+              {sortOptions.map((option) => (
+                <SelectItem
+                  key={option.value}
+                  value={option.value}
+                  className="py-2"
+                >
+                  <div className="flex items-center gap-2">
+                    {option.icon}
+                    <span>{option.label}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
+      {/* Categories Grid */}
       {isLoading ? (
         <div className="flex justify-center py-8">
           <p>Loading categories...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {categories.map((category) => {
-            return (
-              <Link
-                key={category.slug}
-                href={`/tools?category=${category.slug}`}
-                className="block"
-              >
-                <Card className="hover:shadow-sm transition-shadow border border-gray-200 p-4">
-                  <div className="flex justify-between items-center">
-                    {/* Left side: Category name */}
-                    <div>
-                      <h3 className="text-base font-medium text-gray-800">
-                        {category.name}
-                      </h3>
-                    </div>
-
-                    {/* Right side: Count in purple */}
-                    <div>
-                      <span className="text-purple-600 text-base font-medium">
-                        {category.count}
-                      </span>
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-            );
-          })}
+          {sortedCategories.map((category) => (
+            <Card
+              key={category.slug}
+              className="hover:shadow-md transition-shadow border border-gray-200 p-4 rounded-xl cursor-pointer"
+              onClick={() =>
+                router.push(`/tools?category=${category.slug}`)
+              }
+            >
+              <div className="flex justify-between items-center">
+                <h3 className="text-base font-medium text-gray-800">
+                  {category.name}
+                </h3>
+                <span className="text-purple-600 text-base font-semibold">
+                  {category.count}
+                </span>
+              </div>
+            </Card>
+          ))}
         </div>
       )}
 

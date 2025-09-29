@@ -25,7 +25,7 @@ export function Navbar() {
   const links = [
     { href: "/", label: "Home" },
     { href: "/tools", label: "All Tools" },
-    { href: "/categories", label: "AI Categories" },
+    { href: "/categories", label: "All Categories" },
     { href: "/free-tools", label: "Free Tools" },
     { href: "/blog", label: "Blogs" },
   ];

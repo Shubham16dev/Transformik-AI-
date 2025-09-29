@@ -1,19 +1,116 @@
-import { BlogCard } from "@/components/blog/BlogCard";
+"use client";
 
-const mockBlogs = [
-  { title: "Top 10 AI Tools in 2025", slug: "top-10-ai-tools", excerpt: "Discover trending AI tools..." },
-  { title: "How AI Changes Productivity", slug: "ai-productivity", excerpt: "AI is boosting workflow efficiency..." },
-];
+import { useState, useEffect } from "react";
+import { supabase } from "@/utils/supabase";
+import { BlogCard } from "@/components/blog/BlogCard";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Pagination } from "@/components/Pagination";
+
+interface Blog {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  image?: string;
+  author?: string;
+  category?: string;
+  created_at: string; // date field
+}
 
 export default function BlogListingPage() {
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([]);
+  const [sortOption, setSortOption] = useState("date-desc"); // default newest first
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
+  const totalPages = Math.ceil(filteredBlogs.length / pageSize);
+  const paginatedBlogs = filteredBlogs.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  // Fetch blogs from Supabase
+  useEffect(() => {
+    async function fetchBlogs() {
+      const { data, error } = await supabase
+        .from("blogs")
+        .select("*")
+        .order("created_at", { ascending: false }); // default newest first
+
+      if (error) {
+        console.error("Error fetching blogs:", error);
+        return;
+      }
+
+      setBlogs(data || []);
+      setFilteredBlogs(data || []);
+    }
+    fetchBlogs();
+  }, []);
+
+  // Sort blogs when sortOption changes
+  useEffect(() => {
+    let sorted = [...blogs];
+    if (sortOption === "date-desc") {
+      sorted.sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+    } else if (sortOption === "date-asc") {
+      sorted.sort(
+        (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+    }
+    setFilteredBlogs(sorted);
+    setCurrentPage(1); // reset to first page on sort change
+  }, [sortOption, blogs]);
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Blog</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {mockBlogs.map((blog) => (
-          <BlogCard key={blog.slug} blog={blog} />
-        ))}
+
+      {/* Sort Select */}
+      <div className="flex justify-end">
+        <Select value={sortOption} onValueChange={setSortOption}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent className="max-h-60 overflow-y-auto">
+            <SelectItem value="date-desc">Newest First</SelectItem>
+            <SelectItem value="date-asc">Oldest First</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
+
+      {/* Blog Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {paginatedBlogs.length > 0 ? (
+          paginatedBlogs.map((blog) => <BlogCard key={blog.id} blog={blog} />)
+        ) : (
+          <p className="text-gray-500">No blogs found.</p>
+        )}
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Pagination
+          totalItems={filteredBlogs.length}
+          pageSize={pageSize}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setCurrentPage(1);
+          }}
+        />
+      )}
     </div>
   );
 }

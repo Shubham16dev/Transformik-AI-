@@ -44,22 +44,21 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Menu */}
-        <NavigationMenu className="hidden md:flex flex-1 justify-center">
-          <NavigationMenuList className="flex gap-6">
+        <div className="hidden md:flex flex-1 justify-center">
+          <ul className="flex gap-6">
             {links.map((link) => (
-              <NavigationMenuItem key={link.href}>
-                <NavigationMenuLink asChild>
-                  <Link
-                    href={link.href}
-                    className="text-white font-medium relative transition-colors duration-200 hover:text-[#181828] after:absolute after:left-0 after:-bottom-1 after:w-full after:h-0.5 after:bg-white after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100 after:origin-left"
-                  >
-                    {link.label}
-                  </Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="text-white font-medium relative transition-colors duration-200 hover:text-gray-300 px-2 py-1 group"
+                >
+                  {link.label}
+                  <span className="absolute inset-x-0 bottom-0 h-0.5 bg-white transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100" />
+                </Link>
+              </li>
             ))}
-          </NavigationMenuList>
-        </NavigationMenu>
+          </ul>
+        </div>
 
         {/* Contact Us Button (desktop only) */}
         <div className="hidden md:block">
@@ -81,9 +80,14 @@ export function Navbar() {
             </SheetTrigger>
             <AnimatePresence>
               {isOpen && (
-                <SheetContent side="left" className="bg-[#181828] text-white p-6">
+                <SheetContent
+                  side="left"
+                  className="bg-[#181828] text-white p-6"
+                >
                   <SheetHeader>
-                    <SheetTitle className="text-white">Transformik AI</SheetTitle>
+                    <SheetTitle className="text-white">
+                      Transformik AI
+                    </SheetTitle>
                   </SheetHeader>
 
                   <motion.div

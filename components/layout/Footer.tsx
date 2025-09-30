@@ -69,7 +69,10 @@ export function Footer() {
             </p>
             <p className="text-white text-sm">
               Contact:{" "}
-              <a href="mailto:shubhampatel0513@gmail.com" className="underline">
+              <a
+                href="mailto:shubhampatel0513@gmail.com"
+                className="relative hover:text-gray-300 transition-colors duration-300 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-white after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
+              >
                 shubhampatel0513@gmail.com
               </a>
             </p>
@@ -80,13 +83,44 @@ export function Footer() {
             <h3 className="font-semibold text-xl mb-3">Quick Links</h3>
             <ul className="space-y-2 text-white">
               <li>
-                <Link href="/blog">All Tools</Link>
+                <Link
+                  href="/"
+                  className="relative hover:text-gray-300 transition-colors duration-300 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-white after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
+                >
+                  Home
+                </Link>
               </li>
               <li>
-                <Link href="/tools/submit">All Categories</Link>
+                <Link
+                  href="/tools"
+                  className="relative hover:text-gray-300 transition-colors duration-300 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-white after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
+                >
+                  All Tools
+                </Link>
               </li>
               <li>
-                <Link href="/tools">Blogs</Link>
+                <Link
+                  href="/categories"
+                  className="relative hover:text-gray-300 transition-colors duration-300 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-white after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
+                >
+                  All Categories
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/free-tools"
+                  className="relative hover:text-gray-300 transition-colors duration-300 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-white after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
+                >
+                  Free Tools
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/blog"
+                  className="relative hover:text-gray-300 transition-colors duration-300 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-white after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
+                >
+                  Blogs
+                </Link>
               </li>
             </ul>
           </div>
@@ -95,13 +129,17 @@ export function Footer() {
           <div className="md:pl-12">
             <h3 className="font-semibold text-xl mb-3">Top AI Categories</h3>
             <ul className="space-y-2 text-white">
-              <li>AI Video Generation</li>
-              <li>AI Image Generation</li>
-              <li>NSFW Chat</li>
+              {["AI Video Generation", "AI Image Generation", "NSFW Chat"].map(
+                (category) => (
+                  <li key={category} className="footer-link-hover">
+                    {category}
+                  </li>
+                )
+              )}
             </ul>
             <Link
               href="/categories"
-              className="font-semibold text-white flex items-center gap-2 mt-3"
+              className="footer-link-hover font-semibold text-white flex items-center gap-2 mt-3"
             >
               All AI Categories <span>→</span>
             </Link>
@@ -109,8 +147,7 @@ export function Footer() {
         </div>
 
         <div className="flex flex-col items-center justify-center mt-12">
-          <div className="flex items-center gap-3 mb-4">
-          </div>
+          <div className="flex items-center gap-3 mb-4"></div>
           <div className="text-center text-[#8ca0b3] text-sm">
             © {new Date().getFullYear()} Transformik AI. All rights reserved.
           </div>

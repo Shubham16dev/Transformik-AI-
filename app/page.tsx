@@ -73,18 +73,52 @@ export default async function HomePage() {
 
         {/* Latest Blogs Section */}
         <section className="space-y-4">
-          <h2 className="text-2xl font-bold">Latest Blogs</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {blogs?.map((blog) => (
-              <BlogCard
-                key={blog.id}
-                blog={{
-                  title: blog.title,
-                  slug: blog.slug,
-                  excerpt: blog.excerpt,
-                }}
-              />
-            ))}
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-bold">Explore AI Insights</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Stay updated with the latest insights, tutorials, and trends in AI
+              tools and technology.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-10 gap-6">
+            {/* Latest 2 Blogs - Left Side (Bigger) */}
+            <div className="md:col-span-6 space-y-4">
+              <h3 className="text-xl font-semibold">Latest in AI</h3>
+              {blogs?.slice(0, 2).map((blog) => (
+                <BlogCard
+                  key={blog.id}
+                  blog={{
+                    title: blog.title,
+                    slug: blog.slug,
+                    excerpt: blog.excerpt,
+                  }}
+                />
+              ))}
+                <div className="pt-4">
+                  <a
+                    href="/blogs"
+                    className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white rounded-lg hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl font-medium"
+                  >
+                    View All Blogs →
+                  </a>
+                </div>
+            </div>
+            
+
+            {/* Rest of the Blogs - Right Side */}
+            <div className="md:col-span-4 space-y-4">
+              <h3 className="text-xl font-semibold">More Stories</h3>
+              {blogs?.slice(2).map((blog) => (
+                <BlogCard
+                  key={blog.id}
+                  blog={{
+                    title: blog.title,
+                    slug: blog.slug,
+                    excerpt: blog.excerpt,
+                  }}
+                />
+              ))}
+            </div>
           </div>
         </section>
       </div>

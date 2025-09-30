@@ -4,12 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from "@/components/ui/navigation-menu";
-import {
   Sheet,
   SheetContent,
   SheetHeader,
@@ -60,7 +54,7 @@ export function Navbar() {
           </ul>
         </div>
 
-        {/* Contact Us Button (desktop only) */}
+        {/* Get Started Button (desktop only) */}
         <div className="hidden md:block">
           <Button
             asChild
@@ -111,7 +105,7 @@ export function Navbar() {
                       asChild
                       className="mt-4 w-full bg-white hover:bg-gray-200 text-black font-semibold px-6 py-2 rounded-full shadow-lg border border-gray-300"
                     >
-                      <Link href="/contact">Contact Us</Link>
+                      <Link href="/free-tools">Get Started</Link>
                     </Button>
                   </motion.div>
                 </SheetContent>

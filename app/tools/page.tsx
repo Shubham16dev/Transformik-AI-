@@ -1,18 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/utils/supabase";
 import { ToolCard } from "@/components/tools/ToolCard";
+import { Button } from "@/components/ui/button";
+import { Check, ChevronsUpDown } from "lucide-react";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Pagination } from "@/components/Pagination";
+import { cn } from "@/lib/utils";
 
 interface Tool {
   id: string;
@@ -47,6 +51,7 @@ export default function AllToolsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
 
+  // Fetch tools and categories
   useEffect(() => {
     async function fetchTools() {
       const { data, error } = (await supabase
@@ -65,24 +70,19 @@ export default function AllToolsPage() {
       const fetchedTools = data || [];
       setTools(fetchedTools);
 
-      // Extract unique categories alphabetically
       const uniqueCategories = Array.from(
         new Set(fetchedTools.map((t) => t.category).filter(Boolean) as string[])
       ).sort((a, b) => a.localeCompare(b));
       setCategories(uniqueCategories);
 
-      // Handle category URL param
+      // Handle category param
       if (categoryParam) {
-        const formattedCategoryName = categoryParam
+        const formattedCategory = categoryParam
           .split("-")
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
           .join(" ");
-        if (
-          uniqueCategories.some(
-            (cat) => cat.toLowerCase() === formattedCategoryName.toLowerCase()
-          )
-        ) {
-          setCategory(formattedCategoryName);
+        if (uniqueCategories.some((cat) => cat.toLowerCase() === formattedCategory.toLowerCase())) {
+          setCategory(formattedCategory);
         }
       }
 
@@ -92,18 +92,16 @@ export default function AllToolsPage() {
     fetchTools();
   }, [categoryParam]);
 
-  // Filter tools based on search, category, and price
+  // Filter tools based on search, category, price
   useEffect(() => {
     let filtered: Tool[] = tools;
 
-    // Search filter
     if (search) {
       filtered = filtered.filter((tool) =>
         tool.name.toLowerCase().includes(search.toLowerCase())
       );
     }
 
-    // Category filter
     if (category !== "all") {
       filtered = filtered.filter(
         (tool) =>
@@ -112,7 +110,6 @@ export default function AllToolsPage() {
       );
     }
 
-    // Price filter
     if (priceFilter !== "all") {
       filtered = filtered.filter(
         (tool) => tool.price.toLowerCase() === priceFilter.toLowerCase()
@@ -120,15 +117,88 @@ export default function AllToolsPage() {
     }
 
     setFilteredTools(filtered);
-    setCurrentPage(1); // Reset to first page whenever filters change
+    setCurrentPage(1);
   }, [search, category, priceFilter, tools]);
 
-  // Pagination logic
+  // Pagination
   const totalPages = Math.ceil(filteredTools.length / pageSize);
   const paginatedTools = filteredTools.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
+
+  // Combobox component
+  const Combobox = ({
+    value,
+    options,
+    onChange,
+    placeholder,
+  }: {
+    value: string;
+    options: { value: string; label: string }[];
+    onChange: (val: string) => void;
+    placeholder: string;
+  }) => {
+    const [open, setOpen] = useState(false);
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const [contentWidth, setContentWidth] = useState<number | undefined>();
+
+    useEffect(() => {
+      if (buttonRef.current) {
+        setContentWidth(buttonRef.current.offsetWidth);
+      }
+    }, [buttonRef.current?.offsetWidth]);
+
+    return (
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            ref={buttonRef}
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-full md:w-1/3 justify-between border border-purple-600 text-purple-600 hover:bg-purple-50 focus:ring-1 focus:ring-purple-600"
+          >
+            {value
+              ? options.find((o) => o.value === value)?.label
+              : placeholder}
+            <ChevronsUpDown className="ml-2 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent style={{ width: contentWidth }} className="p-0">
+          <Command>
+            <CommandInput placeholder={`Search ${placeholder.toLowerCase()}...`} 
+            className="focus:ring-0 focus:outline-none"/>
+            <CommandList>
+              <CommandEmpty>No option found.</CommandEmpty>
+              <CommandGroup>
+                {options.map((option) => (
+                  <CommandItem
+                    key={option.value}
+                    value={option.value}
+                    onSelect={(currentValue) => {
+                      onChange(currentValue === value ? "all" : currentValue);
+                      setOpen(false);
+                    }}
+                  >
+                    {option.label}
+                    <Check
+                      className={cn(
+                        "ml-auto",
+                        value === option.value
+                          ? "opacity-100 text-purple-600"
+                          : "opacity-0"
+                      )}
+                    />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -137,50 +207,32 @@ export default function AllToolsPage() {
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 items-center">
         {/* Search Input */}
-        <Input
+        <input
           type="text"
           placeholder="Search tools..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full md:w-1/3"
+          className="w-full md:w-1/3 border border-gray-300 rounded-md px-3 py-2"
         />
 
-        {/* Category Filter */}
-        <Select
+        {/* Category Combobox */}
+        <Combobox
           value={category}
-          onValueChange={setCategory}
-          className="w-full md:w-1/3"
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="All Categories" />
-          </SelectTrigger>
-          <SelectContent className="max-h-80 overflow-y-auto">
-            <SelectItem value="all">All Categories</SelectItem>
-            {categories.map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          onChange={setCategory}
+          options={[
+            { value: "all", label: "All Categories" },
+            ...categories.map((cat) => ({ value: cat, label: cat })),
+          ]}
+          placeholder="Select Category"
+        />
 
-        {/* Price Filter */}
-        <Select
+        {/* Price Combobox */}
+        <Combobox
           value={priceFilter}
-          onValueChange={setPriceFilter}
-          className="w-full md:w-1/3"
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="All Prices" />
-          </SelectTrigger>
-          <SelectContent className="max-h-60 overflow-y-auto">
-            {PRICE_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          onChange={setPriceFilter}
+          options={PRICE_OPTIONS}
+          placeholder="Select Price"
+        />
       </div>
 
       {/* Tools Grid */}
@@ -204,7 +256,7 @@ export default function AllToolsPage() {
         )}
       </div>
 
-      {/* Pagination Controls */}
+      {/* Pagination */}
       <Pagination
         totalItems={filteredTools.length}
         pageSize={pageSize}
@@ -212,7 +264,7 @@ export default function AllToolsPage() {
         onPageChange={setCurrentPage}
         onPageSizeChange={(size) => {
           setPageSize(size);
-          setCurrentPage(1); // Reset to first page when page size changes
+          setCurrentPage(1);
         }}
       />
     </div>

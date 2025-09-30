@@ -96,7 +96,7 @@ export default async function HomePage() {
               ))}
                 <div className="pt-4">
                   <a
-                    href="/blogs"
+                    href="/blog"
                     className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white rounded-lg hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl font-medium"
                   >
                     View All Blogs →

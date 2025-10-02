@@ -31,26 +31,6 @@ interface Blog {
 }
 
 // ---------- Data Fetchers ----------
-async function getFeaturedTools(): Promise<Tool[]> {
-  const { data, error } = await supabase
-    .from("tools_summary")
-    .select("id, tool_name, slug, one_line_description, pricing_model, url, logo, category")
-    .order("created_at", { ascending: false })
-    .limit(3);
-
-  if (error) {
-    console.error("Error fetching featured tools:", error.message);
-    return [];
-  }
-
-  return (
-    data?.map((tool) => ({
-      ...tool,
-      logo: getPublicImageUrl("Logo_Images", tool.logo),
-    })) ?? []
-  );
-}
-
 async function getLatestTools(): Promise<Tool[]> {
   const { data, error } = await supabase
     .from("tools_summary")

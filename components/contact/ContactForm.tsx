@@ -65,7 +65,7 @@ export function ContactForm() {
     } catch (error) {
       setSubmitStatus({
         type: "error",
-        message: "An error occurred. Please try again later.",
+        message: "Something went wrong. Please try again.",
       });
     } finally {
       setIsSubmitting(false);

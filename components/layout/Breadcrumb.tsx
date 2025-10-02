@@ -7,7 +7,6 @@ import {
   BreadcrumbSeparator,
   BreadcrumbList,
 } from "@/components/ui/breadcrumb";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, SlashIcon } from "lucide-react";
 import React from "react";

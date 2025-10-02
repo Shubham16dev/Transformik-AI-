@@ -1,9 +1,7 @@
 import { notFound } from "next/navigation";
 import { supabase } from "@/utils/supabase";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import Image from "next/image";
-import { ToolCard } from "@/components/tools/ToolCard";
 import { FeaturedTools } from "@/components/tools/FeaturedTool";
 import { TopCategories } from "@/components/category/TopCategories";
 
@@ -31,11 +29,7 @@ export default async function BlogDetailPage({
   if (detailsError) return notFound();
 
   // Fetch featured tools (limit 5)
-  const { data: featuredTools } = await supabase
-    .from("tools_summary")
-    .select("id, tool_name, slug, logo, one_line_description, price, url")
-    .order("name", { ascending: true })
-    .limit(5);
+ 
 
   // Fetch categories (for sidebar)
   const { data: categories } = await supabase

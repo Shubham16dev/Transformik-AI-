@@ -97,7 +97,7 @@ export default function FreeToolsPage() {
     setCurrentPage(1);
   }, [search, selectedCategory, sortMode, tools]);
 
-  const totalPages = Math.ceil(filteredTools.length / ITEMS_PER_PAGE);
+ 
   const paginatedTools = filteredTools.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE

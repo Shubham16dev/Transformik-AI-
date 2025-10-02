@@ -2,9 +2,7 @@ import { supabase } from "@/utils/supabase"
 import { getPublicImageUrl } from "@/utils/getPublicImageUrl"
 import { notFound } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
 import Image from "next/image"
-import { ToolCard } from "@/components/tools/ToolCard"
 import { ToolLogo } from "@/components/tools/ToolLogo"
 import {
   Accordion,
@@ -31,15 +29,7 @@ interface ToolSummary {
   category?: string
 }
 
-interface ToolDetails {
-  description?: string
-  how_to_use?: string
-  use_cases?: string
-  pros?: string
-  cons?: string
-  faqs?: { question: string; answer: string }[]
-  screenshots?: string[]
-}
+
 
 interface Category {
   id: string
@@ -83,14 +73,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
 
   if (detailsError) console.error(detailsError)
 
-  // 3️⃣ Sidebar data
-  const [featuredToolsRes, categoriesRes] = await Promise.all([
-    supabase.from("tools_summary").select("*").limit(5),
-    supabase.from("categories").select("*").order("name"),
-  ])
-
-  const featuredTools: ToolSummary[] = featuredToolsRes.data ?? []
-  const categories: Category[] = categoriesRes.data ?? []
+ 
 
   const logoUrl = getPublicImageUrl("Logo_Images", toolSummary.logo)
   const screenshots: string[] =
@@ -183,7 +166,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
       {/* Sidebar */}
       <aside className="md:col-span-3 space-y-8">
         <FeaturedTools limit={5} />
-        <TopCategories categories={categories ?? []} limit={6} />
+        <TopCategories limit={6} />
       </aside>
     </div>
   )

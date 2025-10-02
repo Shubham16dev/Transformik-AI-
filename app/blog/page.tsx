@@ -32,7 +32,7 @@ export default function BlogListingPage() {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(6);
+  const pageSize = 6; // Blogs per page
   const totalPages = Math.ceil(filteredBlogs.length / pageSize);
   const paginatedBlogs = filteredBlogs.slice(
     (currentPage - 1) * pageSize,
@@ -61,7 +61,7 @@ export default function BlogListingPage() {
 
   // Sort blogs when sortOption changes
   useEffect(() => {
-    let sorted = [...blogs];
+    const sorted = [...blogs];
     if (sortOption === "date-desc") {
       sorted.sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()

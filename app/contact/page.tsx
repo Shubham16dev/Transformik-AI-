@@ -16,8 +16,8 @@ export default function ContactPage() {
           Contact Us
         </h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Have questions, feedback, or want to collaborate? We'd love to hear
-          from you. Fill out the form below and we'll get back to you as soon as
+          Have questions, feedback, or want to collaborate? We&apos;d love to hear
+          from you. Fill out the form below and we&apos;ll get back to you as soon as
           possible.
         </p>
       </div>

@@ -62,7 +62,7 @@ export function ContactForm() {
           message: data.error || "Something went wrong. Please try again.",
         });
       }
-    } catch (error) {
+    } catch (_error) {
       setSubmitStatus({
         type: "error",
         message: "Something went wrong. Please try again.",

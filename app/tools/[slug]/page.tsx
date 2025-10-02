@@ -18,23 +18,6 @@ interface ToolDetailPageProps {
   params: { slug: string }
 }
 
-interface ToolSummary {
-  id: string
-  tool_name: string
-  slug: string
-  one_line_description: string
-  pricing_model: string
-  url?: string
-  logo?: string
-  category?: string
-}
-
-
-
-interface Category {
-  id: string
-  name: string
-}
 
 // Dynamic metadata
 export async function generateMetadata({ params }: ToolDetailPageProps): Promise<Metadata> {

@@ -15,16 +15,17 @@ import { FeaturedTools } from "@/components/tools/FeaturedTool"
 import { TopCategories } from "@/components/category/TopCategories"
 
 interface ToolDetailPageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }> // Changed to Promise
 }
-
 
 // Dynamic metadata
 export async function generateMetadata({ params }: ToolDetailPageProps): Promise<Metadata> {
+  const { slug } = await params // Await params here
+  
   const { data: toolSummary } = await supabase
     .from("tools_summary")
     .select("tool_name, one_line_description")
-    .eq("slug", params.slug)
+    .eq("slug", slug) // Use the awaited slug
     .single()
 
   if (!toolSummary) return { title: "Tool Not Found" }
@@ -36,7 +37,7 @@ export async function generateMetadata({ params }: ToolDetailPageProps): Promise
 }
 
 export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
-  const { slug } = params
+  const { slug } = await params // Await params here too
 
   // 1️⃣ Fetch main tool summary
   const { data: toolSummary, error: summaryError } = await supabase
@@ -55,8 +56,6 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
     .single()
 
   if (detailsError) console.error(detailsError)
-
- 
 
   const logoUrl = getPublicImageUrl("Logo_Images", toolSummary.logo)
   const screenshots: string[] =

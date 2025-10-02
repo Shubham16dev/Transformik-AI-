@@ -6,11 +6,11 @@ import { FeaturedTools } from "@/components/tools/FeaturedTool";
 import { TopCategories } from "@/components/category/TopCategories";
 
 interface BlogDetailPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>; // Change this to Promise
 }
 
 export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
-  const { slug } = params;
+  const { slug } = await params; // Await params here
 
   // Fetch blog summary
   const { data: summary, error: summaryError } = await supabase
@@ -29,7 +29,6 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
     .single();
 
   if (detailsError || !details) return notFound();
-
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-10 gap-10 px-4 md:px-8 py-6">

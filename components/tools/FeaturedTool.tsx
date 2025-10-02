@@ -61,22 +61,28 @@ export function FeaturedTools({ limit = 5 }: FeaturedToolsProps) {
     <div>
       <h3 className="text-lg font-semibold mb-4 text-gray-900">Featured Tools</h3>
       <div className="space-y-4">
-        {tools.map((tool) => (
-          <ToolCard
-            key={tool.id}
-            tool={{
-              tool_name: tool.tool_name,
-              slug: tool.slug,
-              one_line_description: tool.one_line_description,
-              pricing_model: ["Free", "Freemium", "Paid", "Free Trial"].includes(tool.pricing_model)
-                ? (tool.pricing_model as "Free" | "Freemium" | "Paid" | "Free Trial")
-                : undefined,
-              url: tool.url,
-              logo: tool.logo ? getPublicImageUrl("Logo_Images", tool.logo) : undefined,
-              category: tool.category ?? "Other",
-            }}
-          />
-        ))}
+        {tools.map((tool) => {
+          const logoUrl = tool.logo 
+            ? getPublicImageUrl("Images", `ToolLogos/${tool.logo}`) 
+            : undefined;
+
+          return (
+            <ToolCard
+              key={tool.id}
+              tool={{
+                tool_name: tool.tool_name,
+                slug: tool.slug,
+                one_line_description: tool.one_line_description,
+                pricing_model: ["Free", "Freemium", "Paid", "Free Trial"].includes(tool.pricing_model)
+                  ? (tool.pricing_model as "Free" | "Freemium" | "Paid" | "Free Trial")
+                  : undefined,
+                url: tool.url,
+                logo: logoUrl,
+                category: tool.category ?? "Other",
+              }}
+            />
+          );
+        })}
       </div>
     </div>
   );

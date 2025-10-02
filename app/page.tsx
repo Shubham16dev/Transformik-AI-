@@ -46,10 +46,12 @@ async function getLatestTools(): Promise<Tool[]> {
   return (
     data?.map((tool) => ({
       ...tool,
-      logo: getPublicImageUrl("Logo_Images", tool.logo),
+      logo: getPublicImageUrl("Images",tool.logo ? `ToolLogos/${tool.logo}` : undefined),
     })) ?? []
   );
 }
+
+
 
 async function getBlogs(): Promise<Blog[]> {
   const { data, error } = await supabase

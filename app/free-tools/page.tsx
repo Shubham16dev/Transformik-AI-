@@ -26,8 +26,16 @@ interface CategoryOption {
 
 const ITEMS_PER_PAGE = 9;
 const sortOptions = [
-  { value: "alpha-asc", label: "A → Z", icon: <ArrowDownAZ className="h-4 w-4 text-purple-600" /> },
-  { value: "alpha-desc", label: "Z → A", icon: <ArrowUpAZ className="h-4 w-4 text-purple-600" /> },
+  {
+    value: "alpha-asc",
+    label: "A → Z",
+    icon: <ArrowDownAZ className="h-4 w-4 text-purple-600" />,
+  },
+  {
+    value: "alpha-desc",
+    label: "Z → A",
+    icon: <ArrowUpAZ className="h-4 w-4 text-purple-600" />,
+  },
 ];
 
 export default function FreeToolsPage() {
@@ -36,7 +44,7 @@ export default function FreeToolsPage() {
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortMode, setSortMode] = useState<string>("alpha-asc");
   const [currentPage, setCurrentPage] = useState<number>(1);
 
@@ -46,7 +54,9 @@ export default function FreeToolsPage() {
       try {
         const { data: toolsData, error: toolsError } = await supabase
           .from("tools_summary")
-          .select("id,tool_name,slug,one_line_description,pricing_model,url,logo,category")
+          .select(
+            "id,tool_name,slug,one_line_description,pricing_model,url,logo,category"
+          )
           .eq("pricing_model", "Freemium");
 
         if (toolsError) throw toolsError;
@@ -59,10 +69,13 @@ export default function FreeToolsPage() {
           if (tool.category) categorySet.add(tool.category);
         });
 
-        const categoryList: CategoryOption[] = Array.from(categorySet).map((cat) => ({
-          value: cat.toLowerCase().replace(/\s+/g, "-"),
-          label: cat,
-        }));
+        const categoryList: CategoryOption[] = [
+          { value: "all", label: "All Categories" },
+          ...Array.from(categorySet).map((cat) => ({
+            value: cat.toLowerCase().replace(/\s+/g, "-"),
+            label: cat,
+          })),
+        ];
         setCategories(categoryList);
       } catch (err) {
         console.error("Error fetching tools or categories:", err);
@@ -78,9 +91,10 @@ export default function FreeToolsPage() {
   useEffect(() => {
     let temp = [...tools];
 
-    if (selectedCategory) {
+    if (selectedCategory && selectedCategory !== "all") {
       temp = temp.filter(
-        (tool) => tool.category?.toLowerCase().replace(/\s+/g, "-") === selectedCategory
+        (tool) =>
+          tool.category?.toLowerCase().replace(/\s+/g, "-") === selectedCategory
       );
     }
 
@@ -90,14 +104,15 @@ export default function FreeToolsPage() {
       );
     }
 
-    if (sortMode === "alpha-asc") temp.sort((a, b) => a.tool_name.localeCompare(b.tool_name));
-    if (sortMode === "alpha-desc") temp.sort((a, b) => b.tool_name.localeCompare(a.tool_name));
+    if (sortMode === "alpha-asc")
+      temp.sort((a, b) => a.tool_name.localeCompare(b.tool_name));
+    if (sortMode === "alpha-desc")
+      temp.sort((a, b) => b.tool_name.localeCompare(a.tool_name));
 
     setFilteredTools(temp);
     setCurrentPage(1);
   }, [search, selectedCategory, sortMode, tools]);
 
- 
   const paginatedTools = filteredTools.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
@@ -108,7 +123,9 @@ export default function FreeToolsPage() {
       {/* Header */}
       <div className="space-y-2">
         <h1 className="text-4xl font-bold">Free AI Tools</h1>
-        <p className="text-gray-600">Explore all AI tools available for free to boost your workflow.</p>
+        <p className="text-gray-600">
+          Explore all AI tools available for free to boost your workflow.
+        </p>
       </div>
 
       {/* Filters */}
@@ -146,20 +163,37 @@ export default function FreeToolsPage() {
         <p className="text-gray-500">No free tools found.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {paginatedTools.map((tool) => (
-            <ToolCard
-              key={tool.id}
-              tool={{
-                tool_name: tool.tool_name,
-                slug: tool.slug,
-                one_line_description: tool.one_line_description,
-                pricing_model: tool.pricing_model,
-                url: tool.url,
-                logo: getPublicImageUrl("Logo_Images", tool.logo ?? undefined),
-                category: tool.category,
-              }}
-            />
-          ))}
+          {paginatedTools.map((tool) => {
+            const logoUrl = tool.logo
+              ? getPublicImageUrl("Images", `ToolLogos/${tool.logo}`)
+              : undefined;
+
+            return (
+              <ToolCard
+                key={tool.id}
+                tool={{
+                  tool_name: tool.tool_name,
+                  slug: tool.slug,
+                  one_line_description: tool.one_line_description,
+                  pricing_model: [
+                    "Free",
+                    "Freemium",
+                    "Paid",
+                    "Free Trial",
+                  ].includes(tool.pricing_model)
+                    ? (tool.pricing_model as
+                        | "Free"
+                        | "Freemium"
+                        | "Paid"
+                        | "Free Trial")
+                    : undefined,
+                  url: tool.url,
+                  logo: logoUrl,
+                  category: tool.category ?? "Other",
+                }}
+              />
+            );
+          })}
         </div>
       )}
 

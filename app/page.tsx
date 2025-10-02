@@ -88,8 +88,7 @@ async function getBlogs(): Promise<Blog[]> {
 
 // ---------- Page ----------
 export default async function HomePage() {
-  const [featuredTools, latestTools, blogs] = await Promise.all([
-    getFeaturedTools(),
+  const [latestTools, blogs] = await Promise.all([
     getLatestTools(),
     getBlogs(),
   ]);

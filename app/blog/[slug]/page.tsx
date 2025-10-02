@@ -30,11 +30,6 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
 
   if (detailsError || !details) return notFound();
 
-  // Fetch categories for sidebar if needed
-  const { data: categories } = await supabase
-    .from("tools_summary")
-    .select("category")
-    .order("category");
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-10 gap-10 px-4 md:px-8 py-6">

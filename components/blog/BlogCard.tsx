@@ -5,18 +5,7 @@ import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-interface BlogCardProps {
-  blog: {
-    title: string;
-    slug: string;
-    excerpt: string;
-    image?: string;
-    author?: string;
-    category?: BlogCategory;
-  };
-}
-
-// Enum for blog categories
+// Export the type so other components can use it
 export type BlogCategory =
   | "Writing & Editing"
   | "Technology"
@@ -28,6 +17,17 @@ export type BlogCategory =
   | "Lifestyle"
   | "Finance"
   | "Other";
+
+interface BlogCardProps {
+  blog: {
+    title: string;
+    slug: string;
+    excerpt: string;
+    image?: string;
+    author?: string;
+    category?: BlogCategory;
+  };
+}
 
 // Map enum values to purple theme colors
 function getCategoryColor(category?: BlogCategory) {

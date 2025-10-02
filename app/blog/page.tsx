@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/utils/supabase";
-import { BlogCard } from "@/components/blog/BlogCard";
+import { BlogCard, BlogCategory } from "@/components/blog/BlogCard";
 import {
   Select,
   SelectContent,
@@ -12,8 +12,6 @@ import {
 } from "@/components/ui/select";
 import { Pagination } from "@/components/Pagination";
 
-type BlogCategory = string | undefined;
-
 interface BlogSummary {
   id: string;
   title: string;
@@ -21,7 +19,7 @@ interface BlogSummary {
   excerpt: string;
   image?: string;
   author?: string;
-  category?: BlogCategory;
+  category?: BlogCategory; // Now uses the imported type
   created_at: string;
 }
 
@@ -96,13 +94,7 @@ export default function BlogListingPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {paginatedBlogs.length > 0 ? (
           paginatedBlogs.map((blog) => (
-            <BlogCard
-              key={blog.id}
-              blog={{
-                ...blog,
-                category: blog.category ?? undefined,
-              }}
-            />
+            <BlogCard key={blog.id} blog={blog} /> 
           ))
         ) : (
           <p className="text-gray-500">No blogs found.</p>

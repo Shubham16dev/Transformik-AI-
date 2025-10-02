@@ -5,41 +5,40 @@ import Image from "next/image";
 import { FeaturedTools } from "@/components/tools/FeaturedTool";
 import { TopCategories } from "@/components/category/TopCategories";
 
-export default async function BlogDetailPage({
-  params,
-}: {
+interface BlogDetailPageProps {
   params: { slug: string };
-}) {
-  // Fetch blog summary by slug
+}
+
+export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
+  const { slug } = params;
+
+  // Fetch blog summary
   const { data: summary, error: summaryError } = await supabase
     .from("blogs_summary")
     .select("*")
-    .eq("slug", params.slug)
+    .eq("slug", slug)
     .single();
 
   if (summaryError || !summary) return notFound();
 
-  // Fetch blog details by blog_id
+  // Fetch blog details
   const { data: details, error: detailsError } = await supabase
     .from("blogs_details")
     .select("content")
     .eq("blog_id", summary.id)
     .single();
 
-  if (detailsError) return notFound();
+  if (detailsError || !details) return notFound();
 
-  // Fetch featured tools (limit 5)
- 
-
-  // Fetch categories (for sidebar)
+  // Fetch categories for sidebar if needed
   const { data: categories } = await supabase
-    .from("tools_summary") // Or your categories table if separate
+    .from("tools_summary")
     .select("category")
     .order("category");
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-10 gap-10 px-4 md:px-8 py-6">
-      {/* Main Content - 80% */}
+      {/* Main Content */}
       <div className="md:col-span-7 space-y-8">
         <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-100 space-y-6">
           {/* Blog Header */}
@@ -55,11 +54,8 @@ export default async function BlogDetailPage({
                 />
               </div>
             )}
-
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900">
-                {summary.title}
-              </h1>
+              <h1 className="text-3xl font-bold text-gray-900">{summary.title}</h1>
               <div className="flex flex-wrap items-center text-sm text-gray-600 gap-4 mt-2">
                 {summary.created_at && (
                   <span>
@@ -91,14 +87,10 @@ export default async function BlogDetailPage({
         </div>
       </div>
 
-      {/* Sidebar - 20% */}
+      {/* Sidebar */}
       <div className="md:col-span-3 space-y-8">
-        {/* Featured Tools */}
-
         <FeaturedTools limit={5} />
-
-        {/* Top AI Categories */}
-        <TopCategories categories={categories ?? []} limit={6} />
+        <TopCategories limit={6} />
       </div>
     </div>
   );

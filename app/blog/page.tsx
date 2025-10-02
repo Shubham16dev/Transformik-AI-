@@ -12,21 +12,23 @@ import {
 } from "@/components/ui/select";
 import { Pagination } from "@/components/Pagination";
 
-interface Blog {
+type BlogCategory = string | undefined;
+
+interface BlogSummary {
   id: string;
   title: string;
   slug: string;
   excerpt: string;
   image?: string;
   author?: string;
-  category?: string;
-  created_at: string; // date field
+  category?: BlogCategory;
+  created_at: string;
 }
 
 export default function BlogListingPage() {
-  const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([]);
-  const [sortOption, setSortOption] = useState("date-desc"); // default newest first
+  const [blogs, setBlogs] = useState<BlogSummary[]>([]);
+  const [filteredBlogs, setFilteredBlogs] = useState<BlogSummary[]>([]);
+  const [sortOption, setSortOption] = useState("date-desc");
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -37,13 +39,13 @@ export default function BlogListingPage() {
     currentPage * pageSize
   );
 
-  // Fetch blogs from Supabase
+  // Fetch blogs from blogs_summary table
   useEffect(() => {
     async function fetchBlogs() {
       const { data, error } = await supabase
-        .from("blogs")
+        .from("blogs_summary")
         .select("*")
-        .order("created_at", { ascending: false }); // default newest first
+        .order("created_at", { ascending: false });
 
       if (error) {
         console.error("Error fetching blogs:", error);
@@ -53,6 +55,7 @@ export default function BlogListingPage() {
       setBlogs(data || []);
       setFilteredBlogs(data || []);
     }
+
     fetchBlogs();
   }, []);
 
@@ -69,7 +72,7 @@ export default function BlogListingPage() {
       );
     }
     setFilteredBlogs(sorted);
-    setCurrentPage(1); // reset to first page on sort change
+    setCurrentPage(1);
   }, [sortOption, blogs]);
 
   return (
@@ -92,7 +95,15 @@ export default function BlogListingPage() {
       {/* Blog Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {paginatedBlogs.length > 0 ? (
-          paginatedBlogs.map((blog) => <BlogCard key={blog.id} blog={blog} />)
+          paginatedBlogs.map((blog) => (
+            <BlogCard
+              key={blog.id}
+              blog={{
+                ...blog,
+                category: blog.category ?? undefined,
+              }}
+            />
+          ))
         ) : (
           <p className="text-gray-500">No blogs found.</p>
         )}
@@ -105,10 +116,6 @@ export default function BlogListingPage() {
           pageSize={pageSize}
           currentPage={currentPage}
           onPageChange={setCurrentPage}
-          onPageSizeChange={(size) => {
-            setPageSize(size);
-            setCurrentPage(1);
-          }}
         />
       )}
     </div>

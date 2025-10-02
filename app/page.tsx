@@ -1,127 +1,160 @@
 import { supabase } from "@/utils/supabase";
 import { ToolCard } from "@/components/tools/ToolCard";
-import { BlogCard } from "@/components/blog/BlogCard";
+import { BlogCard, BlogCategory } from "@/components/blog/BlogCard";
 import { SearchBar } from "@/components/layout/SearchBar";
+import { getPublicImageUrl } from "@/utils/getPublicImageUrl";
+import Link from "next/link";
+import { FeaturedTools } from "@/components/tools/FeaturedTool";
 
-export default async function HomePage() {
-  // Fetch Featured Tool (latest added)
-  const { data: featuredTools } = await supabase
-    .from("tools")
-    .select("id, name, slug, one_line_description, price, url")
-    .order("name", { ascending: true })
-    .limit(1);
+// ---------- Types ----------
+type PricingModel = "Free" | "Freemium" | "Paid" | "Free Trial";
 
-  // Fetch Latest Tools (next 6 tools)
-  const { data: latestTools } = await supabase
-    .from("tools")
-    .select("id, name, slug, one_line_description, price, url")
-    .order("name", { ascending: true })
+interface Tool {
+  id: string;
+  tool_name: string;
+  slug: string;
+  one_line_description: string;
+  pricing_model?: PricingModel;
+  url: string;
+  logo?: string;
+  category?: string; // use enum string here
+}
+
+interface Blog {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  image?: string;
+  author?: string;
+  category?: BlogCategory; // enum type
+}
+
+// ---------- Data Fetchers ----------
+async function getFeaturedTools(): Promise<Tool[]> {
+  const { data, error } = await supabase
+    .from("tools_summary")
+    .select("id, tool_name, slug, one_line_description, pricing_model, url, logo, category")
+    .order("created_at", { ascending: false })
+    .limit(3);
+
+  if (error) {
+    console.error("Error fetching featured tools:", error.message);
+    return [];
+  }
+
+  return (
+    data?.map((tool) => ({
+      ...tool,
+      logo: getPublicImageUrl("Logo_Images", tool.logo),
+    })) ?? []
+  );
+}
+
+async function getLatestTools(): Promise<Tool[]> {
+  const { data, error } = await supabase
+    .from("tools_summary")
+    .select("id, tool_name, slug, one_line_description, pricing_model, url, logo, category")
+    .order("created_at", { ascending: false })
     .limit(6);
 
-  // Fetch Latest Blogs (5)
-  const { data: blogs } = await supabase
-    .from("blogs")
-    .select("id, title, slug, excerpt")
+  if (error) {
+    console.error("Error fetching latest tools:", error.message);
+    return [];
+  }
+
+  return (
+    data?.map((tool) => ({
+      ...tool,
+      logo: getPublicImageUrl("Logo_Images", tool.logo),
+    })) ?? []
+  );
+}
+
+async function getBlogs(): Promise<Blog[]> {
+  const { data, error } = await supabase
+    .from("blogs_summary")
+    .select("id, title, slug, excerpt, category")
     .order("created_at", { ascending: false })
     .limit(5);
 
+  if (error) {
+    console.error("Error fetching blogs:", error.message);
+    return [];
+  }
+
+  return data ?? [];
+}
+
+// ---------- Page ----------
+export default async function HomePage() {
+  const [featuredTools, latestTools, blogs] = await Promise.all([
+    getFeaturedTools(),
+    getLatestTools(),
+    getBlogs(),
+  ]);
+
   return (
-    <div className="space-y-16">
-      {/* HeroSection goes here if you have it */}
+    <main className="space-y-16">
+      {/* Search Bar */}
       <SearchBar />
 
-      {/* ✅ Main content container */}
       <div className="px-6 py-8 max-w-7xl mx-auto space-y-16">
-        {/* Featured + Latest Tools Section */}
-        <section className="grid grid-cols-1 md:grid-cols-10 gap-6">
-          {/* Featured Tool 30% */}
+        {/* Featured + Latest Tools */}
+        <section aria-labelledby="tools-section" className="grid grid-cols-1 md:grid-cols-10 gap-6">
           <div className="md:col-span-3 space-y-4">
-            <h2 className="text-2xl font-bold">Featured Tool</h2>
-            {featuredTools?.map((tool) => (
-              <ToolCard
-                key={tool.id}
-                tool={{
-                  name: tool.name,
-                  slug: tool.slug,
-                  description: tool.one_line_description,
-                  price: tool.price,
-                  url: tool.url,
-                }}
-              />
-            ))}
+            <FeaturedTools limit={3} />
           </div>
 
-          {/* Latest Tools 70% */}
           <div className="md:col-span-7 space-y-4">
             <h2 className="text-2xl font-bold">Latest Tools</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-              {latestTools?.map((tool) => (
-                <ToolCard
-                  key={tool.id}
-                  tool={{
-                    name: tool.name,
-                    slug: tool.slug,
-                    description: tool.one_line_description,
-                    price: tool.price,
-                    url: tool.url,
-                  }}
-                />
-              ))}
+              {latestTools.length > 0 ? (
+                latestTools.map((tool) => <ToolCard key={tool.id} tool={tool} />)
+              ) : (
+                <p className="text-gray-500">No latest tools available.</p>
+              )}
             </div>
           </div>
         </section>
 
-        {/* Latest Blogs Section */}
-        <section className="space-y-4">
+        {/* Blogs Section */}
+        <section aria-labelledby="blogs-section" className="space-y-4">
           <div className="text-center space-y-2">
-            <h2 className="text-2xl font-bold">Explore AI Insights</h2>
+            <h2 id="blogs-section" className="text-2xl font-bold">Explore AI Insights</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Stay updated with the latest insights, tutorials, and trends in AI
-              tools and technology.
+              Stay updated with the latest insights, tutorials, and trends in AI tools and technology.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-10 gap-6">
-            {/* Latest 2 Blogs - Left Side (Bigger) */}
-            <div className="md:col-span-6 space-y-4">
-              <h3 className="text-xl font-semibold">Latest in AI</h3>
-              {blogs?.slice(0, 2).map((blog) => (
-                <BlogCard
-                  key={blog.id}
-                  blog={{
-                    title: blog.title,
-                    slug: blog.slug,
-                    excerpt: blog.excerpt,
-                  }}
-                />
-              ))}
+
+          {blogs.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-10 gap-6">
+              <div className="md:col-span-6 space-y-4">
+                <h3 className="text-xl font-semibold">Latest in AI</h3>
+                {blogs.slice(0, 2).map((blog) => (
+                  <BlogCard key={blog.id} blog={blog} />
+                ))}
                 <div className="pt-4">
-                  <a
+                  <Link
                     href="/blog"
                     className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white rounded-lg hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl font-medium"
                   >
                     View All Blogs →
-                  </a>
+                  </Link>
                 </div>
+              </div>
+              <div className="md:col-span-4 space-y-4">
+                <h3 className="text-xl font-semibold">More Stories</h3>
+                {blogs.slice(2).map((blog) => (
+                  <BlogCard key={blog.id} blog={blog} />
+                ))}
+              </div>
             </div>
-            
-
-            {/* Rest of the Blogs - Right Side */}
-            <div className="md:col-span-4 space-y-4">
-              <h3 className="text-xl font-semibold">More Stories</h3>
-              {blogs?.slice(2).map((blog) => (
-                <BlogCard
-                  key={blog.id}
-                  blog={{
-                    title: blog.title,
-                    slug: blog.slug,
-                    excerpt: blog.excerpt,
-                  }}
-                />
-              ))}
-            </div>
-          </div>
+          ) : (
+            <p className="text-center text-gray-500">No blogs available.</p>
+          )}
         </section>
       </div>
-    </div>
+    </main>
   );
 }

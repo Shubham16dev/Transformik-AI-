@@ -1,3 +1,5 @@
+"use client";
+
 import {
   FaYoutube,
   FaInstagram,
@@ -8,9 +10,12 @@ import {
 import Link from "next/link";
 
 export function Footer() {
+  const topCategories = ["AI Video Generation", "AI Image Generation", "NSFW Chat"];
+
   return (
     <footer className="bg-[#181828] text-white pt-10 pb-6 px-6 md:px-16">
       <div className="max-w-7xl mx-auto">
+        {/* Top section: Logo + Social Icons */}
         <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-[#23233a] pb-8 mb-8 gap-6">
           <span className="font-bold text-3xl md:text-4xl">Transformik AI</span>
           <div className="flex gap-6 text-2xl">
@@ -57,8 +62,9 @@ export function Footer() {
           </div>
         </div>
 
+        {/* Footer Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-0">
-          {/* About Section */}
+          {/* About */}
           <div className="md:pr-12">
             <h3 className="font-semibold text-xl mb-3">About Transformik AI</h3>
             <p className="text-white mb-4 leading-relaxed">
@@ -82,46 +88,22 @@ export function Footer() {
           <div className="md:px-8">
             <h3 className="font-semibold text-xl mb-3">Quick Links</h3>
             <ul className="space-y-2 text-white">
-              <li>
-                <Link
-                  href="/"
-                  className="relative hover:text-gray-300 transition-colors duration-300 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-white after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
-                >
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/tools"
-                  className="relative hover:text-gray-300 transition-colors duration-300 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-white after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
-                >
-                  All Tools
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/categories"
-                  className="relative hover:text-gray-300 transition-colors duration-300 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-white after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
-                >
-                  All Categories
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/free-tools"
-                  className="relative hover:text-gray-300 transition-colors duration-300 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-white after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
-                >
-                  Free Tools
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/blog"
-                  className="relative hover:text-gray-300 transition-colors duration-300 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-white after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
-                >
-                  Blogs
-                </Link>
-              </li>
+              {[
+                { href: "/", label: "Home" },
+                { href: "/tools", label: "All Tools" },
+                { href: "/categories", label: "All Categories" },
+                { href: "/free-tools", label: "Free Tools" },
+                { href: "/blog", label: "Blogs" },
+              ].map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="relative hover:text-gray-300 transition-colors duration-300 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-white after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -129,13 +111,11 @@ export function Footer() {
           <div className="md:pl-12">
             <h3 className="font-semibold text-xl mb-3">Top AI Categories</h3>
             <ul className="space-y-2 text-white">
-              {["AI Video Generation", "AI Image Generation", "NSFW Chat"].map(
-                (category) => (
-                  <li key={category} className="footer-link-hover">
-                    {category}
-                  </li>
-                )
-              )}
+              {topCategories.map((category) => (
+                <li key={category} className="footer-link-hover">
+                  {category}
+                </li>
+              ))}
             </ul>
             <Link
               href="/categories"
@@ -146,8 +126,8 @@ export function Footer() {
           </div>
         </div>
 
+        {/* Bottom */}
         <div className="flex flex-col items-center justify-center mt-12">
-          <div className="flex items-center gap-3 mb-4"></div>
           <div className="text-center text-[#8ca0b3] text-sm">
             © {new Date().getFullYear()} Transformik AI. All rights reserved.
           </div>

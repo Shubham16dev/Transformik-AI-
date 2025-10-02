@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <HomeHeroWrapper />
         <CategoryHeroWrapper />
 
-        <BreadcrumbsClient /> {/* Dynamic breadcrumb in client component */}
+        <BreadcrumbsClient />
 
         <main className="flex-grow w-full max-w-7xl mx-auto p-4">{children}</main>
         <Footer />

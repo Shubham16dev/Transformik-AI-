@@ -13,16 +13,17 @@ import {
 import { Menu } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+// Define navigation links outside the component
+const NAV_LINKS = [
+  { href: "/", label: "Home" },
+  { href: "/tools", label: "All Tools" },
+  { href: "/categories", label: "All Categories" },
+  { href: "/free-tools", label: "Free Tools" },
+  { href: "/blog", label: "Blogs" },
+];
+
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-
-  const links = [
-    { href: "/", label: "Home" },
-    { href: "/tools", label: "All Tools" },
-    { href: "/categories", label: "All Categories" },
-    { href: "/free-tools", label: "Free Tools" },
-    { href: "/blog", label: "Blogs" },
-  ];
 
   return (
     <nav className="bg-[#181828] shadow-md sticky top-0 z-50">
@@ -40,7 +41,7 @@ export function Navbar() {
         {/* Desktop Menu */}
         <div className="hidden md:flex flex-1 justify-center">
           <ul className="flex gap-6">
-            {links.map((link) => (
+            {NAV_LINKS.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
@@ -54,7 +55,7 @@ export function Navbar() {
           </ul>
         </div>
 
-        {/* Get Started Button (desktop only) */}
+        {/* Desktop Contact Button */}
         <div className="hidden md:block">
           <Button
             asChild
@@ -64,14 +65,18 @@ export function Navbar() {
           </Button>
         </div>
 
-        {/* Mobile Menu Button */}
+        {/* Mobile Menu */}
         <div className="md:hidden flex items-center">
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-              <button className="text-white focus:outline-none">
+              <button
+                className="text-white focus:outline-none"
+                aria-label="Open Mobile Menu"
+              >
                 <Menu size={28} />
               </button>
             </SheetTrigger>
+
             <AnimatePresence>
               {isOpen && (
                 <SheetContent
@@ -91,7 +96,7 @@ export function Navbar() {
                     transition={{ duration: 0.3 }}
                     className="mt-6 space-y-4"
                   >
-                    {links.map((link) => (
+                    {NAV_LINKS.map((link) => (
                       <Link
                         key={link.href}
                         href={link.href}
@@ -101,11 +106,12 @@ export function Navbar() {
                         {link.label}
                       </Link>
                     ))}
+
                     <Button
                       asChild
                       className="mt-4 w-full bg-white hover:bg-gray-200 text-black font-semibold px-6 py-2 rounded-full shadow-lg border border-gray-300"
                     >
-                      <Link href="/free-tools">Get Started</Link>
+                      <Link href="/contact">Contact Us</Link>
                     </Button>
                   </motion.div>
                 </SheetContent>

@@ -1,20 +1,8 @@
-// next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
   images: {
-    remotePatterns: [
-  {
-    protocol: "https",
-    hostname: "qfvgfrezpemporwxhmny.supabase.co",
-    pathname: "/storage/v1/object/public/Logo_Images/**",
-  },
-  {
-    protocol: "https",
-    hostname: "qfvgfrezpemporwxhmny.supabase.co",
-    pathname: "/storage/v1/object/public/Tool_Screenshots/**",
-  },
-],
-
+    domains: ["qfvgfrezpemporwxhmny.supabase.co"], 
   },
 };
 

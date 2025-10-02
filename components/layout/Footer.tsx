@@ -8,9 +8,18 @@ import {
   FaFacebook,
 } from "react-icons/fa6";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 export function Footer() {
   const topCategories = ["AI Video Generation", "AI Image Generation", "NSFW Chat"];
+
+  const socialLinks = [
+    { href: "https://youtube.com", icon: <FaYoutube />, label: "YouTube" },
+    { href: "https://instagram.com", icon: <FaInstagram />, label: "Instagram" },
+    { href: "https://linkedin.com", icon: <FaLinkedin />, label: "LinkedIn" },
+    { href: "https://twitter.com", icon: <FaXTwitter />, label: "X" },
+    { href: "https://facebook.com", icon: <FaFacebook />, label: "Facebook" },
+  ];
 
   return (
     <footer className="bg-[#181828] text-white pt-10 pb-6 px-6 md:px-16">
@@ -18,47 +27,22 @@ export function Footer() {
         {/* Top section: Logo + Social Icons */}
         <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-[#23233a] pb-8 mb-8 gap-6">
           <span className="font-bold text-3xl md:text-4xl">Transformik AI</span>
+
           <div className="flex gap-6 text-2xl">
-            <a
-              href="https://youtube.com"
-              aria-label="YouTube"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaYoutube />
-            </a>
-            <a
-              href="https://instagram.com"
-              aria-label="Instagram"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaInstagram />
-            </a>
-            <a
-              href="https://linkedin.com"
-              aria-label="LinkedIn"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaLinkedin />
-            </a>
-            <a
-              href="https://twitter.com"
-              aria-label="X"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaXTwitter />
-            </a>
-            <a
-              href="https://facebook.com"
-              aria-label="Facebook"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaFacebook />
-            </a>
+            {socialLinks.map((social) => (
+              <motion.a
+                key={social.href}
+                href={social.href}
+                aria-label={social.label}
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ scale: 1.2 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className="text-white"
+              >
+                {social.icon}
+              </motion.a>
+            ))}
           </div>
         </div>
 
@@ -107,22 +91,29 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Top Categories */}
+          {/* Top Categories (Static) */}
           <div className="md:pl-12">
             <h3 className="font-semibold text-xl mb-3">Top AI Categories</h3>
             <ul className="space-y-2 text-white">
               {topCategories.map((category) => (
-                <li key={category} className="footer-link-hover">
-                  {category}
+                <li key={category}>
+                  <Link
+                    href={`/tools?category=${encodeURIComponent(category)}`}
+                    className="relative hover:text-gray-300 transition-colors duration-300 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-white after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
+                  >
+                    {category}
+                  </Link>
                 </li>
               ))}
+              <li>
+                <Link
+                  href="/categories"
+                  className="relative hover:text-gray-300 transition-colors duration-300 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-white after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
+                >
+                  All Categories →
+                </Link>
+              </li>
             </ul>
-            <Link
-              href="/categories"
-              className="footer-link-hover font-semibold text-white flex items-center gap-2 mt-3"
-            >
-              All AI Categories <span>→</span>
-            </Link>
           </div>
         </div>
 

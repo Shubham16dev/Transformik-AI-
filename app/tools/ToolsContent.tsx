@@ -170,24 +170,31 @@ export function ToolsContent() {
                   tool_name: tool.tool_name,
                   slug: tool.slug,
                   one_line_description: tool.one_line_description,
-                  pricing_model:
-                    ["Free", "Freemium", "Free Trial", "Paid"].includes(
-                      tool.pricing_model
-                    )
-                      ? (tool.pricing_model as
-                          | "Free"
-                          | "Freemium"
-                          | "Free Trial"
-                          | "Paid")
-                      : undefined,
+                  pricing_model: [
+                    "Free",
+                    "Freemium",
+                    "Free Trial",
+                    "Paid",
+                  ].includes(tool.pricing_model)
+                    ? (tool.pricing_model as
+                        | "Free"
+                        | "Freemium"
+                        | "Free Trial"
+                        | "Paid")
+                    : undefined,
                   url: tool.url,
                   category: tool.category || "Other",
-                  logo: getPublicImageUrl("Logo_Images", tool.logo || undefined),
+                  logo: getPublicImageUrl(
+                    "Images",
+                    tool.logo ? `ToolLogos/${tool.logo}` : undefined
+                  ),
                 }}
               />
             ))
           ) : (
-            <p className="text-gray-500">No tools found matching your filters.</p>
+            <p className="text-gray-500">
+              No tools found matching your filters.
+            </p>
           )}
         </div>
       )}

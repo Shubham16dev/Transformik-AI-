@@ -58,7 +58,7 @@ async function getLatestTools(): Promise<Tool[]> {
 async function getBlogs(): Promise<Blog[]> {
   const { data, error } = await supabase
     .from("blogs_summary")
-    .select("id, title, slug, excerpt, category")
+    .select("id, title, slug, excerpt")
     .order("created_at", { ascending: false })
     .limit(5);
 

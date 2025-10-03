@@ -30,21 +30,21 @@ interface BlogCardProps {
 }
 
 // Map enum values to purple theme colors
-function getCategoryColor(category?: BlogCategory) {
-  const colors: Record<BlogCategory, string> = {
-    "Writing & Editing": "bg-blue-100 text-blue-800",
-    Technology: "bg-green-100 text-green-800",
-    Education: "bg-yellow-100 text-yellow-800",
-    "Health & Wellness": "bg-red-100 text-red-800",
-    Business: "bg-teal-100 text-teal-800",
-    Marketing: "bg-orange-100 text-orange-800",
-    "AI & ML": "bg-purple-100 text-purple-800",
-    Lifestyle: "bg-pink-100 text-pink-800",
-    Finance: "bg-indigo-100 text-indigo-800",
-    Other: "bg-gray-100 text-gray-800",
-  };
-  return category ? colors[category] : colors.Other;
-}
+// function getCategoryColor(category?: BlogCategory) {
+//   const colors: Record<BlogCategory, string> = {
+//     "Writing & Editing": "bg-blue-100 text-blue-800",
+//     Technology: "bg-green-100 text-green-800",
+//     Education: "bg-yellow-100 text-yellow-800",
+//     "Health & Wellness": "bg-red-100 text-red-800",
+//     Business: "bg-teal-100 text-teal-800",
+//     Marketing: "bg-orange-100 text-orange-800",
+//     "AI & ML": "bg-purple-100 text-purple-800",
+//     Lifestyle: "bg-pink-100 text-pink-800",
+//     Finance: "bg-indigo-100 text-indigo-800",
+//     Other: "bg-gray-100 text-gray-800",
+//   };
+//   return category ? colors[category] : colors.Other;
+// }
 
 export function BlogCard({ blog }: BlogCardProps) {
   const authorName = blog.author || "Harsh Mistry";
@@ -75,13 +75,13 @@ export function BlogCard({ blog }: BlogCardProps) {
       <div className="flex flex-col justify-between flex-grow">
         <div className="space-y-2 overflow-hidden">
           {/* Category Badge */}
-          <span
+          {/* <span
             className={`inline-block text-xs font-semibold px-2 py-1 rounded-md ${getCategoryColor(
               categoryName as BlogCategory
             )}`}
           >
             {categoryName}
-          </span>
+          </span> */}
 
           {/* Blog Title */}
           <h3 className="text-lg font-bold hover:text-purple-600  text-ellipsis">

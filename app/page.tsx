@@ -34,7 +34,9 @@ interface Blog {
 async function getLatestTools(): Promise<Tool[]> {
   const { data, error } = await supabase
     .from("tools_summary")
-    .select("id, tool_name, slug, one_line_description, pricing_model, url, logo, category")
+    .select(
+      "id, tool_name, slug, one_line_description, pricing_model, url, logo, category"
+    )
     .order("created_at", { ascending: false })
     .limit(6);
 
@@ -46,12 +48,13 @@ async function getLatestTools(): Promise<Tool[]> {
   return (
     data?.map((tool) => ({
       ...tool,
-      logo: getPublicImageUrl("Images",tool.logo ? `ToolLogos/${tool.logo}` : undefined),
+      logo: getPublicImageUrl(
+        "Images",
+        tool.logo ? `ToolLogos/${tool.logo}` : undefined
+      ),
     })) ?? []
   );
 }
-
-
 
 async function getBlogs(): Promise<Blog[]> {
   const { data, error } = await supabase
@@ -82,16 +85,63 @@ export default async function HomePage() {
 
       <div className="px-6 py-8 max-w-7xl mx-auto space-y-16">
         {/* Featured + Latest Tools */}
-        <section aria-labelledby="tools-section" className="grid grid-cols-1 md:grid-cols-10 gap-6">
+        <section
+          aria-labelledby="tools-section"
+          className="grid grid-cols-1 md:grid-cols-10 gap-6"
+        >
           <div className="md:col-span-3 space-y-4">
-            <FeaturedTools limit={3} />
+            <h2 className="text-xl font-bold">Top AI Categories</h2>
+            <div className="space-y-2">
+              <Link
+                href="/tools?category=writing-content"
+                className="block p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+              >
+                <span className="text-gray-800 font-medium">
+                  Writing & Content
+                </span>
+              </Link>
+              <Link
+                href={`/tools?category=${encodeURIComponent(
+                  "Image Generation & Editing"
+                )}`}
+                className="block p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+              >
+                <span className="text-gray-800 font-medium">
+                  Image Generation & Editing
+                </span>
+              </Link>
+              <Link
+                href="/tools?category=video-audio"
+                className="block p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+              >
+                <span className="text-gray-800 font-medium">Video & Audio</span>
+              </Link>
+              <Link
+                href="/tools?category=code-development"
+                className="block p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+              >
+                <span className="text-gray-800 font-medium">
+                  Code & Development
+                </span>
+              </Link>
+              <Link
+                href="/tools?category=business-marketing"
+                className="block p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+              >
+                <span className="text-gray-800 font-medium">
+                  Business & Marketing
+                </span>
+              </Link>
+            </div>
           </div>
 
           <div className="md:col-span-7 space-y-4">
             <h2 className="text-2xl font-bold">Latest Tools</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
               {latestTools.length > 0 ? (
-                latestTools.map((tool) => <ToolCard key={tool.id} tool={tool} />)
+                latestTools.map((tool) => (
+                  <ToolCard key={tool.id} tool={tool} />
+                ))
               ) : (
                 <p className="text-gray-500">No latest tools available.</p>
               )}
@@ -102,9 +152,12 @@ export default async function HomePage() {
         {/* Blogs Section */}
         <section aria-labelledby="blogs-section" className="space-y-4">
           <div className="text-center space-y-2">
-            <h2 id="blogs-section" className="text-2xl font-bold">Explore AI Insights</h2>
+            <h2 id="blogs-section" className="text-2xl font-bold">
+              Explore AI Insights
+            </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Stay updated with the latest insights, tutorials, and trends in AI tools and technology.
+              Stay updated with the latest insights, tutorials, and trends in AI
+              tools and technology.
             </p>
           </div>
 

@@ -18,9 +18,26 @@ export function TopCategories({ limit = 6 }: TopCategoriesProps) {
         .select("category");
 
       if (!error && data) {
-        const unique = Array.from(
-          new Set(data.map((c) => c.category).filter(Boolean))
-        );
+        const allCategories: string[] = [];
+
+        data.forEach((tool) => {
+          const categories = tool.category;
+
+          if (Array.isArray(categories)) {
+            // Handle array of categories
+            categories.forEach((cat) => {
+              if (cat && typeof cat === "string") {
+                allCategories.push(cat);
+              }
+            });
+          } else if (typeof categories === "string" && categories) {
+            // Handle single category string
+            allCategories.push(categories);
+          }
+        });
+
+        // Get unique categories
+        const unique = Array.from(new Set(allCategories));
         setCategories(unique);
       }
     };

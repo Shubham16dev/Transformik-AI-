@@ -67,8 +67,23 @@ export default function CategoriesPage() {
       const categoryCount: Record<string, number> = {};
 
       toolsData?.forEach((tool) => {
-        const category = tool.category || "Uncategorized";
-        categoryCount[category] = (categoryCount[category] || 0) + 1;
+        const categories = tool.category;
+
+        if (Array.isArray(categories)) {
+          // Handle array of categories
+          categories.forEach((cat) => {
+            if (cat && typeof cat === "string") {
+              categoryCount[cat] = (categoryCount[cat] || 0) + 1;
+            }
+          });
+        } else if (typeof categories === "string" && categories) {
+          // Handle single category string
+          categoryCount[categories] = (categoryCount[categories] || 0) + 1;
+        } else {
+          // Handle uncategorized
+          categoryCount["Uncategorized"] =
+            (categoryCount["Uncategorized"] || 0) + 1;
+        }
       });
 
       const categoryArray: Category[] = Object.entries(categoryCount).map(

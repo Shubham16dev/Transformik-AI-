@@ -15,7 +15,7 @@ interface Tool {
   one_line_description: string;
   pricing_model: string;
   url?: string;
-  category?: string | null;
+  category?: string | string[] | null;
   logo?: string | null;
 }
 
@@ -24,32 +24,7 @@ const PRICE_OPTIONS = [
   { value: "Free", label: "Free" },
   { value: "Freemium", label: "Freemium" },
   { value: "Free Trial", label: "Free Trial" },
-  { value: "Paid", label: "Paid" },
-];
-
-const FIXED_CATEGORIES = [
-  "Writing & Editing",
-  "Image Generation & Editing",
-  "Image Analysis",
-  "Music & Audio",
-  "Voice Generation & Conversion",
-  "Art & Creative Design",
-  "Social Media",
-  "AI Detection & Anti-Detection",
-  "Coding & Development",
-  "Video & Animation",
-  "Daily Life",
-  "Legal & Finance",
-  "Business Management",
-  "Marketing & Advertising",
-  "Health & Wellness",
-  "Business Research",
-  "Education & Translation",
-  "Chatbots & Virtual Companions",
-  "Interior & Architectural Design",
-  "Office & Productivity",
-  "Research & Data Analysis",
-  "Other",
+  { value: "Premium", label: "Premium" },
 ];
 
 export function ToolsContent() {
@@ -57,6 +32,7 @@ export function ToolsContent() {
   const categoryParam = searchParams.get("category");
 
   const [tools, setTools] = useState<Tool[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState("");
@@ -66,9 +42,9 @@ export function ToolsContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 15;
 
-  // Fetch tools
+  // Fetch tools and categories
   useEffect(() => {
-    const fetchTools = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
         const { data, error } = await supabase
@@ -79,24 +55,50 @@ export function ToolsContent() {
         if (error) throw error;
         setTools(data ?? []);
 
+        // Extract unique categories from all tools
+        const allCategories: string[] = [];
+        data?.forEach((tool) => {
+          const toolCategories = tool.category;
+
+          if (Array.isArray(toolCategories)) {
+            // Handle array of categories
+            toolCategories.forEach((cat) => {
+              if (cat && typeof cat === "string") {
+                allCategories.push(cat);
+              }
+            });
+          } else if (typeof toolCategories === "string" && toolCategories) {
+            // Handle single category string
+            allCategories.push(toolCategories);
+          }
+        });
+
+        // Get unique categories and sort them
+        const uniqueCategories = Array.from(new Set(allCategories)).sort();
+        setCategories(uniqueCategories);
+
         // Apply category param from URL
         if (categoryParam) {
-          const formattedCategory = categoryParam
-            .split("-")
-            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-            .join(" ");
-          if (FIXED_CATEGORIES.includes(formattedCategory)) {
-            setCategory(formattedCategory);
+          // Try to match the category param directly with available categories
+          const matchingCategory = uniqueCategories.find(
+            (cat) =>
+              cat.toLowerCase() === categoryParam.toLowerCase() ||
+              cat.toLowerCase() ===
+                categoryParam.replace(/-/g, " ").toLowerCase()
+          );
+
+          if (matchingCategory) {
+            setCategory(matchingCategory);
           }
         }
       } catch (err) {
-        console.error("Error fetching tools:", err);
+        console.error("Error fetching data:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTools();
+    fetchData();
   }, [categoryParam]);
 
   // Filtering (memoized for performance)
@@ -106,9 +108,25 @@ export function ToolsContent() {
         .toLowerCase()
         .includes(search.toLowerCase());
 
-      const matchesCategory =
-        category === "all" ||
-        tool.category?.toLowerCase() === category.toLowerCase();
+      let matchesCategory = category === "all";
+
+      if (!matchesCategory) {
+        const toolCategories = tool.category;
+
+        if (Array.isArray(toolCategories)) {
+          // Check if any category in the array matches
+          matchesCategory = toolCategories.some(
+            (cat) =>
+              cat &&
+              typeof cat === "string" &&
+              cat.toLowerCase() === category.toLowerCase()
+          );
+        } else if (typeof toolCategories === "string" && toolCategories) {
+          // Check single category string
+          matchesCategory =
+            toolCategories.toLowerCase() === category.toLowerCase();
+        }
+      }
 
       const matchesPrice =
         priceFilter === "all" ||
@@ -144,7 +162,7 @@ export function ToolsContent() {
           onChange={setCategory}
           options={[
             { value: "all", label: "All Categories" },
-            ...FIXED_CATEGORIES.map((c) => ({ value: c, label: c })),
+            ...categories.map((c) => ({ value: c, label: c })),
           ]}
           placeholder="Select Category"
         />
@@ -183,7 +201,9 @@ export function ToolsContent() {
                         | "Paid")
                     : undefined,
                   url: tool.url,
-                  category: tool.category || "Other",
+                  category: Array.isArray(tool.category)
+                    ? tool.category[0] || "Other"
+                    : tool.category || "Other",
                   logo: getPublicImageUrl(
                     "Images",
                     tool.logo ? `ToolLogos/${tool.logo}` : undefined

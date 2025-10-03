@@ -93,43 +93,45 @@ export default async function HomePage() {
             <h2 className="text-xl font-bold">Top AI Categories</h2>
             <div className="space-y-2">
               <Link
-                href="/tools?category=writing-content"
+                href={`/tools?category=${encodeURIComponent("AI Chatbots")}`}
                 className="block p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
               >
-                <span className="text-gray-800 font-medium">
-                  Writing & Content
-                </span>
+                <span className="text-gray-800 font-medium">AI Chatbots</span>
+              </Link>
+              <Link
+                href={`/tools?category=${encodeURIComponent("AI Agents")}`}
+                className="block p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+              >
+                <span className="text-gray-800 font-medium">AI Agents</span>
               </Link>
               <Link
                 href={`/tools?category=${encodeURIComponent(
-                  "Image Generation & Editing"
+                  "AI Writing Assistants"
                 )}`}
                 className="block p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
               >
                 <span className="text-gray-800 font-medium">
-                  Image Generation & Editing
+                  AI Writing Assistants
                 </span>
               </Link>
               <Link
-                href="/tools?category=video-audio"
-                className="block p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-              >
-                <span className="text-gray-800 font-medium">Video & Audio</span>
-              </Link>
-              <Link
-                href="/tools?category=code-development"
+                href={`/tools?category=${encodeURIComponent(
+                  "AI Coding Assistants"
+                )}`}
                 className="block p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
               >
                 <span className="text-gray-800 font-medium">
-                  Code & Development
+                  AI Coding Assistants
                 </span>
               </Link>
               <Link
-                href="/tools?category=business-marketing"
+                href={`/tools?category=${encodeURIComponent(
+                  "AI Tools for Marketers"
+                )}`}
                 className="block p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
               >
                 <span className="text-gray-800 font-medium">
-                  Business & Marketing
+                  AI Tools for Marketers
                 </span>
               </Link>
             </div>

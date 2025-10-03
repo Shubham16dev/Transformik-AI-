@@ -88,13 +88,13 @@ export function ToolCard({ tool }: ToolCardProps) {
                 {tool.category}
               </span>
             )}
-            <span
+            {/* <span
               className={`inline-block text-xs font-medium px-2 py-1 ${getPriceColor(
                 tool.pricing_model
               )}`}
             >
               {tool.pricing_model ?? "Unknown"}
-            </span>
+            </span> */}
           </div>
         </div>
       </div>

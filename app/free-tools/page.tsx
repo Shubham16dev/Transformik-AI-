@@ -16,7 +16,7 @@ interface Tool {
   pricing_model: "Free" | "Freemium" | "Paid" | "Free Trial";
   url: string;
   logo?: string;
-  category?: string;
+  category?: string | string[];
 }
 
 interface CategoryOption {
@@ -66,7 +66,19 @@ export default function FreeToolsPage() {
 
         const categorySet = new Set<string>();
         toolsData?.forEach((tool) => {
-          if (tool.category) categorySet.add(tool.category);
+          const categories = tool.category;
+
+          if (Array.isArray(categories)) {
+            // Handle array of categories
+            categories.forEach((cat) => {
+              if (cat && typeof cat === "string") {
+                categorySet.add(cat);
+              }
+            });
+          } else if (typeof categories === "string" && categories) {
+            // Handle single category string
+            categorySet.add(categories);
+          }
         });
 
         const categoryList: CategoryOption[] = [
@@ -92,10 +104,26 @@ export default function FreeToolsPage() {
     let temp = [...tools];
 
     if (selectedCategory && selectedCategory !== "all") {
-      temp = temp.filter(
-        (tool) =>
-          tool.category?.toLowerCase().replace(/\s+/g, "-") === selectedCategory
-      );
+      temp = temp.filter((tool) => {
+        const categories = tool.category;
+
+        if (Array.isArray(categories)) {
+          // Check if any category in the array matches
+          return categories.some(
+            (cat) =>
+              cat &&
+              typeof cat === "string" &&
+              cat.toLowerCase().replace(/\s+/g, "-") === selectedCategory
+          );
+        } else if (typeof categories === "string" && categories) {
+          // Check single category string
+          return (
+            categories.toLowerCase().replace(/\s+/g, "-") === selectedCategory
+          );
+        }
+
+        return false;
+      });
     }
 
     if (search) {
@@ -189,7 +217,9 @@ export default function FreeToolsPage() {
                     : undefined,
                   url: tool.url,
                   logo: logoUrl,
-                  category: tool.category ?? "Other",
+                  category: Array.isArray(tool.category)
+                    ? tool.category[0] ?? "Other"
+                    : tool.category ?? "Other",
                 }}
               />
             );

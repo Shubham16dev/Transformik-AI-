@@ -217,9 +217,7 @@ export default function FreeToolsPage() {
                     : undefined,
                   url: tool.url,
                   logo: logoUrl,
-                  category: Array.isArray(tool.category)
-                    ? tool.category[0] ?? "Other"
-                    : tool.category ?? "Other",
+                  category: tool.category ?? "Other",
                 }}
               />
             );

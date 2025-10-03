@@ -201,9 +201,7 @@ export function ToolsContent() {
                         | "Paid")
                     : undefined,
                   url: tool.url,
-                  category: Array.isArray(tool.category)
-                    ? tool.category[0] || "Other"
-                    : tool.category || "Other",
+                  category: tool.category || "Other",
                   logo: getPublicImageUrl(
                     "Images",
                     tool.logo ? `ToolLogos/${tool.logo}` : undefined

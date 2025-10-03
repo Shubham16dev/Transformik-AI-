@@ -105,7 +105,10 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
                 Price: {toolSummary.pricing_model}
               </p>
               <p className="mt-1 font-medium text-gray-700">
-                Category: {toolSummary.category}
+                Category:{" "}
+                {Array.isArray(toolSummary.category)
+                  ? toolSummary.category.join(", ")
+                  : toolSummary.category}
               </p>
             </div>
           </div>
@@ -183,23 +186,26 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
 
           {/* Screenshots */}
           {screenshots.length > 0 && (
-  <ToolSection title="Screenshots">
-    <div className="space-y-4">
-      {screenshots.map((url, idx) => (
-        <div key={idx} className="w-full overflow-hidden rounded-lg border border-gray-200">
-          <Image
-            src={url}
-            alt={`${toolSummary.tool_name} screenshot ${idx + 1}`}
-            width={1200} // provide a large width so Next.js can optimize
-            height={0}   // allow auto height
-            sizes="100vw"
-            className="w-full h-auto object-contain"
-          />
-        </div>
-      ))}
-    </div>
-  </ToolSection>
-)}
+            <ToolSection title="Screenshots">
+              <div className="space-y-4">
+                {screenshots.map((url, idx) => (
+                  <div
+                    key={idx}
+                    className="w-full overflow-hidden rounded-lg border border-gray-200"
+                  >
+                    <Image
+                      src={url}
+                      alt={`${toolSummary.tool_name} screenshot ${idx + 1}`}
+                      width={1200} // provide a large width so Next.js can optimize
+                      height={0} // allow auto height
+                      sizes="100vw"
+                      className="w-full h-auto object-contain"
+                    />
+                  </div>
+                ))}
+              </div>
+            </ToolSection>
+          )}
         </div>
       </div>
 

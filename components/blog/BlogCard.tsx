@@ -48,7 +48,7 @@ interface BlogCardProps {
 
 export function BlogCard({ blog }: BlogCardProps) {
   const authorName = blog.author || "Harsh Mistry";
-  const categoryName = blog.category || "Other";
+  
 
   return (
     <Card

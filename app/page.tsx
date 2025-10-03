@@ -4,7 +4,6 @@ import { BlogCard, BlogCategory } from "@/components/blog/BlogCard";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { getPublicImageUrl } from "@/utils/getPublicImageUrl";
 import Link from "next/link";
-import { FeaturedTools } from "@/components/tools/FeaturedTool";
 
 // ---------- Types ----------
 type PricingModel = "Free" | "Freemium" | "Paid" | "Free Trial";

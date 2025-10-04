@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/utils/supabase";
-import { BlogCard, BlogCategory } from "@/components/blog/BlogCard";
+import { BlogCard } from "@/components/blog/BlogCard";
 import {
   Select,
   SelectContent,
@@ -19,7 +19,6 @@ interface BlogSummary {
   excerpt: string;
   image?: string;
   author?: string;
-  category?: BlogCategory; // Now uses the imported type
   created_at: string;
 }
 
@@ -42,11 +41,11 @@ export default function BlogListingPage() {
     async function fetchBlogs() {
       const { data, error } = await supabase
         .from("blogs_summary")
-        .select("*")
+        .select("id, title, slug, excerpt, image, author, created_at")
         .order("created_at", { ascending: false });
 
       if (error) {
-        console.error("Error fetching blogs:", error);
+        console.error("Error fetching blogs:", error.message);
         return;
       }
 

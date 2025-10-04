@@ -161,6 +161,28 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
               </CardContent>
             </Card>
           )}
+          {/* Screenshots */}
+          {screenshots.length > 0 && (
+            <ToolSection title="Screenshots">
+              <div className="space-y-4">
+                {screenshots.map((url, idx) => (
+                  <div
+                    key={idx}
+                    className="w-full overflow-hidden rounded-lg border border-gray-200"
+                  >
+                    <Image
+                      src={url}
+                      alt={`${toolSummary.tool_name} screenshot ${idx + 1}`}
+                      width={1200}
+                      height={0}
+                      sizes="100vw"
+                      className="w-full h-auto object-contain"
+                    />
+                  </div>
+                ))}
+              </div>
+            </ToolSection>
+          )}
 
           {/* How to Use */}
           {toolDetails?.how_to_use && (
@@ -270,6 +292,21 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
             </Card>
           )}
 
+          {/* Pricing */}
+          {toolDetails?.pricing && (
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  Pricing
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4 text-gray-700 leading-relaxed">
+                {toolDetails.pricing}
+              </CardContent>
+            </Card>
+          )}
+
           {/* FAQs */}
           {faqs.length > 0 && (
             <Card className="mt-6">
@@ -310,7 +347,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
           )}
 
           {/* Screenshots */}
-          {screenshots.length > 0 && (
+          {/* {screenshots.length > 0 && (
             <ToolSection title="Screenshots">
               <div className="space-y-4">
                 {screenshots.map((url, idx) => (
@@ -330,7 +367,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
                 ))}
               </div>
             </ToolSection>
-          )}
+          )} */}
         </div>
       </div>
 

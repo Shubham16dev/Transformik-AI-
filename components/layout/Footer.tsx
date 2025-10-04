@@ -1,17 +1,29 @@
 "use client";
 
-import {
-  FaYoutube,
-  FaInstagram,
-  FaLinkedin,
-  FaXTwitter,
-  FaFacebook,
-} from "react-icons/fa6";
+import { useEffect, useState } from "react";
+import { FaYoutube, FaInstagram, FaLinkedin, FaXTwitter, FaFacebook } from "react-icons/fa6";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { supabase } from "@/utils/supabase";
 
 export function Footer() {
-  const topCategories = ["AI Video Generation", "AI Image Generation", "NSFW Chat"];
+  const [categories, setCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data, error } = await supabase.from("tools_summary").select("category");
+      if (!error && data) {
+        const allCategories: string[] = [];
+        data.forEach((tool) => {
+          const cat = tool.category;
+          if (Array.isArray(cat)) cat.forEach((c) => c && allCategories.push(c));
+          else if (typeof cat === "string" && cat) allCategories.push(cat);
+        });
+        setCategories(Array.from(new Set(allCategories))); // unique
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const socialLinks = [
     { href: "https://youtube.com", icon: <FaYoutube />, label: "YouTube" },
@@ -24,10 +36,9 @@ export function Footer() {
   return (
     <footer className="bg-[#181828] text-white pt-10 pb-6 px-6 md:px-16">
       <div className="max-w-7xl mx-auto">
-        {/* Top section: Logo + Social Icons */}
+        {/* Top section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-[#23233a] pb-8 mb-8 gap-6">
           <span className="font-bold text-3xl md:text-4xl">Transformik AI</span>
-
           <div className="flex gap-6 text-2xl">
             {socialLinks.map((social) => (
               <motion.a
@@ -52,10 +63,8 @@ export function Footer() {
           <div className="md:pr-12">
             <h3 className="font-semibold text-xl mb-3">About Transformik AI</h3>
             <p className="text-white mb-4 leading-relaxed">
-              Discover cutting-edge AI tools and resources to transform your
-              workflow. From AI generators to productivity enhancers, we curate
-              the best artificial intelligence solutions for creators and
-              professionals.
+              Discover cutting-edge AI tools and resources to transform your workflow.
+              From AI generators to productivity enhancers, we curate the best AI solutions.
             </p>
             <p className="text-white text-sm">
               Contact:{" "}
@@ -91,11 +100,12 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Top Categories (Static) */}
+          {/* Top Categories (Dynamic) */}
+          {/* Top Categories (Dynamic) */}
           <div className="md:pl-12">
             <h3 className="font-semibold text-xl mb-3">Top AI Categories</h3>
             <ul className="space-y-2 text-white">
-              {topCategories.map((category) => (
+              {categories.slice(0, 4).map((category) => (
                 <li key={category}>
                   <Link
                     href={`/tools?category=${encodeURIComponent(category)}`}
@@ -115,6 +125,7 @@ export function Footer() {
               </li>
             </ul>
           </div>
+
         </div>
 
         {/* Bottom */}

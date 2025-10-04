@@ -1,4 +1,4 @@
-// layout.tsx (Server Component)
+// layout.tsx
 import type { Metadata } from "next";
 import { Navbar } from "@/components/layout/Navbar";
 import { HomeHeroWrapper } from "@/components/layout/HomeHeroWrapper";
@@ -14,8 +14,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen flex flex-col bg-gray-50 text-gray-900">
+        {/* Make sure these are client components if they have dynamic content */}
         <Navbar />
         <HomeHeroWrapper />
         <CategoryHeroWrapper />

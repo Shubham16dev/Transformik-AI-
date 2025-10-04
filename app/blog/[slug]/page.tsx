@@ -1,16 +1,16 @@
 import { notFound } from "next/navigation";
 import { supabase } from "@/utils/supabase";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { FeaturedTools } from "@/components/tools/FeaturedTool";
 import { TopCategories } from "@/components/category/TopCategories";
+import parse from "html-react-parser";
 
 interface BlogDetailPageProps {
-  params: Promise<{ slug: string }>; // Change this to Promise
+  params: Promise<{ slug: string }>;
 }
 
 export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
-  const { slug } = await params; // Await params here
+  const { slug } = await params;
 
   // Fetch blog summary
   const { data: summary, error: summaryError } = await supabase
@@ -25,7 +25,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
   const { data: details, error: detailsError } = await supabase
     .from("blogs_details")
     .select("content")
-    .eq("blog_id", summary.id)
+    .eq("id", summary.id)
     .single();
 
   if (detailsError || !details) return notFound();
@@ -37,19 +37,10 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
         <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-100 space-y-6">
           {/* Blog Header */}
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            {summary.image && (
-              <div className="w-full md:w-48 h-48 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
-                <Image
-                  src={summary.image}
-                  alt={summary.title}
-                  width={192}
-                  height={192}
-                  className="object-cover w-full h-full"
-                />
-              </div>
-            )}
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900">{summary.title}</h1>
+              <h1 className="text-4xl font-extrabold text-gray-900">
+                {summary.title}
+              </h1>
               <div className="flex flex-wrap items-center text-sm text-gray-600 gap-4 mt-2">
                 {summary.created_at && (
                   <span>
@@ -66,7 +57,9 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
           </div>
 
           {/* Blog Content */}
-          <div className="prose max-w-none mt-4">{details.content}</div>
+          <div className="prose max-w-none mt-4">
+            {parse(details.content || "")}
+          </div>
 
           {/* Optional Action */}
           {summary.url && (

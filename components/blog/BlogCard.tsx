@@ -5,19 +5,6 @@ import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-// Export the type so other components can use it
-export type BlogCategory =
-  | "Writing & Editing"
-  | "Technology"
-  | "Education"
-  | "Health & Wellness"
-  | "Business"
-  | "Marketing"
-  | "AI & ML"
-  | "Lifestyle"
-  | "Finance"
-  | "Other";
-
 interface BlogCardProps {
   blog: {
     title: string;
@@ -25,31 +12,12 @@ interface BlogCardProps {
     excerpt: string;
     image?: string;
     author?: string;
-    category?: BlogCategory;
   };
 }
-
-// Map enum values to purple theme colors
-// function getCategoryColor(category?: BlogCategory) {
-//   const colors: Record<BlogCategory, string> = {
-//     "Writing & Editing": "bg-blue-100 text-blue-800",
-//     Technology: "bg-green-100 text-green-800",
-//     Education: "bg-yellow-100 text-yellow-800",
-//     "Health & Wellness": "bg-red-100 text-red-800",
-//     Business: "bg-teal-100 text-teal-800",
-//     Marketing: "bg-orange-100 text-orange-800",
-//     "AI & ML": "bg-purple-100 text-purple-800",
-//     Lifestyle: "bg-pink-100 text-pink-800",
-//     Finance: "bg-indigo-100 text-indigo-800",
-//     Other: "bg-gray-100 text-gray-800",
-//   };
-//   return category ? colors[category] : colors.Other;
-// }
 
 export function BlogCard({ blog }: BlogCardProps) {
   const authorName = blog.author || "Harsh Mistry";
   
-
   return (
     <Card
       className="hover:shadow-xl transition-shadow duration-300 rounded-xl border border-gray-200 p-4 w-full flex flex-col md:flex-row gap-4"
@@ -74,15 +42,7 @@ export function BlogCard({ blog }: BlogCardProps) {
       {/* Blog Details */}
       <div className="flex flex-col justify-between flex-grow">
         <div className="space-y-2 overflow-hidden">
-          {/* Category Badge */}
-          {/* <span
-            className={`inline-block text-xs font-semibold px-2 py-1 rounded-md ${getCategoryColor(
-              categoryName as BlogCategory
-            )}`}
-          >
-            {categoryName}
-          </span> */}
-
+          
           {/* Blog Title */}
           <h3 className="text-lg font-bold hover:text-purple-600  text-ellipsis">
             <Link href={`/blog/${blog.slug}`}>{blog.title}</Link>

@@ -61,11 +61,13 @@ export default function BlogListingPage() {
     const sorted = [...blogs];
     if (sortOption === "date-desc") {
       sorted.sort(
-        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
     } else if (sortOption === "date-asc") {
       sorted.sort(
-        (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        (a, b) =>
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
       );
     }
     setFilteredBlogs(sorted);
@@ -92,9 +94,7 @@ export default function BlogListingPage() {
       {/* Blog Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {paginatedBlogs.length > 0 ? (
-          paginatedBlogs.map((blog) => (
-            <BlogCard key={blog.id} blog={blog} /> 
-          ))
+          paginatedBlogs.map((blog) => <BlogCard key={blog.id} blog={blog} />)
         ) : (
           <p className="text-gray-500">No blogs found.</p>
         )}

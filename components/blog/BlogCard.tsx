@@ -16,7 +16,7 @@ interface BlogCardProps {
 }
 
 export function BlogCard({ blog }: BlogCardProps) {
-  const authorName = blog.author || "Harsh Mistry";
+  // const authorName = blog.author || "Harsh Mistry";
   
   return (
     <Card
@@ -52,7 +52,7 @@ export function BlogCard({ blog }: BlogCardProps) {
           <p className="text-gray-600 text-sm line-clamp-3">{blog.excerpt}</p>
 
           {/* Author */}
-          <p className="text-gray-500 text-xs">By {authorName}</p>
+          {/* <p className="text-gray-500 text-xs">By {authorName}</p> */}
         </div>
 
         {/* Read More Button */}

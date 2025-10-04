@@ -1,21 +1,308 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# Transformik AI Website - Content Management Guide
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+This guide explains how to update and manage content for the Transformik AI website, including tools and blogs.
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+## 📊 Database Structure
+
+The website uses Supabase as the database with a two-table structure for both tools and blogs:
+
+### Tools Structure
+
+#### 1. `tools_summary` Table
+
+Contains basic information displayed on the tools listing page and cards.
+
+| Column                 | Type       | Description                                         | Required |
+| ---------------------- | ---------- | --------------------------------------------------- | -------- |
+| `id`                   | UUID       | Primary key, auto-generated                         | ✅       |
+| `tool_name`            | Text       | Name of the AI tool                                 | ✅       |
+| `slug`                 | Text       | URL-friendly version of tool name (e.g., "chatgpt") | ✅       |
+| `one_line_description` | Text       | Brief description shown on cards                    | ✅       |
+| `pricing_model`        | Text       | "Free", "Freemium", "Free Trial", "Premium"         | ✅       |
+| `url`                  | Text       | Official website URL of the tool                    | ❌       |
+| `category`             | Array/Text | Tool categories (e.g., ["AI & ML", "Writing"])      | ❌       |
+| `logo`                 | Text       | Logo filename (stored in Supabase Storage)          | ❌       |
+| `created_at`           | Timestamp  | Auto-generated creation date                        | ✅       |
+
+#### 2. `tools_details` Table
+
+Contains detailed information for individual tool pages.
+
+| Column        | Type  | Description                               | Required |
+| ------------- | ----- | ----------------------------------------- | -------- |
+| `id`          | UUID  | Foreign key linking to `tools_summary.id` | ✅       |
+| `description` | Text  | Detailed tool description                 | ❌       |
+| `how_to_use`  | Text  | Step-by-step usage instructions           | ❌       |
+| `use_cases`   | Text  | List of use cases (newline separated)     | ❌       |
+| `pros`        | Text  | Tool advantages (newline separated)       | ❌       |
+| `cons`        | Text  | Tool disadvantages (newline separated)    | ❌       |
+| `pricing`     | Text  | Detailed pricing information              | ❌       |
+| `screenshots` | Array | Screenshot filenames array                | ❌       |
+| `faqs`        | JSON  | Array of {question, answer} objects       | ❌       |
+
+### Blogs Structure
+
+#### 1. `blogs_summary` Table
+
+Contains basic blog information for the blog listing page.
+
+| Column       | Type      | Description                                   | Required |
+| ------------ | --------- | --------------------------------------------- | -------- |
+| `id`         | UUID      | Primary key, auto-generated                   | ✅       |
+| `title`      | Text      | Blog post title                               | ✅       |
+| `slug`       | Text      | URL-friendly version (e.g., "ai-trends-2024") | ✅       |
+| `excerpt`    | Text      | Brief summary shown on blog cards             | ✅       |
+| `image`      | Text      | Featured image filename                       | ❌       |
+| `author`     | Text      | Author name (defaults to "Harsh Mistry")      | ❌       |
+| `created_at` | Timestamp | Auto-generated creation date                  | ✅       |
+
+#### 2. `blogs_details` Table
+
+Contains full blog content for individual blog pages.
+
+| Column    | Type | Description                               | Required |
+| --------- | ---- | ----------------------------------------- | -------- |
+| `id`      | UUID | Foreign key linking to `blogs_summary.id` | ✅       |
+| `content` | Text | Full HTML content of the blog post        | ✅       |
+
+## 🔄 How to Add/Update Content
+
+### Adding a New Tool
+
+#### Step 1: Add to `tools_summary`
+
+```sql
+INSERT INTO tools_summary (
+  tool_name,
+  slug,
+  one_line_description,
+  pricing_model,
+  url,
+  category,
+  logo
+) VALUES (
+  'ChatGPT',
+  'chatgpt',
+  'AI-powered conversational assistant',
+  'Freemium',
+  'https://chat.openai.com',
+  ARRAY['AI & ML', 'Writing'],
+  'chatgpt-logo.png'
+);
+```
+
+#### Step 2: Add to `tools_details`
+
+```sql
+INSERT INTO tools_details (
+  id,
+  description,
+  how_to_use,
+  use_cases,
+  pros,
+  cons,
+  pricing,
+  screenshots,
+  faqs
+) VALUES (
+  'uuid-from-tools-summary',
+  'Detailed description of the tool...',
+  'Step 1: Sign up for an account
+Step 2: Navigate to the chat interface
+Step 3: Type your question',
+  'Content creation
+Code assistance
+Customer support',
+  'Easy to use
+High-quality responses
+Multiple languages',
+  'Rate limits
+Requires internet',
+  'Free tier: 20 queries/month
+Pro: $20/month unlimited',
+  ARRAY['screenshot1.png', 'screenshot2.png'],
+  '[
+    {"question": "Is it free?", "answer": "Yes, with limitations"},
+    {"question": "How accurate is it?", "answer": "Very accurate for most tasks"}
+  ]'::jsonb
+);
+```
+
+### Adding a New Blog Post
+
+#### Step 1: Add to `blogs_summary`
+
+```sql
+INSERT INTO blogs_summary (
+  title,
+  slug,
+  excerpt,
+  image,
+  author
+) VALUES (
+  'The Future of AI in 2024',
+  'future-of-ai-2024',
+  'Exploring the latest trends and predictions for artificial intelligence...',
+  'ai-future-2024.jpg',
+  'Harsh Mistry'
+);
+```
+
+#### Step 2: Add to `blogs_details`
+
+```sql
+INSERT INTO blogs_details (
+  id,
+  content
+) VALUES (
+  'uuid-from-blogs-summary',
+  '<h2>Introduction</h2>
+  <p>The artificial intelligence landscape is evolving rapidly...</p>
+  <h2>Key Trends</h2>
+  <ul>
+    <li>Generative AI adoption</li>
+    <li>Edge computing integration</li>
+  </ul>'
+);
+```
+
+## 📁 File Storage Structure
+
+### Supabase Storage Buckets
+
+#### `Images` Bucket
+
+```
+Images/
+├── ToolLogos/
+│   ├── chatgpt-logo.png
+│   ├── midjourney-logo.png
+│   └── ...
+├── ToolScreenshot/
+│   ├── chatgpt-screenshot1.png
+│   ├── chatgpt-screenshot2.png
+│   └── ...
+└── BlogImages/
+    ├── ai-future-2024.jpg
+    ├── ml-trends.png
+    └── ...
+```
+
+## 🛠️ Content Management Best Practices
+
+### Tool Management
+
+1. **Slugs**: Always use lowercase, hyphen-separated slugs (e.g., `google-bard` not `Google Bard`)
+
+2. **Categories**: Use consistent category names:
+
+   - "AI & ML"
+   - "Writing & Editing"
+   - "Technology"
+   - "Business"
+   - "Marketing"
+   - "Education"
+   - "Health & Wellness"
+
+3. **Pricing Models**: Use exact values:
+
+   - "Free"
+   - "Freemium"
+   - "Free Trial"
+   - "Premium"
+
+4. **Images**:
+   - Logos: 200x200px PNG with transparent background
+   - Screenshots: 1200px wide, maintain aspect ratio
+   - Use descriptive filenames
+
+### Blog Management
+
+1. **Slugs**: Use SEO-friendly slugs (e.g., `best-ai-tools-2024`)
+
+2. **Content**:
+
+   - Use proper HTML formatting
+   - Include headings (h2, h3) for structure
+   - Add images with alt text
+   - Keep paragraphs concise
+
+3. **Excerpts**:
+   - 150-200 characters
+   - End with "..." if truncated
+   - Compelling and informative
+
+## 🔍 Common Queries
+
+### Get All Tools by Category
+
+```sql
+SELECT * FROM tools_summary
+WHERE category @> ARRAY['AI & ML']
+ORDER BY tool_name;
+```
+
+### Get Recent Blog Posts
+
+```sql
+SELECT * FROM blogs_summary
+ORDER BY created_at DESC
+LIMIT 10;
+```
+
+### Update Tool Pricing
+
+```sql
+UPDATE tools_summary
+SET pricing_model = 'Premium'
+WHERE slug = 'chatgpt';
+```
+
+### Get Full Blog Post
+
+```sql
+SELECT
+  bs.*,
+  bd.content
+FROM blogs_summary bs
+JOIN blogs_details bd ON bs.id = bd.id
+WHERE bs.slug = 'future-of-ai-2024';
+```
+
+## 🚨 Important Notes
+
+1. **Always maintain the relationship** between summary and details tables using the same `id`
+
+2. **Test slugs** to ensure they're unique and URL-friendly
+
+3. **Optimize images** before uploading to reduce load times
+
+4. **Backup data** before making bulk changes
+
+5. **Use transactions** when inserting related records:
+
+```sql
+BEGIN;
+INSERT INTO tools_summary (...) RETURNING id;
+INSERT INTO tools_details (id, ...) VALUES ('returned-id', ...);
+COMMIT;
+```
+
+## 📱 Frontend Integration
+
+The website automatically:
+
+- Fetches data from these tables
+- Generates SEO-friendly URLs
+- Handles image loading from Supabase Storage
+- Provides search and filtering functionality
+- Manages pagination
+
+No additional configuration needed after adding content to the database!
+
+---
+
+For technical issues or questions, contact the development team.
 
 ## Features
 

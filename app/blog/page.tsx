@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/utils/supabase";
-import { BlogCard, BlogCategory } from "@/components/blog/BlogCard";
+import { BlogCard} from "@/components/blog/BlogCard";
 import {
   Select,
   SelectContent,
@@ -19,7 +19,6 @@ interface BlogSummary {
   excerpt: string;
   image?: string;
   author?: string;
-  category?: BlogCategory; // Now uses the imported type
   created_at: string;
 }
 

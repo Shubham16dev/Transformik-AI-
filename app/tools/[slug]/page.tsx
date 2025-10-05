@@ -105,15 +105,18 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
           {/* Header */}
           <div className="flex flex-col items-start gap-4">
             {/* Logo on top */}
-            <div className="mb-2">
+            <div className="mb-2 flex items-center gap-4">
               <ToolLogo src={logoUrl} alt={`${toolSummary.tool_name} logo`} />
+              <h1 className="text-3xl font-bold text-gray-900">
+              {toolSummary.tool_name}
+              </h1>
             </div>
 
             {/* Details */}
             <div className="flex flex-col gap-2">
-              <h1 className="text-3xl font-bold text-gray-900">
+              {/* <h1 className="text-3xl font-bold text-gray-900">
                 {toolSummary.tool_name}
-              </h1>
+              </h1> */}
               <p className="text-gray-500">
                 {toolSummary.one_line_description}
               </p>
@@ -163,7 +166,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
           )}
           {/* Screenshots */}
           {screenshots.length > 0 && (
-            <ToolSection title="Screenshots">
+            <ToolSection title="">
               <div className="space-y-4">
                 {screenshots.map((url, idx) => (
                   <div
@@ -335,7 +338,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
                         <AccordionTrigger className="text-left font-medium text-gray-800">
                           {faq.question}
                         </AccordionTrigger>
-                        <AccordionContent className="mt-2 text-gray-600 text-balance">
+                        <AccordionContent className="mt-2 text-gray-600 text-balance pr-0">
                           {faq.answer}
                         </AccordionContent>
                       </AccordionItem>
@@ -346,28 +349,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
             </Card>
           )}
 
-          {/* Screenshots */}
-          {/* {screenshots.length > 0 && (
-            <ToolSection title="Screenshots">
-              <div className="space-y-4">
-                {screenshots.map((url, idx) => (
-                  <div
-                    key={idx}
-                    className="w-full overflow-hidden rounded-lg border border-gray-200"
-                  >
-                    <Image
-                      src={url}
-                      alt={`${toolSummary.tool_name} screenshot ${idx + 1}`}
-                      width={1200}
-                      height={0}
-                      sizes="100vw"
-                      className="w-full h-auto object-contain"
-                    />
-                  </div>
-                ))}
-              </div>
-            </ToolSection>
-          )} */}
+          
         </div>
       </div>
 

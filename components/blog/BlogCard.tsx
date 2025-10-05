@@ -11,22 +11,21 @@ interface BlogCardProps {
     slug: string;
     excerpt: string;
     image?: string;
+    featured_image?: string;
     author?: string;
   };
 }
 
 export function BlogCard({ blog }: BlogCardProps) {
   // const authorName = blog.author || "Harsh Mistry";
-  
+
   return (
-    <Card
-      className="hover:shadow-xl transition-shadow duration-300 rounded-xl border border-gray-200 p-4 w-full flex flex-col md:flex-row gap-4"
-    >
+    <Card className="rounded-xl border border-gray-200 p-4 w-full flex flex-col md:flex-row gap-4">
       {/* Blog Thumbnail */}
       <div className="w-full md:w-1/3 min-w-[120px] flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center  aspect-[5/3]">
-        {blog.image ? (
+        {blog.featured_image || blog.image ? (
           <Image
-            src={blog.image}
+            src={blog.featured_image || blog.image || ""}
             alt={blog.title}
             width={400}
             height={250}
@@ -42,7 +41,6 @@ export function BlogCard({ blog }: BlogCardProps) {
       {/* Blog Details */}
       <div className="flex flex-col justify-between flex-grow">
         <div className="space-y-2 overflow-hidden">
-          
           {/* Blog Title */}
           <h3 className="text-lg font-bold hover:text-purple-600  text-ellipsis">
             <Link href={`/blog/${blog.slug}`}>{blog.title}</Link>
@@ -57,7 +55,12 @@ export function BlogCard({ blog }: BlogCardProps) {
 
         {/* Read More Button */}
         <div className="mt-2 flex-shrink-0">
-          <Button asChild size="sm" variant="outline" className="px-4 py-1 bg-gray-200 text-gray-800 hover:bg-gray-300">
+          <Button
+            asChild
+            size="sm"
+            variant="outline"
+            className="px-4 py-1 bg-gray-200 text-gray-800 hover:bg-gray-300"
+          >
             <Link href={`/blog/${blog.slug}`}>Read More</Link>
           </Button>
         </div>

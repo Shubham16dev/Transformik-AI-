@@ -1,8 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaYoutube, FaInstagram, FaLinkedin, FaXTwitter, FaFacebook } from "react-icons/fa6";
+import {
+  FaYoutube,
+  FaInstagram,
+  FaLinkedin,
+  FaXTwitter,
+  FaFacebook,
+} from "react-icons/fa6";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { supabase } from "@/utils/supabase";
 
@@ -11,12 +18,15 @@ export function Footer() {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const { data, error } = await supabase.from("tools_summary").select("category");
+      const { data, error } = await supabase
+        .from("tools_summary")
+        .select("category");
       if (!error && data) {
         const allCategories: string[] = [];
         data.forEach((tool) => {
           const cat = tool.category;
-          if (Array.isArray(cat)) cat.forEach((c) => c && allCategories.push(c));
+          if (Array.isArray(cat))
+            cat.forEach((c) => c && allCategories.push(c));
           else if (typeof cat === "string" && cat) allCategories.push(cat);
         });
         setCategories(Array.from(new Set(allCategories))); // unique
@@ -27,7 +37,11 @@ export function Footer() {
 
   const socialLinks = [
     { href: "https://youtube.com", icon: <FaYoutube />, label: "YouTube" },
-    { href: "https://instagram.com", icon: <FaInstagram />, label: "Instagram" },
+    {
+      href: "https://instagram.com",
+      icon: <FaInstagram />,
+      label: "Instagram",
+    },
     { href: "https://linkedin.com", icon: <FaLinkedin />, label: "LinkedIn" },
     { href: "https://twitter.com", icon: <FaXTwitter />, label: "X" },
     { href: "https://facebook.com", icon: <FaFacebook />, label: "Facebook" },
@@ -38,7 +52,17 @@ export function Footer() {
       <div className="max-w-7xl mx-auto">
         {/* Top section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-[#23233a] pb-8 mb-8 gap-6">
-          <span className="font-bold text-3xl md:text-4xl">Transformik AI</span>
+          <div className="flex items-center gap-4">
+            <Image
+              src="/images/TransformikLogo.png"
+              alt="Transformik AI"
+              width={230}
+              height={230}
+            />
+            {/* <span className="font-bold text-3xl md:text-4xl">
+              Transformik AI
+            </span> */}
+          </div>
           <div className="flex gap-6 text-2xl">
             {socialLinks.map((social) => (
               <motion.a
@@ -63,8 +87,9 @@ export function Footer() {
           <div className="md:pr-12">
             <h3 className="font-semibold text-xl mb-3">About Transformik AI</h3>
             <p className="text-white mb-4 leading-relaxed">
-              Discover cutting-edge AI tools and resources to transform your workflow.
-              From AI generators to productivity enhancers, we curate the best AI solutions.
+              Discover cutting-edge AI tools and resources to transform your
+              workflow. From AI generators to productivity enhancers, we curate
+              the best AI solutions.
             </p>
             <p className="text-white text-sm">
               Contact:{" "}
@@ -125,7 +150,6 @@ export function Footer() {
               </li>
             </ul>
           </div>
-
         </div>
 
         {/* Bottom */}

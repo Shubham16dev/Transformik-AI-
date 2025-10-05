@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/utils/supabase";
-import { BlogCard} from "@/components/blog/BlogCard";
+import { BlogCard } from "@/components/blog/BlogCard";
 import {
   Select,
   SelectContent,
@@ -18,6 +18,7 @@ interface BlogSummary {
   slug: string;
   excerpt: string;
   image?: string;
+  featured_image?: string;
   author?: string;
   created_at: string;
 }
@@ -29,7 +30,7 @@ export default function BlogListingPage() {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 6; // Blogs per page
+  const pageSize = 9; // Blogs per page
   const totalPages = Math.ceil(filteredBlogs.length / pageSize);
   const paginatedBlogs = filteredBlogs.slice(
     (currentPage - 1) * pageSize,

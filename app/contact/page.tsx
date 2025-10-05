@@ -16,9 +16,9 @@ export default function ContactPage() {
           Contact Us
         </h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Have questions, feedback, or want to collaborate? We&apos;d love to hear
-          from you. Fill out the form below and we&apos;ll get back to you as soon as
-          possible.
+          Have questions, feedback, or want to collaborate? We&apos;d love to
+          hear from you. Fill out the form below and we&apos;ll get back to you
+          as soon as possible.
         </p>
       </div>
 
@@ -54,7 +54,7 @@ export default function ContactPage() {
                     href="mailto:contact@transformik.ai"
                     className="text-gray-700 hover:text-black transition-colors"
                   >
-                    contact@transformik.ai
+                    contact@transformik.com
                   </a>
                 </div>
               </div>
@@ -114,7 +114,9 @@ export default function ContactPage() {
           </div>
 
           <div className="bg-white shadow-md rounded-md p-6 border border-gray-200">
-            <h3 className="text-xl font-semibold mb-4 text-gray-800">Quick Response</h3>
+            <h3 className="text-xl font-semibold mb-4 text-gray-800">
+              Quick Response
+            </h3>
             <p className="text-gray-600 mb-4">
               We aim to respond to all inquiries within 24-48 hours during
               business days.
@@ -125,7 +127,7 @@ export default function ContactPage() {
                 href="mailto:urgent@transformik.ai"
                 className="block text-gray-700 hover:text-black mt-1 font-medium transition-colors"
               >
-                urgent@transformik.ai
+                contact@transformik.com
               </a>
             </div>
           </div>

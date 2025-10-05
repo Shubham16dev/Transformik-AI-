@@ -3,6 +3,7 @@ import { supabase } from "@/utils/supabase";
 import { Button } from "@/components/ui/button";
 import { FeaturedTools } from "@/components/tools/FeaturedTool";
 import { TopCategories } from "@/components/category/TopCategories";
+import Image from "next/image";
 import parse from "html-react-parser";
 
 interface BlogDetailPageProps {
@@ -29,19 +30,9 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
     .single();
 
   if (detailsError || !details) return notFound();
-  // formatted date for display in hero/meta
-  const formattedDate = summary.created_at
-    ? new Date(summary.created_at).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : null;
-
-  // safe fallbacks for image/avatar/excerpt fields (DB column names may vary)
+  // safe fallbacks for image/excerpt fields (DB column names may vary)
   const heroImage =
     summary.featured_image || summary.image || summary.cover_image || null;
-  const authorImage = summary.author_image || summary.avatar || null;
   const excerpt =
     summary.excerpt || summary.description || summary.summary || null;
 
@@ -77,11 +68,16 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
 
           <div className="md:col-span-3 flex justify-end">
             {heroImage ? (
-              <img
-                src={heroImage}
-                alt={summary.title}
-                className="w-full max-w-[360px] object-cover rounded-lg "
-              />
+              <div className="w-full max-w-[360px] rounded-lg overflow-hidden">
+                <Image
+                  src={heroImage}
+                  alt={summary.title}
+                  width={720}
+                  height={480}
+                  sizes="(max-width: 768px) 100vw, 360px"
+                  className="object-cover w-full h-full"
+                />
+              </div>
             ) : (
               <div className="w-full max-w-[360px] h-44 bg-white/10 rounded-lg flex items-center justify-center">
                 <span className="text-white/70">No image</span>

@@ -89,10 +89,10 @@ export function Navbar() {
                       <Image
                         src="/images/TransformikLogo.png"
                         alt="Transformik AI"
-                        width={36}
-                        height={36}
+                        width={150}
+                        height={150}
                       />
-                      Transformik AI
+                      
                     </SheetTitle>
                   </SheetHeader>
 

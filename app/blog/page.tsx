@@ -30,7 +30,7 @@ export default function BlogListingPage() {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 9; // Blogs per page
+  const pageSize = 8; // Blogs per page
   const totalPages = Math.ceil(filteredBlogs.length / pageSize);
   const paginatedBlogs = filteredBlogs.slice(
     (currentPage - 1) * pageSize,

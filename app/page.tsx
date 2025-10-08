@@ -1,6 +1,6 @@
 import { supabase } from "@/utils/supabase";
 import { ToolCard } from "@/components/tools/ToolCard";
-import { BlogCard} from "@/components/blog/BlogCard";
+import { BlogCard } from "@/components/blog/BlogCard";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { getPublicImageUrl } from "@/utils/getPublicImageUrl";
 import Link from "next/link";
@@ -25,6 +25,7 @@ interface Blog {
   slug: string;
   excerpt: string;
   image?: string;
+  featured_image?: string;
   author?: string;
 }
 
@@ -57,7 +58,7 @@ async function getLatestTools(): Promise<Tool[]> {
 async function getBlogs(): Promise<Blog[]> {
   const { data, error } = await supabase
     .from("blogs_summary")
-    .select("id, title, slug, excerpt")
+    .select("id, title, slug, excerpt, featured_image")
     .order("created_at", { ascending: false })
     .limit(5);
 

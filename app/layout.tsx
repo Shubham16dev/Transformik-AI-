@@ -10,9 +10,14 @@ import BreadcrumbsClient from "@/components/layout/Breadcrumb";
 export const metadata: Metadata = {
   title: "AI Tools Hub",
   description: "Discover 10,000+ AI tools with blogs and reviews",
+  icons: [{ url: "/images/Logo_favicon.svg", type: "image/svg+xml" }],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen flex flex-col bg-gray-50 text-gray-900">
@@ -23,7 +28,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <BreadcrumbsClient />
 
-        <main className="flex-grow w-full max-w-7xl mx-auto p-4">{children}</main>
+        <main className="flex-grow w-full max-w-7xl mx-auto p-4">
+          {children}
+        </main>
         <Footer />
       </body>
     </html>

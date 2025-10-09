@@ -16,7 +16,8 @@ export const CATEGORY_COLORS: Record<string, string> = {
   "AI Customer Service Bots": "bg-lime-50 text-lime-700 border-lime-200",
   "AI Customer Support": "bg-emerald-50 text-emerald-700 border-emerald-200",
   "AI Data Analysis Tools": "bg-cyan-50 text-cyan-700 border-cyan-200",
-  "AI Data Visualization Tools": "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200",
+  "AI Data Visualization Tools":
+    "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200",
   "AI Deepfake & Face Swap Tools": "bg-rose-50 text-rose-700 border-rose-200",
   "AI Fun Tools": "bg-violet-50 text-violet-700 border-violet-200",
   "AI Games Tools": "bg-pink-50 text-pink-700 border-pink-200",
@@ -60,17 +61,23 @@ export const CATEGORY_COLORS: Record<string, string> = {
   "Text-to-Video Tools": "bg-pink-50 text-pink-700 border-pink-200",
 };
 
-
 interface CategoryBadgeProps {
   category: string;
+}
+
+function generateSlug(category: string): string {
+  return category
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
 }
 
 export const CategoryBadge: React.FC<CategoryBadgeProps> = ({ category }) => {
   const badgeClass =
     CATEGORY_COLORS[category] || "bg-gray-50 text-gray-700 border-gray-200";
 
-  // Redirect to /tools page with query param filter
-  const linkHref = `/tools?category=${encodeURIComponent(category)}`;
+  // Redirect to /tools/category/[slug]
+  const linkHref = `/tools/category/${generateSlug(category)}`;
 
   return (
     <Link href={linkHref}>
@@ -78,8 +85,8 @@ export const CategoryBadge: React.FC<CategoryBadgeProps> = ({ category }) => {
         variant="secondary"
         className={`px-3 py-1 text-sm cursor-pointer ${badgeClass}`}
       >
-        {category}
-      </Badge>
+        {category}{" "}
+      </Badge>{" "}
     </Link>
   );
 };

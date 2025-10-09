@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -18,7 +17,7 @@ import { motion, AnimatePresence } from "framer-motion";
 const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/tools", label: "All Tools" },
-  { href: "/categories", label: "All Categories" },
+  { href: "/tools/category", label: "All Categories" },
   { href: "/free-tools", label: "Free Tools" },
   { href: "/blog", label: "Blogs" },
 ];
@@ -30,13 +29,13 @@ export function Navbar() {
     <nav className="bg-[#181828] shadow-md sticky top-0 z-50">
       <div className="mx-auto flex max-w-7xl items-center justify-between p-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3">
-          <Image
-            src="/images/TransformikLogo.png"
-            alt="Transformik AI"
-            width={180}
-            height={180}
-          />
+        <Link
+          href="/"
+          className="text-xl font-extrabold text-white tracking-wide"
+        >
+          <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+            Transformik AI
+          </span>
         </Link>
 
         {/* Desktop Menu */}
@@ -85,14 +84,8 @@ export function Navbar() {
                   className="bg-[#181828] text-white p-6"
                 >
                   <SheetHeader>
-                    <SheetTitle className="text-white flex items-center gap-3">
-                      <Image
-                        src="/images/TransformikLogo.png"
-                        alt="Transformik AI"
-                        width={150}
-                        height={150}
-                      />
-                      
+                    <SheetTitle className="text-white">
+                      Transformik AI
                     </SheetTitle>
                   </SheetHeader>
 

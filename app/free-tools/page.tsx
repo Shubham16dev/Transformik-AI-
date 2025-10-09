@@ -57,7 +57,7 @@ export default function FreeToolsPage() {
           .select(
             "id,tool_name,slug,one_line_description,pricing_model,url,logo,category"
           )
-          .eq("pricing_model", "Freemium");
+          .eq("pricing_model", "Free");
 
         if (toolsError) throw toolsError;
 

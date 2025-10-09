@@ -1,7 +1,7 @@
+// components/tools/ToolsContent.tsx
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { useSearchParams } from "next/navigation";
 import { supabase } from "@/utils/supabase";
 import { ToolCard } from "@/components/tools/ToolCard";
 import { Pagination } from "@/components/Pagination";
@@ -27,22 +27,17 @@ const PRICE_OPTIONS = [
   { value: "Premium", label: "Premium" },
 ];
 
-export function ToolsContent() {
-  const searchParams = useSearchParams();
-  const categoryParam = searchParams.get("category");
-
+export function ToolsContent({ categorySlug }: { categorySlug?: string }) {
   const [tools, setTools] = useState<Tool[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState(categoryParam || "all");
+  const [category, setCategory] = useState("all");
   const [priceFilter, setPriceFilter] = useState("all");
-
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 15;
 
-  // Fetch tools and categories
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -55,41 +50,28 @@ export function ToolsContent() {
         if (error) throw error;
         setTools(data ?? []);
 
-        // Extract unique categories from all tools
         const allCategories: string[] = [];
         data?.forEach((tool) => {
           const toolCategories = tool.category;
-
           if (Array.isArray(toolCategories)) {
-            // Handle array of categories
-            toolCategories.forEach((cat) => {
-              if (cat && typeof cat === "string") {
-                allCategories.push(cat);
-              }
-            });
+            toolCategories.forEach((cat) => cat && allCategories.push(cat));
           } else if (typeof toolCategories === "string" && toolCategories) {
-            // Handle single category string
             allCategories.push(toolCategories);
           }
         });
 
-        // Get unique categories and sort them
         const uniqueCategories = Array.from(new Set(allCategories)).sort();
         setCategories(uniqueCategories);
 
-        // Apply category param from URL
-        if (categoryParam) {
-          // Try to match the category param directly with available categories
+        if (categorySlug) {
+          const slugify = (name: string) =>
+            name.toLowerCase().trim().replace(/\s+/g, "-");
+
           const matchingCategory = uniqueCategories.find(
-            (cat) =>
-              cat.toLowerCase() === categoryParam.toLowerCase() ||
-              cat.toLowerCase() ===
-                categoryParam.replace(/-/g, " ").toLowerCase()
+            (cat) => slugify(cat) === categorySlug.toLowerCase()
           );
 
-          if (matchingCategory) {
-            setCategory(matchingCategory);
-          }
+          setCategory(matchingCategory || "all");
         }
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -99,7 +81,8 @@ export function ToolsContent() {
     };
 
     fetchData();
-  }, [categoryParam]);
+  }, [categorySlug]);
+
 
   // Filtering (memoized for performance)
   const filteredTools = useMemo(() => {

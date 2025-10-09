@@ -183,7 +183,7 @@ export default function CategoriesPage() {
               className="hover:shadow-md transition-shadow border border-gray-200 p-4 rounded-xl cursor-pointer"
               onClick={() =>
                 router.push(
-                  `/tools?category=${encodeURIComponent(category.name)}`
+                  `/tools/category/${category.slug}`
                 )
               }
             >

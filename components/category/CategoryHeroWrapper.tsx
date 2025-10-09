@@ -5,6 +5,6 @@ import { CategoryHero } from "./CategoryHero";
 
 export function CategoryHeroWrapper() {
   const pathname = usePathname();
-  if (pathname !== "/categories") return null;
+  if (pathname !== "/tools/category") return null;
   return <CategoryHero />;
 }

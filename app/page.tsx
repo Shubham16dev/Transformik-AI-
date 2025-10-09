@@ -16,7 +16,7 @@ interface Tool {
   pricing_model?: PricingModel;
   url: string;
   logo?: string;
-  category?: string; // use enum string here
+  category?: string;
 }
 
 interface Blog {
@@ -70,6 +70,14 @@ async function getBlogs(): Promise<Blog[]> {
   return data ?? [];
 }
 
+// ---------- Helpers ----------
+function generateSlug(category: string) {
+  return category
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+}
+
 // ---------- Page ----------
 export default async function HomePage() {
   const [latestTools, blogs] = await Promise.all([
@@ -79,9 +87,7 @@ export default async function HomePage() {
 
   return (
     <main className="space-y-16">
-      {/* Search Bar */}
-      <SearchBar />
-
+      {/* Search Bar */} <SearchBar />
       <div className="px-6 py-8 max-w-7xl mx-auto space-y-16">
         {/* Featured + Latest Tools */}
         <section
@@ -91,48 +97,26 @@ export default async function HomePage() {
           <div className="md:col-span-3 space-y-4">
             <h2 className="text-xl font-bold">Top AI Categories</h2>
             <div className="space-y-2">
-              <Link
-                href={`/tools?category=${encodeURIComponent("AI Chatbots")}`}
-                className="block p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-              >
-                <span className="text-gray-800 font-medium">AI Chatbots</span>
-              </Link>
-              <Link
-                href={`/tools?category=${encodeURIComponent("AI Agents")}`}
-                className="block p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-              >
-                <span className="text-gray-800 font-medium">AI Agents</span>
-              </Link>
-              <Link
-                href={`/tools?category=${encodeURIComponent(
-                  "AI Writing Assistants"
-                )}`}
-                className="block p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-              >
-                <span className="text-gray-800 font-medium">
-                  AI Writing Assistants
-                </span>
-              </Link>
-              <Link
-                href={`/tools?category=${encodeURIComponent(
-                  "AI Coding Assistants"
-                )}`}
-                className="block p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-              >
-                <span className="text-gray-800 font-medium">
-                  AI Coding Assistants
-                </span>
-              </Link>
-              <Link
-                href={`/tools?category=${encodeURIComponent(
-                  "AI Tools for Marketers"
-                )}`}
-                className="block p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-              >
-                <span className="text-gray-800 font-medium">
-                  AI Tools for Marketers
-                </span>
-              </Link>
+              {[
+                "AI Chatbots",
+                "AI Agents",
+                "AI Writing Assistants",
+                "AI Coding Assistants",
+                "AI Tools for Marketers",
+              ].map((category) => {
+                const slug = generateSlug(category);
+                return (
+                  <Link
+                    key={category}
+                    href={`/tools/category/${slug}`}
+                    className="block p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+                  >
+                    <span className="text-gray-800 font-medium">
+                      {category}
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
 

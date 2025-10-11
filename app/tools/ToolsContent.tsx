@@ -149,12 +149,12 @@ export function ToolsContent({
       <section className="relative bg-gradient-to-r from-gray-900 to-gray-800 text-white py-16 w-screen -ml-[50vw] left-1/2 relative">
         <div className="max-w-7xl mx-auto text-left space-y-6 px-6">
           <h1 className="text-xl md:text-3xl lg:text-4xl font-bold">
-            {categoryMeta?.meta_title || categoryMeta?.name || "All AI Tools"}
+            {categoryMeta?.name || categoryMeta?.name || "All AI Tools"}
           </h1>
 
-            <p className="text-base md:text-lg text-gray-300 w-full leading-relaxed">
+          <p className="text-base md:text-lg text-gray-300 w-full leading-relaxed">
             {categoryMeta?.description || "Explore our collection of AI tools."}
-            </p>
+          </p>
         </div>
       </section>
 

@@ -41,11 +41,29 @@ export async function generateMetadata({
     .eq("slug", slug)
     .single();
 
-  if (!toolSummary) return { title: "Tool Not Found" };
+  if (!toolSummary) {
+    return {
+      title: "Tool Not Found | Transformik AI",
+      alternates: {
+        canonical: `https://www.transformik.com/tools/${slug}`,
+      },
+    };
+  }
+
+  const title = `${toolSummary.tool_name} - AI Tool Review | Transformik AI`;
+  const description = toolSummary.one_line_description;
 
   return {
-    title: `${toolSummary.tool_name} - AI Tool`,
-    description: toolSummary.one_line_description,
+    title,
+    description,
+    alternates: {
+      canonical: `https://www.transformik.com/tools/${slug}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://www.transformik.com/tools/${slug}`,
+    },
   };
 }
 
@@ -108,7 +126,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
             <div className="mb-2 flex items-center gap-4">
               <ToolLogo src={logoUrl} alt={`${toolSummary.tool_name} logo`} />
               <h1 className="text-3xl font-bold text-gray-900">
-              {toolSummary.tool_name}
+                {toolSummary.tool_name}
               </h1>
             </div>
 
@@ -348,8 +366,6 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
               </CardContent>
             </Card>
           )}
-
-          
         </div>
       </div>
 

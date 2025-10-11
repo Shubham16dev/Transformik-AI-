@@ -5,9 +5,51 @@ import { FeaturedTools } from "@/components/tools/FeaturedTool";
 import { TopCategories } from "@/components/category/TopCategories";
 import Image from "next/image";
 import parse from "html-react-parser";
+import type { Metadata } from "next";
 
 interface BlogDetailPageProps {
   params: Promise<{ slug: string }>;
+}
+
+// Dynamic metadata
+export async function generateMetadata({
+  params,
+}: BlogDetailPageProps): Promise<Metadata> {
+  const { slug } = await params;
+
+  const { data: blogSummary } = await supabase
+    .from("blogs_summary")
+    .select("title, excerpt, featured_image, image, cover_image")
+    .eq("slug", slug)
+    .single();
+
+  if (!blogSummary) {
+    return {
+      title: "Blog Post Not Found | Transformik AI",
+      alternates: {
+        canonical: `https://www.transformik.com/blog/${slug}`,
+      },
+    };
+  }
+
+  const title = `${blogSummary.title} | Transformik AI Blog`;
+  const description = blogSummary.excerpt || blogSummary.title;
+  const image =
+    blogSummary.featured_image || blogSummary.image || blogSummary.cover_image;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `https://www.transformik.com/blog/${slug}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://www.transformik.com/blog/${slug}`,
+      images: image ? [{ url: image }] : undefined,
+    },
+  };
 }
 
 export default async function BlogDetailPage({ params }: BlogDetailPageProps) {

@@ -8,9 +8,28 @@ import "./globals.css";
 import BreadcrumbsClient from "@/components/layout/Breadcrumb";
 
 export const metadata: Metadata = {
-  title: "AI Tools Hub",
-  description: "Discover 10,000+ AI tools with blogs and reviews",
+  title: "Transformik AI - Discover 10,000+ AI Tools | AI Tools Hub",
+  description:
+    "Discover 10,000+ AI tools with blogs and reviews. Find the best AI tools for your needs across all categories.",
   icons: [{ url: "/images/Logo_favicon.svg", type: "image/svg+xml" }],
+  metadataBase: new URL("https://www.transformik.com"),
+  alternates: {
+    canonical: "https://www.transformik.com",
+  },
+  openGraph: {
+    title: "Transformik AI - Discover 10,000+ AI Tools",
+    description:
+      "Discover 10,000+ AI tools with blogs and reviews. Find the best AI tools for your needs across all categories.",
+    url: "https://www.transformik.com",
+    siteName: "Transformik AI",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Transformik AI - Discover 10,000+ AI Tools",
+    description:
+      "Discover 10,000+ AI tools with blogs and reviews. Find the best AI tools for your needs across all categories.",
+  },
 };
 
 export default function RootLayout({

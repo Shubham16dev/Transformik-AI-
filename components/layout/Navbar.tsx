@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -29,13 +30,15 @@ export function Navbar() {
     <nav className="bg-[#181828] shadow-md sticky top-0 z-50">
       <div className="mx-auto flex max-w-7xl items-center justify-between p-4">
         {/* Logo */}
-        <Link
-          href="/"
-          className="text-xl font-extrabold text-white tracking-wide"
-        >
-          <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-            Transformik AI
-          </span>
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/images/TransformikLogo.png"
+            alt="Transformik Logo"
+            width={160}
+            height={40}
+            priority
+            className="object-contain"
+          />
         </Link>
 
         {/* Desktop Menu */}
@@ -84,8 +87,14 @@ export function Navbar() {
                   className="bg-[#181828] text-white p-6"
                 >
                   <SheetHeader>
-                    <SheetTitle className="text-white">
-                      Transformik AI
+                    <SheetTitle className="text-white flex items-center">
+                      <Image
+                        src="/images/TransformikLogo.png"
+                        alt="Transformik Logo"
+                        width={140}
+                        height={36}
+                        className="object-contain"
+                      />
                     </SheetTitle>
                   </SheetHeader>
 

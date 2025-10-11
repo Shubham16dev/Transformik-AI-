@@ -4,6 +4,22 @@ import { BlogCard } from "@/components/blog/BlogCard";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { getPublicImageUrl } from "@/utils/getPublicImageUrl";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Transformik AI - Discover 10,000+ AI Tools | AI Tools Hub",
+  description:
+    "Discover the latest AI tools, chatbots, writing assistants, and coding tools. Browse 10,000+ AI tools across all categories with reviews and insights.",
+  alternates: {
+    canonical: "https://www.transformik.com",
+  },
+  openGraph: {
+    title: "Transformik AI - Discover 10,000+ AI Tools",
+    description:
+      "Discover the latest AI tools, chatbots, writing assistants, and coding tools. Browse 10,000+ AI tools across all categories with reviews and insights.",
+    url: "https://www.transformik.com",
+  },
+};
 
 // ---------- Types ----------
 type PricingModel = "Free" | "Freemium" | "Paid" | "Free Trial";

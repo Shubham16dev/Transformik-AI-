@@ -7,6 +7,12 @@ import { ToolCard } from "@/components/tools/ToolCard";
 import { Pagination } from "@/components/Pagination";
 import { FilterCombobox } from "@/components/ui/FilterCombobox";
 import { getPublicImageUrl } from "@/utils/getPublicImageUrl";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
 
 interface Tool {
   id: string;
@@ -27,7 +33,20 @@ const PRICE_OPTIONS = [
   { value: "Premium", label: "Premium" },
 ];
 
-export function ToolsContent({ categorySlug }: { categorySlug?: string }) {
+interface CategoryMeta {
+  name?: string;
+  meta_title?: string;
+  description?: string;
+  faqs?: { question: string; answer: string }[] | null;
+}
+
+export function ToolsContent({
+  categorySlug,
+  categoryMeta,
+}: {
+  categorySlug?: string;
+  categoryMeta?: CategoryMeta | null;
+}) {
   const [tools, setTools] = useState<Tool[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,7 +102,6 @@ export function ToolsContent({ categorySlug }: { categorySlug?: string }) {
     fetchData();
   }, [categorySlug]);
 
-
   // Filtering (memoized for performance)
   const filteredTools = useMemo(() => {
     return tools.filter((tool) => {
@@ -126,87 +144,121 @@ export function ToolsContent({ categorySlug }: { categorySlug?: string }) {
   }, [filteredTools, currentPage]);
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">All AI Tools</h1>
+    <>
+      {/* Hero Section - Full Width */}
+      <section className="relative bg-gradient-to-r from-gray-900 to-gray-800 text-white py-16 w-screen -ml-[50vw] left-1/2 relative">
+        <div className="max-w-7xl mx-auto text-left space-y-6 px-6">
+          <h1 className="text-xl md:text-3xl lg:text-4xl font-bold">
+            {categoryMeta?.meta_title || categoryMeta?.name || "All AI Tools"}
+          </h1>
 
-      {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-4 items-center">
-        <input
-          type="text"
-          aria-label="Search tools"
-          placeholder="Search tools..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full md:w-1/3 border border-gray-300 rounded-md px-3 py-2"
-        />
-
-        <FilterCombobox
-          value={category}
-          onChange={setCategory}
-          options={[
-            { value: "all", label: "All Categories" },
-            ...categories.map((c) => ({ value: c, label: c })),
-          ]}
-          placeholder="Select Category"
-        />
-
-        <FilterCombobox
-          value={priceFilter}
-          onChange={setPriceFilter}
-          options={PRICE_OPTIONS}
-          placeholder="Select Price"
-        />
-      </div>
-
-      {/* Tools Grid */}
-      {loading ? (
-        <p className="text-gray-500">Loading tools...</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {paginatedTools.length ? (
-            paginatedTools.map((tool) => (
-              <ToolCard
-                key={tool.id}
-                tool={{
-                  tool_name: tool.tool_name,
-                  slug: tool.slug,
-                  one_line_description: tool.one_line_description,
-                  pricing_model: [
-                    "Free",
-                    "Freemium",
-                    "Free Trial",
-                    "Paid",
-                  ].includes(tool.pricing_model)
-                    ? (tool.pricing_model as
-                        | "Free"
-                        | "Freemium"
-                        | "Free Trial"
-                        | "Paid")
-                    : undefined,
-                  url: tool.url,
-                  category: tool.category || "Other",
-                  logo: getPublicImageUrl(
-                    "Images",
-                    tool.logo ? `ToolLogos/${tool.logo}` : undefined
-                  ),
-                }}
-              />
-            ))
-          ) : (
-            <p className="text-gray-500">
-              No tools found matching your filters.
+            <p className="text-base md:text-lg text-gray-300 w-full leading-relaxed">
+            {categoryMeta?.description || "Explore our collection of AI tools."}
             </p>
-          )}
         </div>
-      )}
+      </section>
 
-      {/* Pagination */}
-      <Pagination
-        totalItems={filteredTools.length}
-        pageSize={pageSize}
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-      />
-    </div>
+      <div className="space-y-6 mt-8">
+        {/* Filters */}
+        <div className="flex flex-col md:flex-row gap-4 items-center">
+          <input
+            type="text"
+            aria-label="Search tools"
+            placeholder="Search tools..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full md:w-1/3 border border-gray-300 rounded-md px-3 py-2"
+          />
+
+          <FilterCombobox
+            value={category}
+            onChange={setCategory}
+            options={[
+              { value: "all", label: "All Categories" },
+              ...categories.map((c) => ({ value: c, label: c })),
+            ]}
+            placeholder="Select Category"
+          />
+
+          <FilterCombobox
+            value={priceFilter}
+            onChange={setPriceFilter}
+            options={PRICE_OPTIONS}
+            placeholder="Select Price"
+          />
+        </div>
+
+        {/* Tools Grid */}
+        {loading ? (
+          <p className="text-gray-500">Loading tools...</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {paginatedTools.length ? (
+              paginatedTools.map((tool) => (
+                <ToolCard
+                  key={tool.id}
+                  tool={{
+                    tool_name: tool.tool_name,
+                    slug: tool.slug,
+                    one_line_description: tool.one_line_description,
+                    pricing_model: [
+                      "Free",
+                      "Freemium",
+                      "Free Trial",
+                      "Paid",
+                    ].includes(tool.pricing_model)
+                      ? (tool.pricing_model as
+                          | "Free"
+                          | "Freemium"
+                          | "Free Trial"
+                          | "Paid")
+                      : undefined,
+                    url: tool.url,
+                    category: tool.category || "Other",
+                    logo: getPublicImageUrl(
+                      "Images",
+                      tool.logo ? `ToolLogos/${tool.logo}` : undefined
+                    ),
+                  }}
+                />
+              ))
+            ) : (
+              <p className="text-gray-500">
+                No tools found matching your filters.
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Pagination */}
+        <Pagination
+          totalItems={filteredTools.length}
+          pageSize={pageSize}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+        />
+
+        {/* Optional FAQs section */}
+        {categoryMeta?.faqs && categoryMeta.faqs.length > 0 && (
+          <section className="mt-6">
+            <h2 className="text-xl font-semibold">
+              Frequently asked questions
+            </h2>
+            <Accordion type="single" collapsible className="mt-3">
+              {categoryMeta.faqs.map((faq, idx) => (
+                <AccordionItem key={idx} value={`faq-${idx}`} className="py-2">
+                  <AccordionTrigger className="text-left font-medium">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="mt-2 text-gray-600">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </section>
+        )}
+      </div>
+    </>
   );
 }

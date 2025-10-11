@@ -6,6 +6,15 @@ export const metadata: Metadata = {
   title: "Contact Us | Transformik AI",
   description:
     "Reach out to the Transformik AI team for inquiries, feedback, or collaboration opportunities.",
+  alternates: {
+    canonical: "https://www.transformik.com/contact",
+  },
+  openGraph: {
+    title: "Contact Us | Transformik AI",
+    description:
+      "Reach out to the Transformik AI team for inquiries, feedback, or collaboration opportunities.",
+    url: "https://www.transformik.com/contact",
+  },
 };
 
 export default function ContactPage() {

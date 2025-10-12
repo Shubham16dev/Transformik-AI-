@@ -7,6 +7,7 @@ import { ToolCard } from "@/components/tools/ToolCard";
 import { Pagination } from "@/components/Pagination";
 import { FilterCombobox } from "@/components/ui/FilterCombobox";
 import { getPublicImageUrl } from "@/utils/getPublicImageUrl";
+import { ToolsSchema } from "@/components/schema/ToolsSchema";
 import {
   Accordion,
   AccordionItem,
@@ -145,6 +146,15 @@ export function ToolsContent({
 
   return (
     <>
+      {/* Schema Markup */}
+      <ToolsSchema
+        tools={paginatedTools}
+        categoryMeta={categoryMeta}
+        categorySlug={categorySlug}
+        currentPage={currentPage}
+        totalTools={filteredTools.length}
+      />
+
       {/* Hero Section - Full Width */}
       <section className="relative bg-gradient-to-r from-gray-900 to-gray-800 text-white py-16 w-screen -ml-[50vw] left-1/2 relative">
         <div className="max-w-7xl mx-auto text-left space-y-6 px-6">

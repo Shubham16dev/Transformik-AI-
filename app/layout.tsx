@@ -4,6 +4,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { HomeHeroWrapper } from "@/components/layout/HomeHeroWrapper";
 import { Footer } from "@/components/layout/Footer";
 import { CategoryHeroWrapper } from "@/components/category/CategoryHeroWrapper";
+import { OrganizationSchema } from "@/components/schema/OrganizationSchema";
 import "./globals.css";
 import BreadcrumbsClient from "@/components/layout/Breadcrumb";
 
@@ -39,6 +40,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <OrganizationSchema />
+      </head>
       <body className="min-h-screen flex flex-col bg-gray-50 text-gray-900">
         {/* Make sure these are client components if they have dynamic content */}
         <Navbar />

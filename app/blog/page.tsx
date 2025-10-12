@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/utils/supabase";
 import { BlogCard } from "@/components/blog/BlogCard";
+import { BlogSchema } from "@/components/schema/BlogSchema";
 import {
   Select,
   SelectContent,
@@ -76,40 +77,56 @@ export default function BlogListingPage() {
   }, [sortOption, blogs]);
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Blog</h1>
+    <>
+      {/* Schema Markup */}
+      <BlogSchema
+        isListingPage={true}
+        blogs={filteredBlogs}
+        blog={{
+          id: "blog-listing",
+          title: "AI Blog | Latest AI Insights and Tutorials",
+          slug: "blog",
+          excerpt:
+            "Stay updated with the latest AI insights, tutorials, and trends",
+          created_at: new Date().toISOString(),
+        }}
+      />
 
-      {/* Sort Select */}
-      <div className="flex justify-end">
-        <Select value={sortOption} onValueChange={setSortOption}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent className="max-h-60 overflow-y-auto">
-            <SelectItem value="date-desc">Newest First</SelectItem>
-            <SelectItem value="date-asc">Oldest First</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold">Blog</h1>
 
-      {/* Blog Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {paginatedBlogs.length > 0 ? (
-          paginatedBlogs.map((blog) => <BlogCard key={blog.id} blog={blog} />)
-        ) : (
-          <p className="text-gray-500">No blogs found.</p>
+        {/* Sort Select */}
+        <div className="flex justify-end">
+          <Select value={sortOption} onValueChange={setSortOption}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent className="max-h-60 overflow-y-auto">
+              <SelectItem value="date-desc">Newest First</SelectItem>
+              <SelectItem value="date-asc">Oldest First</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Blog Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {paginatedBlogs.length > 0 ? (
+            paginatedBlogs.map((blog) => <BlogCard key={blog.id} blog={blog} />)
+          ) : (
+            <p className="text-gray-500">No blogs found.</p>
+          )}
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <Pagination
+            totalItems={filteredBlogs.length}
+            pageSize={pageSize}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+          />
         )}
       </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <Pagination
-          totalItems={filteredBlogs.length}
-          pageSize={pageSize}
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
-        />
-      )}
-    </div>
+    </>
   );
 }

@@ -61,7 +61,7 @@ async function getLatestTools(): Promise<Tool[]> {
   }
 
   return (
-    data?.map((tool) => ({
+    data?.map((tool: any) => ({
       ...tool,
       logo: getPublicImageUrl(
         "Images",

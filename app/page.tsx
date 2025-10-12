@@ -35,6 +35,17 @@ interface Tool {
   category?: string;
 }
 
+interface RawTool {
+  id: string;
+  tool_name: string;
+  slug: string;
+  one_line_description: string;
+  pricing_model?: PricingModel;
+  url: string;
+  logo?: string | null;
+  category?: string | null;
+}
+
 interface Blog {
   id: string;
   title: string;
@@ -61,13 +72,16 @@ async function getLatestTools(): Promise<Tool[]> {
   }
 
   return (
-    data?.map((tool: any) => ({
-      ...tool,
-      logo: getPublicImageUrl(
-        "Images",
-        tool.logo ? `ToolLogos/${tool.logo}` : undefined
-      ),
-    })) ?? []
+    data?.map(
+      (tool: RawTool): Tool => ({
+        ...tool,
+        logo: getPublicImageUrl(
+          "Images",
+          tool.logo ? `ToolLogos/${tool.logo}` : undefined
+        ),
+        category: tool.category ?? undefined,
+      })
+    ) ?? []
   );
 }
 

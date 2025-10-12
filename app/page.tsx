@@ -86,6 +86,9 @@ async function getLatestTools(): Promise<Tool[]> {
 }
 
 async function getBlogs(): Promise<Blog[]> {
+  console.log("🔍 Attempting to fetch blogs from Supabase...");
+
+  // Try blogs_summary table first
   const { data, error } = await supabase
     .from("blogs_summary")
     .select("id, title, slug, excerpt, featured_image")
@@ -93,9 +96,35 @@ async function getBlogs(): Promise<Blog[]> {
     .limit(5);
 
   if (error) {
-    console.error("Error fetching blogs:", error.message);
-    return [];
+    console.error("❌ Error fetching from blogs_summary:", error.message);
+
+    // Fallback: try 'blogs' table
+    console.log("🔄 Trying 'blogs' table as fallback...");
+    const { data: blogsData, error: blogsError } = await supabase
+      .from("blogs")
+      .select("id, title, slug, excerpt, featured_image")
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    if (blogsError) {
+      console.error("❌ Error fetching from blogs table:", blogsError.message);
+      return [];
+    }
+
+    console.log(
+      "✅ Blogs fetched from 'blogs' table:",
+      blogsData?.length || 0,
+      "blogs found"
+    );
+    return blogsData ?? [];
   }
+
+  console.log(
+    "✅ Blogs fetched successfully from 'blogs_summary':",
+    data?.length || 0,
+    "blogs found"
+  );
+  console.log("📄 Blog data:", data);
 
   return data ?? [];
 }
@@ -114,6 +143,9 @@ export default async function HomePage() {
     getLatestTools(),
     getBlogs(),
   ]);
+
+  console.log("🏠 HomePage - blogs array:", blogs);
+  console.log("🏠 HomePage - blogs length:", blogs.length);
 
   return (
     <main className="space-y-16">

@@ -133,7 +133,7 @@ export default function SitemapPage() {
           Our XML sitemap is automatically generated and available at:
         </p>
         <code className="bg-white px-3 py-2 rounded border text-sm">
-          https://transformik.ai/sitemap.xml
+          https://transformik.com/sitemap.xml
         </code>
       </div>
     </div>

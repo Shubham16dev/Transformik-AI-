@@ -1,6 +1,6 @@
 import { supabase } from "@/utils/supabase";
 import { ToolCard } from "@/components/tools/ToolCard";
-import { BlogCard } from "@/components/blog/BlogCard";
+import { HomeBlogCard } from "@/components/blog/HomeBlogCard";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { getPublicImageUrl } from "@/utils/getPublicImageUrl";
 import Link from "next/link";
@@ -192,7 +192,7 @@ export default async function HomePage() {
               <div className="md:col-span-6 space-y-4">
                 <h3 className="text-xl font-semibold">Latest in AI</h3>
                 {blogs.slice(0, 2).map((blog) => (
-                  <BlogCard key={blog.id} blog={blog} />
+                  <HomeBlogCard key={blog.id} blog={blog} />
                 ))}
                 <div className="pt-4">
                   <Link
@@ -206,7 +206,7 @@ export default async function HomePage() {
               <div className="md:col-span-4 space-y-4">
                 <h3 className="text-xl font-semibold">More Stories</h3>
                 {blogs.slice(2).map((blog) => (
-                  <BlogCard key={blog.id} blog={blog} />
+                  <HomeBlogCard key={blog.id} blog={blog} />
                 ))}
               </div>
             </div>

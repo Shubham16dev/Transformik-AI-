@@ -3,6 +3,7 @@ import { supabase } from "@/utils/supabase";
 import { Button } from "@/components/ui/button";
 import { FeaturedTools } from "@/components/tools/FeaturedTool";
 import { TopCategories } from "@/components/category/TopCategories";
+import { RelatedBlogsHorizontal } from "@/components/blog/RelatedBlogsHorizontal";
 import { BlogSchema } from "@/components/schema/BlogSchema";
 import Image from "next/image";
 import parse from "html-react-parser";
@@ -181,6 +182,20 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
           <div className="md:col-span-3 space-y-8">
             <FeaturedTools limit={5} />
             <TopCategories limit={6} />
+          </div>
+        </div>
+
+        {/* Related Articles Section - Full Width */}
+        <div className="px-4 md:px-8 pb-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="bg-white p-8 rounded-lg border border-gray-100">
+              <RelatedBlogsHorizontal
+                currentBlogId={summary.id}
+                currentBlogSlug={summary.slug}
+                category={summary.category}
+                limit={3}
+              />
+            </div>
           </div>
         </div>
       </div>

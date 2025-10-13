@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-interface BlogCardProps {
+interface BlogCardVerticalProps {
   blog: {
     title: string;
     slug: string;
@@ -16,9 +16,7 @@ interface BlogCardProps {
   };
 }
 
-export function BlogCard({ blog }: BlogCardProps) {
-  // const authorName = blog.author || "Harsh Mistry";
-
+export function BlogCardVertical({ blog }: BlogCardVerticalProps) {
   return (
     <Card className="rounded-xl border border-gray-200 p-6 w-full flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
       {/* Blog Thumbnail */}

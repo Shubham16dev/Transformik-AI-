@@ -1,13 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  FaYoutube,
-  FaInstagram,
-  FaLinkedin,
-  FaXTwitter,
-  FaFacebook,
-} from "react-icons/fa6";
+import { FaYoutube, FaInstagram, FaLinkedin } from "react-icons/fa6";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -44,29 +38,19 @@ export function Footer() {
 
   const socialLinks = [
     {
-      href: "[https://youtube.com](https://youtube.com)",
+      href: "https://www.youtube.com/@Transformik",
       icon: <FaYoutube />,
       label: "YouTube",
     },
     {
-      href: "[https://instagram.com](https://instagram.com)",
+      href: "https://www.instagram.com/transformikai/",
       icon: <FaInstagram />,
       label: "Instagram",
     },
     {
-      href: "[https://linkedin.com](https://linkedin.com)",
+      href: "https://www.linkedin.com/company/transformik",
       icon: <FaLinkedin />,
       label: "LinkedIn",
-    },
-    {
-      href: "[https://twitter.com](https://twitter.com)",
-      icon: <FaXTwitter />,
-      label: "X",
-    },
-    {
-      href: "[https://facebook.com](https://facebook.com)",
-      icon: <FaFacebook />,
-      label: "Facebook",
     },
   ];
 
@@ -116,10 +100,10 @@ export function Footer() {
             <p className="text-white text-sm">
               Contact:{" "}
               <a
-                href="mailto:shubhampatel0513@gmail.com"
+                href="mailto:singhalharsh187@gmail.com"
                 className="relative hover:text-gray-300 transition-colors duration-300 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-white after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
               >
-                contact@transformik.com
+                singhalharsh187@gmail.com
               </a>
             </p>
           </div>
@@ -134,6 +118,7 @@ export function Footer() {
                 { href: "/tools/category", label: "All Categories" },
                 { href: "/free-tools", label: "Free Tools" },
                 { href: "/blog", label: "Blogs" },
+                { href: "/site-map", label: "Site Map" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link

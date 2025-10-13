@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/utils/supabase";
-import { BlogCard } from "@/components/blog/BlogCard";
+import { HomeBlogCard } from "@/components/blog/HomeBlogCard";
 import { BlogSchema } from "@/components/schema/BlogSchema";
 import {
   Select,
@@ -111,7 +111,9 @@ export default function BlogListingPage() {
         {/* Blog Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {paginatedBlogs.length > 0 ? (
-            paginatedBlogs.map((blog) => <BlogCard key={blog.id} blog={blog} />)
+            paginatedBlogs.map((blog) => (
+              <HomeBlogCard key={blog.id} blog={blog} />
+            ))
           ) : (
             <p className="text-gray-500">No blogs found.</p>
           )}

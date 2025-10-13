@@ -29,6 +29,70 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
+  // Category pages
+  const categories = [
+    "text-to-video-tools",
+    "ai-agents",
+    "ai-animation-tools",
+    "ai-art-generators",
+    "ai-characters",
+    "ai-chatbots",
+    "ai-chrome-extensions",
+    "ai-code-review-tools",
+    "ai-coding-assistants",
+    "ai-copywriting-tools",
+    "ai-customer-service-bots",
+    "ai-customer-support",
+    "ai-data-analysis-tools",
+    "ai-data-visualization-tools",
+    "ai-deepfake-&-face-swap-tools",
+    "ai-fun-tools",
+    "ai-games-tools",
+    "ai-headshot-generators",
+    "ai-image-generators",
+    "ai-interior-design-tools",
+    "ai-lead-generation-tools",
+    "ai-logo-generators",
+    "ai-market-research-tools",
+    "ai-meeting-assistants",
+    "ai-music-generators",
+    "ai-paraphrasing-tools",
+    "ai-presentation-makers",
+    "ai-product-photography",
+    "ai-resume-builders",
+    "ai-search-engine-tools",
+    "ai-search-engines",
+    "ai-seo-tools",
+    "ai-social-media-management",
+    "ai-story-generators",
+    "ai-summarizers",
+    "ai-tools-for-architects",
+    "ai-tools-for-artists",
+    "ai-tools-for-marketers",
+    "ai-tools-for-musicians",
+    "ai-tools-for-students",
+    "ai-transcription-tools",
+    "ai-translation-tools",
+    "ai-video-editors",
+    "ai-video-generators",
+    "ai-video-upscaling",
+    "ai-voice-changers",
+    "ai-voice-cloning",
+    "ai-website-builders",
+    "ai-workflow-automation",
+    "ai-writing-assistants",
+    "free-ai-tools",
+    "future-ai-tools",
+    "most-useful-ai-tools",
+    "open-source-ai-tools",
+    "text-generators",
+  ];
+
+  const categoryPages = categories.map((category) => ({
+    url: `${baseUrl}/tools/category/${category}`,
+    lastModified: new Date(),
+  }));
+
   // Fetch dynamic blog pages
   const { data: blogs } = await supabase
     .from("blogs_summary")
@@ -58,6 +122,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Combine all pages
   return [
     ...staticPages,
+    ...categoryPages,
     ...blogPages,
     // ...toolPages, // Uncomment when you have tools
   ];

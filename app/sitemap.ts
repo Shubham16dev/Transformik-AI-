@@ -45,7 +45,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "ai-customer-support",
     "ai-data-analysis-tools",
     "ai-data-visualization-tools",
-    "ai-deepfake-&-face-swap-tools",
+    "ai-deepfake-and-face-swap-tools",
     "ai-fun-tools",
     "ai-games-tools",
     "ai-headshot-generators",

@@ -118,7 +118,6 @@ export function Footer() {
                 { href: "/tools/category", label: "All Categories" },
                 { href: "/free-tools", label: "Free Tools" },
                 { href: "/blog", label: "Blogs" },
-                { href: "/site-map", label: "Site Map" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link
@@ -151,7 +150,7 @@ export function Footer() {
               })}
               <li>
                 <Link
-                  href="/categories"
+                  href="/tools/category"
                   className="relative hover:text-gray-300 transition-colors duration-300 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-white after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
                 >
                   All Categories →

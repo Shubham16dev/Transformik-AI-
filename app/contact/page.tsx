@@ -60,10 +60,10 @@ export default function ContactPage() {
                 <div>
                   <h4 className="text-sm font-medium text-gray-600">Email</h4>
                   <a
-                    href="mailto:contact@transformik.ai"
+                    href="mailto:singhalharsh187@gmail.com"
                     className="text-gray-700 hover:text-black transition-colors"
                   >
-                    contact@transformik.com
+                    singhalharsh187@gmail.com
                   </a>
                 </div>
               </div>
@@ -133,10 +133,10 @@ export default function ContactPage() {
             <div className="text-sm text-gray-500">
               For urgent matters, please email us directly at:
               <a
-                href="mailto:urgent@transformik.ai"
+                href="mailto:singhalharsh187@gmail.com"
                 className="block text-gray-700 hover:text-black mt-1 font-medium transition-colors"
               >
-                contact@transformik.com
+                singhalharsh187@gmail.com
               </a>
             </div>
           </div>

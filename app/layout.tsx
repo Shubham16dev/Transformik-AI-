@@ -7,6 +7,8 @@ import { CategoryHeroWrapper } from "@/components/category/CategoryHeroWrapper";
 import { OrganizationSchema } from "@/components/schema/OrganizationSchema";
 import "./globals.css";
 import BreadcrumbsClient from "@/components/layout/Breadcrumb";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   title: "Transformik AI - Discover 10,000+ AI Tools | AI Tools Hub",
@@ -53,6 +55,8 @@ export default function RootLayout({
 
         <main className="flex-grow w-full max-w-7xl mx-auto p-4">
           {children}
+          <Analytics />
+          <SpeedInsights />
         </main>
         <Footer />
       </body>

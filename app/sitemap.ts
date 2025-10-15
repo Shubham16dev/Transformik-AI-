@@ -3,7 +3,7 @@ import { supabase } from "@/utils/supabase";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Base URL of your website (no trailing slash)
-  const baseUrl = "https://transformik.com";
+  const baseUrl = "https://www.transformik.com";
 
   // Static pages
   const staticPages = [

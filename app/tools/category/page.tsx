@@ -5,6 +5,13 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabase";
 import { Card } from "@/components/ui/card";
 import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+import { FAQSchema } from "@/components/schema/FAQSchema";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -49,6 +56,53 @@ export default function CategoriesPage() {
   const [sortMode, setSortMode] = useState<string>("alpha-asc");
   const [search, setSearch] = useState<string>("");
   const router = useRouter();
+
+  // SEO-friendly FAQs specific to AI tools categories
+  const faqs = useMemo(
+    () => [
+      {
+        question: "What are AI tool categories?",
+        answer:
+          "AI tool categories group similar tools by their primary use cases—such as Content Generation, Image Editing, Coding Assistants, SEO, Marketing, Data Analysis, Transcription, and more—so you can quickly find solutions that match your goals.",
+      },
+      {
+        question: "How do I choose the right AI category for my needs?",
+        answer:
+          "Start with your objective (e.g., write blog posts, design visuals, analyze data). Then filter categories that align with that goal and sort by popularity or relevance. You can also search within categories to narrow options further.",
+      },
+      {
+        question: "Which AI categories are most popular?",
+        answer:
+          "Commonly visited categories include Content Writing, Image & Design, Video & Audio, Code Assistants, SEO, Marketing Automation, and Productivity. Popularity can change as new tools emerge.",
+      },
+      {
+        question: "Are the tools in each category free or paid?",
+        answer:
+          "Many tools offer free tiers alongside paid plans. Category listings often include both—use the tool page to check pricing, features, and usage limits before you commit.",
+      },
+      {
+        question: "Can a single AI tool belong to multiple categories?",
+        answer:
+          "Yes. Some tools span several use cases (for example, a content suite with image and SEO features). We place tools in all relevant categories to improve discoverability.",
+      },
+      {
+        question: "How often are AI tool categories updated?",
+        answer:
+          "Categories are refreshed as new tools launch and existing tools add features. We also update counts and ordering to reflect activity and community interest.",
+      },
+      {
+        question: "What does the number next to each category mean?",
+        answer:
+          "It shows how many tools are currently listed in that category. Use it to gauge breadth—larger counts typically indicate more options to compare.",
+      },
+      {
+        question: "How can I request a new AI category or suggest a tool?",
+        answer:
+          "If you don't see a category you need or want to recommend a tool, head to our contact page and submit a request with details. We'll review and update the directory accordingly.",
+      },
+    ],
+    []
+  );
 
   useEffect(() => {
     async function fetchCategories() {
@@ -181,11 +235,7 @@ export default function CategoriesPage() {
             <Card
               key={category.slug}
               className="hover:shadow-md transition-shadow border border-gray-200 p-4 rounded-xl cursor-pointer"
-              onClick={() =>
-                router.push(
-                  `/tools/category/${category.slug}`
-                )
-              }
+              onClick={() => router.push(`/tools/category/${category.slug}`)}
             >
               <div className="flex justify-between items-center">
                 <h3 className="text-base font-medium text-gray-800">
@@ -203,6 +253,32 @@ export default function CategoriesPage() {
           <p>No categories found matching your search.</p>
         </div>
       )}
+
+      {/* FAQ Section */}
+      <section id="faq" className="mt-12">
+        <h2 className="text-2xl font-semibold mb-6 text-gray-900">
+          Frequently asked questions
+        </h2>
+        <Accordion type="single" collapsible className="w-full">
+          {faqs.map((item, idx) => (
+            <AccordionItem key={idx} value={`faq-${idx}`}>
+              <AccordionTrigger className="text-base text-gray-900 px-0">
+                {item.question}
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-700 leading-relaxed mx-0 px-0">
+                {item.answer}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </section>
+
+      {/* Structured Data for FAQs */}
+      <FAQSchema
+        faqs={faqs}
+        title="Frequently asked questions"
+        url="https://www.transformik.com/tools/category"
+      />
     </div>
   );
 }

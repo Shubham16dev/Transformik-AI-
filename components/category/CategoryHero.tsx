@@ -36,10 +36,13 @@ export function CategoryHero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto"
+          className="text-lg md:text-xl text-white/80 max-w-3xl mx-auto leading-relaxed"
         >
-          Find the perfect AI tools organized by category to boost your
-          productivity and creativity.
+          Discover our comprehensive collection of AI tools categorized by use case. 
+          From machine learning and natural language processing to computer vision 
+          and automation, explore cutting-edge artificial intelligence solutions 
+          designed to enhance productivity, streamline workflows, and drive innovation 
+          across industries including healthcare, finance, marketing, and technology.
         </motion.p>
       </div>
     </section>

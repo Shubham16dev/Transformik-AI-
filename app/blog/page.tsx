@@ -65,7 +65,7 @@ export default async function BlogListingPage() {
           slug: "blog",
           excerpt:
             "Stay updated with the latest AI insights, tutorials, and trends",
-          created_at: new Date().toISOString(),
+          created_at: "2024-01-01T00:00:00.000Z", // Static date for listing page
         }}
       />
 

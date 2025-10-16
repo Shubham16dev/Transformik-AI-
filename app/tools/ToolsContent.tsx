@@ -53,16 +53,21 @@ export function ToolsContent({
   categorySlug,
   categoryMeta,
 }: ToolsContentProps) {
+  // Compute initial category value once to prevent hydration mismatch
+  const initialCategory = useMemo(() => {
+    if (!categorySlug) return "all";
+
+    const matchingCategory = categories.find(
+      (cat) =>
+        cat.toLowerCase().trim().replace(/\s+/g, "-") ===
+        categorySlug.toLowerCase()
+    );
+
+    return matchingCategory || "all";
+  }, [categorySlug, categories]);
+
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState(
-    categorySlug
-      ? categories.find(
-          (cat) =>
-            cat.toLowerCase().trim().replace(/\s+/g, "-") ===
-            categorySlug.toLowerCase()
-        ) || "all"
-      : "all"
-  );
+  const [category, setCategory] = useState(initialCategory);
   const [priceFilter, setPriceFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 15;

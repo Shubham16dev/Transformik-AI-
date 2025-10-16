@@ -137,7 +137,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
               )}
               {/* show created date and author if available */}
               {summary.created_at && (
-                <div className="mt-4 text-sm text-white/80">
+                <div className="mt-4 text-sm text-white/80" suppressHydrationWarning>
                   {new Date(summary.created_at).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "long",

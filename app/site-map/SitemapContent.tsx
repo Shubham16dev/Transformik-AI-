@@ -86,8 +86,12 @@ export function SitemapContent({ blogs }: SitemapContentProps) {
                 >
                   {blog.title}
                 </Link>
-                <span className="text-xs text-gray-400 block">
-                  {new Date(blog.created_at).toLocaleDateString()}
+                <span className="text-xs text-gray-400 block" suppressHydrationWarning>
+                  {new Date(blog.created_at).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
                 </span>
               </li>
             ))}

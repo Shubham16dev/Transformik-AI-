@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { HomeBlogCard } from "@/components/blog/HomeBlogCard";
 import {
   Select,
@@ -27,20 +27,13 @@ interface BlogListingContentProps {
 }
 
 export function BlogListingContent({ initialBlogs }: BlogListingContentProps) {
-  const [blogs, setBlogs] = useState<BlogSummary[]>(initialBlogs);
   const [sortOption, setSortOption] = useState("date-desc");
-
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 8; // Blogs per page
-  const totalPages = Math.ceil(blogs.length / pageSize);
-  const paginatedBlogs = blogs.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
 
-  // Sort blogs when sortOption changes
-  useEffect(() => {
+  const pageSize = 8; // Blogs per page
+
+  // Sort blogs using useMemo to prevent hydration issues
+  const sortedBlogs = useMemo(() => {
     const sorted = [...initialBlogs];
     if (sortOption === "date-desc") {
       sorted.sort(
@@ -53,9 +46,19 @@ export function BlogListingContent({ initialBlogs }: BlogListingContentProps) {
           new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
       );
     }
-    setBlogs(sorted);
-    setCurrentPage(1);
+    return sorted;
   }, [sortOption, initialBlogs]);
+
+  const totalPages = Math.ceil(sortedBlogs.length / pageSize);
+  const paginatedBlogs = sortedBlogs.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  const handleSortChange = (value: string) => {
+    setSortOption(value);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="space-y-6">
@@ -63,7 +66,7 @@ export function BlogListingContent({ initialBlogs }: BlogListingContentProps) {
 
       {/* Sort Select */}
       <div className="flex justify-end">
-        <Select value={sortOption} onValueChange={setSortOption}>
+        <Select value={sortOption} onValueChange={handleSortChange}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
@@ -88,7 +91,7 @@ export function BlogListingContent({ initialBlogs }: BlogListingContentProps) {
       {/* Pagination */}
       {totalPages > 1 && (
         <Pagination
-          totalItems={blogs.length}
+          totalItems={sortedBlogs.length}
           pageSize={pageSize}
           currentPage={currentPage}
           onPageChange={setCurrentPage}

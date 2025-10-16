@@ -1,8 +1,17 @@
-"use client";
+import { supabaseServer } from "@/utils/supabaseServer";
+import { SitemapContent } from "./SitemapContent";
+import type { Metadata } from "next";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { supabase } from "@/utils/supabase";
+export const metadata: Metadata = {
+  title: "Site Map | Find All Pages - Transformik AI",
+  description:
+    "Browse all pages and content on Transformik AI. Find tools, blog posts, categories, and resources easily.",
+  alternates: {
+    canonical: "https://www.transformik.com/site-map",
+  },
+};
+
+export const revalidate = 3600; // Revalidate every hour
 
 interface BlogSummary {
   id: string;
@@ -11,131 +20,27 @@ interface BlogSummary {
   created_at: string;
 }
 
-export default function SitemapPage() {
-  const [blogs, setBlogs] = useState<BlogSummary[]>([]);
-  const [loading, setLoading] = useState(true);
+async function getBlogs(): Promise<BlogSummary[]> {
+  try {
+    const { data, error } = await supabaseServer
+      .from("blogs_summary")
+      .select("id, title, slug, created_at")
+      .order("created_at", { ascending: false });
 
-  useEffect(() => {
-    async function fetchBlogs() {
-      const { data, error } = await supabase
-        .from("blogs_summary")
-        .select("id, title, slug, created_at")
-        .order("created_at", { ascending: false });
-
-      if (!error && data) {
-        setBlogs(data);
-      }
-      setLoading(false);
+    if (error) {
+      console.error("Error fetching blogs:", error);
+      return [];
     }
 
-    fetchBlogs();
-  }, []);
+    return data || [];
+  } catch (err) {
+    console.error("Error fetching blogs:", err);
+    return [];
+  }
+}
 
-  return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-4xl font-bold mb-8 text-center">Site Map</h1>
-      <p className="text-gray-600 mb-8 text-center">
-        Find all pages and content on Transformik AI
-      </p>
+export default async function SitemapPage() {
+  const blogs = await getBlogs();
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Main Pages */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-2xl font-semibold mb-4 text-purple-700">
-            Main Pages
-          </h2>
-          <ul className="space-y-3">
-            <li>
-              <Link
-                href="/"
-                className="text-blue-600 hover:text-purple-600 transition-colors"
-              >
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/tools"
-                className="text-blue-600 hover:text-purple-600 transition-colors"
-              >
-                AI Tools
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/blog"
-                className="text-blue-600 hover:text-purple-600 transition-colors"
-              >
-                Blog
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/free-tools"
-                className="text-blue-600 hover:text-purple-600 transition-colors"
-              >
-                Free Tools
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/contact"
-                className="text-blue-600 hover:text-purple-600 transition-colors"
-              >
-                Contact Us
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Blog Posts */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-2xl font-semibold mb-4 text-purple-700">
-            Latest Blog Posts
-          </h2>
-          {loading ? (
-            <p className="text-gray-500">Loading blogs...</p>
-          ) : (
-            <ul className="space-y-2 max-h-96 overflow-y-auto">
-              {blogs.map((blog) => (
-                <li key={blog.id}>
-                  <Link
-                    href={`/blog/${blog.slug}`}
-                    className="text-blue-600 hover:text-purple-600 transition-colors text-sm line-clamp-2"
-                    title={blog.title}
-                  >
-                    {blog.title}
-                  </Link>
-                  <span className="text-xs text-gray-400 block">
-                    {new Date(blog.created_at).toLocaleDateString()}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-          {blogs.length > 10 && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <Link
-                href="/blog"
-                className="text-purple-600 hover:text-purple-800 font-medium"
-              >
-                View All Blogs →
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* SEO Info */}
-      <div className="mt-12 bg-gray-50 rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">For Search Engines</h2>
-        <p className="text-gray-600 mb-2">
-          Our XML sitemap is automatically generated and available at:
-        </p>
-        <code className="bg-white px-3 py-2 rounded border text-sm">
-          https://transformik.com/sitemap.xml
-        </code>
-      </div>
-    </div>
-  );
+  return <SitemapContent blogs={blogs} />;
 }

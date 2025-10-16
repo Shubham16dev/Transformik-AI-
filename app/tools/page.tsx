@@ -1,5 +1,5 @@
 // app/tools/page.tsx
-import { Suspense } from "react";
+import { supabaseServer } from "@/utils/supabaseServer";
 import { ToolsContent } from "./ToolsContent";
 import type { Metadata } from "next";
 
@@ -18,18 +18,48 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ToolsPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="space-y-6">
-          <h1 className="text-3xl font-bold">All AI Tools</h1>
-          <p className="text-gray-500">Explore our collection of AI tools.</p>
-          <p className="text-gray-500">Loading tools...</p>
-        </div>
-      }
-    >
-      <ToolsContent />
-    </Suspense>
-  );
+export const revalidate = 3600; // Revalidate every hour
+
+interface Tool {
+  id: string;
+  tool_name: string;
+  slug: string;
+  one_line_description: string;
+  pricing_model: string;
+  url?: string;
+  category?: string | string[] | null;
+  logo?: string | null;
+}
+
+async function getTools(): Promise<Tool[]> {
+  try {
+    const { data, error } = await supabaseServer
+      .from("tools_summary")
+      .select("*")
+      .order("tool_name", { ascending: true });
+
+    if (error) throw error;
+    return data ?? [];
+  } catch (err) {
+    console.error("Error fetching tools:", err);
+    return [];
+  }
+}
+
+export default async function ToolsPage() {
+  const tools = await getTools();
+
+  // Extract unique categories
+  const allCategories: string[] = [];
+  tools.forEach((tool) => {
+    const toolCategories = tool.category;
+    if (Array.isArray(toolCategories)) {
+      toolCategories.forEach((cat) => cat && allCategories.push(cat));
+    } else if (typeof toolCategories === "string" && toolCategories) {
+      allCategories.push(toolCategories);
+    }
+  });
+  const categories = Array.from(new Set(allCategories)).sort();
+
+  return <ToolsContent tools={tools} categories={categories} />;
 }

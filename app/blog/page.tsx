@@ -1,17 +1,24 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { supabase } from "@/utils/supabase";
-import { HomeBlogCard } from "@/components/blog/HomeBlogCard";
+import { supabaseServer } from "@/utils/supabaseServer";
+import { BlogListingContent } from "./BlogListingContent";
 import { BlogSchema } from "@/components/schema/BlogSchema";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Pagination } from "@/components/Pagination";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AI Blog | Latest AI Insights and Tutorials - Transformik AI",
+  description:
+    "Stay updated with the latest AI insights, tutorials, and trends. Explore our comprehensive blog covering AI tools, techniques, and industry developments.",
+  alternates: {
+    canonical: "https://www.transformik.com/blog",
+  },
+  openGraph: {
+    title: "AI Blog | Latest AI Insights and Tutorials - Transformik AI",
+    description:
+      "Stay updated with the latest AI insights, tutorials, and trends. Explore our comprehensive blog covering AI tools, techniques, and industry developments.",
+    url: "https://www.transformik.com/blog",
+  },
+};
+
+export const revalidate = 3600; // Revalidate every hour
 
 interface BlogSummary {
   id: string;
@@ -24,64 +31,34 @@ interface BlogSummary {
   created_at: string;
 }
 
-export default function BlogListingPage() {
-  const [blogs, setBlogs] = useState<BlogSummary[]>([]);
-  const [filteredBlogs, setFilteredBlogs] = useState<BlogSummary[]>([]);
-  const [sortOption, setSortOption] = useState("date-desc");
+async function getBlogs(): Promise<BlogSummary[]> {
+  try {
+    const { data, error } = await supabaseServer
+      .from("blogs_summary")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 8; // Blogs per page
-  const totalPages = Math.ceil(filteredBlogs.length / pageSize);
-  const paginatedBlogs = filteredBlogs.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
-
-  // Fetch blogs from blogs_summary table
-  useEffect(() => {
-    async function fetchBlogs() {
-      const { data, error } = await supabase
-        .from("blogs_summary")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching blogs:", error);
-        return;
-      }
-
-      setBlogs(data || []);
-      setFilteredBlogs(data || []);
+    if (error) {
+      console.error("Error fetching blogs:", error);
+      return [];
     }
 
-    fetchBlogs();
-  }, []);
+    return data || [];
+  } catch (err) {
+    console.error("Error fetching blogs:", err);
+    return [];
+  }
+}
 
-  // Sort blogs when sortOption changes
-  useEffect(() => {
-    const sorted = [...blogs];
-    if (sortOption === "date-desc") {
-      sorted.sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-    } else if (sortOption === "date-asc") {
-      sorted.sort(
-        (a, b) =>
-          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-      );
-    }
-    setFilteredBlogs(sorted);
-    setCurrentPage(1);
-  }, [sortOption, blogs]);
+export default async function BlogListingPage() {
+  const blogs = await getBlogs();
 
   return (
     <>
       {/* Schema Markup */}
       <BlogSchema
         isListingPage={true}
-        blogs={filteredBlogs}
+        blogs={blogs}
         blog={{
           id: "blog-listing",
           title: "AI Blog | Latest AI Insights and Tutorials",
@@ -92,43 +69,7 @@ export default function BlogListingPage() {
         }}
       />
 
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold">Blog</h1>
-
-        {/* Sort Select */}
-        <div className="flex justify-end">
-          <Select value={sortOption} onValueChange={setSortOption}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent className="max-h-60 overflow-y-auto">
-              <SelectItem value="date-desc">Newest First</SelectItem>
-              <SelectItem value="date-asc">Oldest First</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Blog Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {paginatedBlogs.length > 0 ? (
-            paginatedBlogs.map((blog) => (
-              <HomeBlogCard key={blog.id} blog={blog} />
-            ))
-          ) : (
-            <p className="text-gray-500">No blogs found.</p>
-          )}
-        </div>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <Pagination
-            totalItems={filteredBlogs.length}
-            pageSize={pageSize}
-            currentPage={currentPage}
-            onPageChange={setCurrentPage}
-          />
-        )}
-      </div>
+      <BlogListingContent initialBlogs={blogs} />
     </>
   );
 }

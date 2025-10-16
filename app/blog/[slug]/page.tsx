@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { supabase } from "@/utils/supabase";
+import { supabaseServer } from "@/utils/supabaseServer";
 import { Button } from "@/components/ui/button";
 import { FeaturedTools } from "@/components/tools/FeaturedTool";
 import { TopCategories } from "@/components/category/TopCategories";
@@ -9,8 +9,24 @@ import Image from "next/image";
 import parse from "html-react-parser";
 import type { Metadata } from "next";
 
+export const revalidate = 3600; // Revalidate every hour
+
 interface BlogDetailPageProps {
   params: Promise<{ slug: string }>;
+}
+
+// Generate static paths at build time
+export async function generateStaticParams() {
+  const { data: blogs } = await supabaseServer
+    .from("blogs_summary")
+    .select("slug")
+    .limit(500); // Limit to prevent too many builds, adjust as needed
+
+  return (
+    blogs?.map((blog) => ({
+      slug: blog.slug,
+    })) || []
+  );
 }
 
 // Dynamic metadata
@@ -19,7 +35,7 @@ export async function generateMetadata({
 }: BlogDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  const { data: blogSummary } = await supabase
+  const { data: blogSummary } = await supabaseServer
     .from("blogs_summary")
     .select("title, excerpt, featured_image, image, cover_image")
     .eq("slug", slug)
@@ -58,7 +74,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
   const { slug } = await params;
 
   // Fetch blog summary
-  const { data: summary, error: summaryError } = await supabase
+  const { data: summary, error: summaryError } = await supabaseServer
     .from("blogs_summary")
     .select("*")
     .eq("slug", slug)
@@ -67,7 +83,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
   if (summaryError || !summary) return notFound();
 
   // Fetch blog details
-  const { data: details, error: detailsError } = await supabase
+  const { data: details, error: detailsError } = await supabaseServer
     .from("blogs_details")
     .select("content")
     .eq("id", summary.id)

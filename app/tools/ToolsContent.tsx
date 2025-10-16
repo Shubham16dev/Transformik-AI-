@@ -1,8 +1,7 @@
 // components/tools/ToolsContent.tsx
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { supabase } from "@/utils/supabase";
+import { useState, useMemo } from "react";
 import { ToolCard } from "@/components/tools/ToolCard";
 import { Pagination } from "@/components/Pagination";
 import { FilterCombobox } from "@/components/ui/FilterCombobox";
@@ -41,67 +40,32 @@ interface CategoryMeta {
   faqs?: { question: string; answer: string }[] | null;
 }
 
-export function ToolsContent({
-  categorySlug,
-  categoryMeta,
-}: {
+interface ToolsContentProps {
+  tools: Tool[];
+  categories: string[];
   categorySlug?: string;
   categoryMeta?: CategoryMeta | null;
-}) {
-  const [tools, setTools] = useState<Tool[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+}
 
+export function ToolsContent({
+  tools,
+  categories,
+  categorySlug,
+  categoryMeta,
+}: ToolsContentProps) {
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] = useState(
+    categorySlug
+      ? categories.find(
+          (cat) =>
+            cat.toLowerCase().trim().replace(/\s+/g, "-") ===
+            categorySlug.toLowerCase()
+        ) || "all"
+      : "all"
+  );
   const [priceFilter, setPriceFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 15;
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from("tools_summary")
-          .select("*")
-          .order("tool_name", { ascending: true });
-
-        if (error) throw error;
-        setTools(data ?? []);
-
-        const allCategories: string[] = [];
-        data?.forEach((tool) => {
-          const toolCategories = tool.category;
-          if (Array.isArray(toolCategories)) {
-            toolCategories.forEach((cat) => cat && allCategories.push(cat));
-          } else if (typeof toolCategories === "string" && toolCategories) {
-            allCategories.push(toolCategories);
-          }
-        });
-
-        const uniqueCategories = Array.from(new Set(allCategories)).sort();
-        setCategories(uniqueCategories);
-
-        if (categorySlug) {
-          const slugify = (name: string) =>
-            name.toLowerCase().trim().replace(/\s+/g, "-");
-
-          const matchingCategory = uniqueCategories.find(
-            (cat) => slugify(cat) === categorySlug.toLowerCase()
-          );
-
-          setCategory(matchingCategory || "all");
-        }
-      } catch (err) {
-        console.error("Error fetching data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [categorySlug]);
 
   // Filtering (memoized for performance)
   const filteredTools = useMemo(() => {
@@ -199,46 +163,42 @@ export function ToolsContent({
         </div>
 
         {/* Tools Grid */}
-        {loading ? (
-          <p className="text-gray-500">Loading tools...</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {paginatedTools.length ? (
-              paginatedTools.map((tool) => (
-                <ToolCard
-                  key={tool.id}
-                  tool={{
-                    tool_name: tool.tool_name,
-                    slug: tool.slug,
-                    one_line_description: tool.one_line_description,
-                    pricing_model: [
-                      "Free",
-                      "Freemium",
-                      "Free Trial",
-                      "Paid",
-                    ].includes(tool.pricing_model)
-                      ? (tool.pricing_model as
-                          | "Free"
-                          | "Freemium"
-                          | "Free Trial"
-                          | "Paid")
-                      : undefined,
-                    url: tool.url,
-                    category: tool.category || "Other",
-                    logo: getPublicImageUrl(
-                      "Images",
-                      tool.logo ? `ToolLogos/${tool.logo}` : undefined
-                    ),
-                  }}
-                />
-              ))
-            ) : (
-              <p className="text-gray-500">
-                No tools found matching your filters.
-              </p>
-            )}
-          </div>
-        )}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {paginatedTools.length ? (
+            paginatedTools.map((tool) => (
+              <ToolCard
+                key={tool.id}
+                tool={{
+                  tool_name: tool.tool_name,
+                  slug: tool.slug,
+                  one_line_description: tool.one_line_description,
+                  pricing_model: [
+                    "Free",
+                    "Freemium",
+                    "Free Trial",
+                    "Paid",
+                  ].includes(tool.pricing_model)
+                    ? (tool.pricing_model as
+                        | "Free"
+                        | "Freemium"
+                        | "Free Trial"
+                        | "Paid")
+                    : undefined,
+                  url: tool.url,
+                  category: tool.category || "Other",
+                  logo: getPublicImageUrl(
+                    "Images",
+                    tool.logo ? `ToolLogos/${tool.logo}` : undefined
+                  ),
+                }}
+              />
+            ))
+          ) : (
+            <p className="text-gray-500">
+              No tools found matching your filters.
+            </p>
+          )}
+        </div>
 
         {/* Pagination */}
         <Pagination

@@ -1,4 +1,4 @@
-import { supabase } from "@/utils/supabase";
+import { supabaseServer } from "@/utils/supabaseServer";
 import { getPublicImageUrl } from "@/utils/getPublicImageUrl";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -26,8 +26,24 @@ import {
 } from "lucide-react";
 import { CategoryBadge } from "@/components/CategoryBadge";
 
+export const revalidate = 3600; // Revalidate every hour
+
 interface ToolDetailPageProps {
   params: Promise<{ slug: string }>;
+}
+
+// Generate static paths at build time
+export async function generateStaticParams() {
+  const { data: tools } = await supabaseServer
+    .from("tools_summary")
+    .select("slug")
+    .limit(1000); // Limit to prevent too many builds, adjust as needed
+
+  return (
+    tools?.map((tool) => ({
+      slug: tool.slug,
+    })) || []
+  );
 }
 
 // Dynamic metadata
@@ -36,7 +52,7 @@ export async function generateMetadata({
 }: ToolDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  const { data: toolSummary } = await supabase
+  const { data: toolSummary } = await supabaseServer
     .from("tools_summary")
     .select("tool_name, one_line_description")
     .eq("slug", slug)
@@ -72,7 +88,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
   const { slug } = await params;
 
   // 1️⃣ Fetch main tool summary
-  const { data: toolSummary, error: summaryError } = await supabase
+  const { data: toolSummary, error: summaryError } = await supabaseServer
     .from("tools_summary")
     .select("*")
     .eq("slug", slug)
@@ -81,7 +97,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
   if (summaryError || !toolSummary) return notFound();
 
   // 2️⃣ Fetch tool details
-  const { data: toolDetails, error: detailsError } = await supabase
+  const { data: toolDetails, error: detailsError } = await supabaseServer
     .from("tools_details")
     .select("*")
     .eq("id", toolSummary.id)

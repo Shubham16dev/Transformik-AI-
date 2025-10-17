@@ -17,9 +17,9 @@ import { motion, AnimatePresence } from "framer-motion";
 // Define navigation links outside the component
 const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/tools", label: "All Tools" },
-  { href: "/tools/category", label: "All Categories" },
-  { href: "/free-tools", label: "Free Tools" },
+  { href: "/tools", label: "All AI Tools" },
+  { href: "/tools/category", label: "AI Tools Categories" },
+  { href: "/free-tools", label: "Free AI Tools" },
   { href: "/blog", label: "Blogs" },
 ];
 

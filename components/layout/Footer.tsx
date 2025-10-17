@@ -114,9 +114,9 @@ export function Footer() {
             <ul className="space-y-2 text-white">
               {[
                 { href: "/", label: "Home" },
-                { href: "/tools", label: "All Tools" },
-                { href: "/tools/category", label: "All Categories" },
-                { href: "/free-tools", label: "Free Tools" },
+                { href: "/tools", label: "All AI Tools" },
+                { href: "/tools/category", label: "AI Tools Categories" },
+                { href: "/free-tools", label: "Free AI Tools" },
                 { href: "/blog", label: "Blogs" },
               ].map((link) => (
                 <li key={link.href}>

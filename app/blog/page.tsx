@@ -53,6 +53,17 @@ async function getBlogs(): Promise<BlogSummary[]> {
 export default async function BlogListingPage() {
   const blogs = await getBlogs();
 
+  // Get current page from search params (for SSR)
+  // Next.js 13+ app router: use searchParams in page function
+  // Fallback to page 1 if not present
+  let currentPage = 1;
+  if (typeof window === "undefined") {
+    // On server, get from process.env or leave as 1 (for static export)
+  } else {
+    const urlParams = new URLSearchParams(window.location.search);
+    currentPage = parseInt(urlParams.get("page") || "1", 10);
+  }
+
   // FAQs for Blog Listing page - SEO optimized
   const blogFaqs = [
     {
@@ -99,6 +110,15 @@ export default async function BlogListingPage() {
 
   return (
     <>
+      {/* Canonical tag for paginated pages */}
+      <head>
+        <link
+          rel="canonical"
+          href={`https://www.transformik.com/blog${
+            currentPage > 1 ? `?page=${currentPage}` : ""
+          }`}
+        />
+      </head>
       {/* Schema Markup */}
       <BlogSchema
         isListingPage={true}

@@ -10,7 +10,7 @@ export function CategoryHero() {
       <div className="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full blur-xl" />
       <div className="absolute bottom-10 left-10 w-24 h-24 bg-white/10 rounded-full blur-lg" />
 
-      <div className="relative max-w-7xl mx-auto text-center space-y-6 px-6">
+      <div className="relative w-full mx-auto text-center space-y-6 px-6">
         {/* Top badge */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -36,13 +36,14 @@ export function CategoryHero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="text-lg md:text-xl text-white/80 max-w-3xl mx-auto leading-relaxed"
+          className="text-lg md:text-xl text-white/80 w-full mx-auto leading-relaxed"
         >
-          Discover our comprehensive collection of AI tools categorized by use case. 
-          From machine learning and natural language processing to computer vision 
-          and automation, explore cutting-edge artificial intelligence solutions 
-          designed to enhance productivity, streamline workflows, and drive innovation 
-          across industries including healthcare, finance, marketing, and technology.
+          Discover our comprehensive collection of AI tools categorized by use
+          case. From machine learning and natural language processing to
+          computer vision and automation, explore cutting-edge artificial
+          intelligence solutions designed to enhance productivity, streamline
+          workflows, and drive innovation across industries including
+          healthcare, finance, marketing, and technology.
         </motion.p>
       </div>
     </section>

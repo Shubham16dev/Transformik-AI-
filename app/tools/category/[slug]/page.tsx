@@ -89,8 +89,10 @@ export async function generateMetadata({
 
 export default async function ToolsByCategory({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ page?: string | string[] }>;
 }) {
   const { slug } = await params;
 
@@ -116,12 +118,17 @@ export default async function ToolsByCategory({
   });
   const categories = Array.from(new Set(allCategories)).sort();
 
+  const sp = (await searchParams) || {};
+  const rawPage = Array.isArray(sp.page) ? sp.page[0] : sp.page;
+  const initialPage = rawPage ? Math.max(parseInt(rawPage, 10) || 1, 1) : 1;
+
   return (
     <ToolsContent
       tools={tools}
       categories={categories}
       categorySlug={slug}
       categoryMeta={catMeta ?? null}
+      initialPage={initialPage}
     />
   );
 }

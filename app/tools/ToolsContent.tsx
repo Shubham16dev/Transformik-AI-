@@ -1,12 +1,14 @@
 // components/tools/ToolsContent.tsx
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ToolCard } from "@/components/tools/ToolCard";
 import { Pagination } from "@/components/Pagination";
 import { FilterCombobox } from "@/components/ui/FilterCombobox";
 import { getPublicImageUrl } from "@/utils/getPublicImageUrl";
 import { ToolsSchema } from "@/components/schema/ToolsSchema";
+import { FAQSchema } from "@/components/schema/FAQSchema";
 import {
   Accordion,
   AccordionItem,
@@ -45,6 +47,9 @@ interface ToolsContentProps {
   categories: string[];
   categorySlug?: string;
   categoryMeta?: CategoryMeta | null;
+  faqs?: { question: string; answer: string }[];
+  showDescription?: boolean;
+  initialPage?: number;
 }
 
 export function ToolsContent({
@@ -52,7 +57,12 @@ export function ToolsContent({
   categories,
   categorySlug,
   categoryMeta,
+  faqs,
+  showDescription = false,
+  initialPage = 1,
 }: ToolsContentProps) {
+  const router = useRouter();
+
   // Compute initial category value once to prevent hydration mismatch
   const initialCategory = useMemo(() => {
     if (!categorySlug) return "all";
@@ -69,7 +79,8 @@ export function ToolsContent({
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState(initialCategory);
   const [priceFilter, setPriceFilter] = useState("all");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [isInitialMount, setIsInitialMount] = useState(true);
   const pageSize = 15;
 
   // Filtering (memoized for performance)
@@ -113,6 +124,35 @@ export function ToolsContent({
     return filteredTools.slice(start, start + pageSize);
   }, [filteredTools, currentPage]);
 
+  // Update URL when page changes
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    const params = new URLSearchParams(window.location.search);
+    if (page > 1) {
+      params.set("page", page.toString());
+    } else {
+      params.delete("page");
+    }
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    if (isInitialMount) {
+      setIsInitialMount(false);
+      return;
+    }
+    if (currentPage !== 1) {
+      handlePageChange(1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, category, priceFilter]);
+
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentPage]);
+
   return (
     <>
       {/* Schema Markup */}
@@ -125,14 +165,29 @@ export function ToolsContent({
       />
 
       {/* Hero Section - Full Width */}
-      <section className="relative bg-gradient-to-r from-gray-900 to-gray-800 text-white py-16 w-screen -ml-[50vw] left-1/2 relative">
-        <div className="max-w-7xl mx-auto text-left space-y-6 px-6">
-          <h1 className="text-xl md:text-3xl lg:text-4xl font-bold">
-            {categoryMeta?.name || categoryMeta?.name || "All AI Tools"}
+      <section className="relative bg-[#181828] text-white py-16 w-screen -ml-[50vw] left-1/2 relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-800/20 to-purple-600/20" />
+        <div className="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full blur-xl" />
+        <div className="absolute bottom-10 left-10 w-24 h-24 bg-white/10 rounded-full blur-lg" />
+
+        <div className="relative max-w-7xl mx-auto text-center space-y-6 px-6">
+          {/* Top badge */}
+          {showDescription && (
+            <div className="inline-block bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 text-sm font-medium">
+              Discover AI Tools
+            </div>
+          )}
+
+          <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+            {categoryMeta?.name || "All AI Tools"}
           </h1>
 
-          <p className="text-base md:text-lg text-gray-300 w-full leading-relaxed">
-            {categoryMeta?.description || "Explore our collection of AI tools."}
+          <p className="text-lg md:text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
+            {showDescription
+              ? "Welcome to Transformik.ai's comprehensive directory of AI tools. Our curated collection features cutting-edge artificial intelligence solutions across multiple categories, helping you discover the perfect AI tools for your projects. Whether you're looking for free AI tools, premium solutions, or specialized tools for specific use cases, our platform makes it easy to compare, filter, and find the best AI technology for your needs."
+              : categoryMeta?.description ||
+                "Explore our collection of AI tools."}
           </p>
         </div>
       </section>
@@ -210,27 +265,37 @@ export function ToolsContent({
           totalItems={filteredTools.length}
           pageSize={pageSize}
           currentPage={currentPage}
-          onPageChange={setCurrentPage}
+          onPageChange={handlePageChange}
         />
 
-        {/* Optional FAQs section */}
-        {categoryMeta?.faqs && categoryMeta.faqs.length > 0 && (
-          <section className="mt-6">
-            <h2 className="text-xl font-semibold">
-              Frequently asked questions
+        {/* FAQs section */}
+        {((faqs && faqs.length > 0) ||
+          (categoryMeta?.faqs && categoryMeta.faqs.length > 0)) && (
+          <section className="mt-12">
+            <h2 className="text-2xl font-semibold mb-6">
+              Frequently Asked Questions
             </h2>
-            <Accordion type="single" collapsible className="mt-3">
-              {categoryMeta.faqs.map((faq, idx) => (
-                <AccordionItem key={idx} value={`faq-${idx}`} className="py-2">
-                  <AccordionTrigger className="text-left font-medium">
+            <Accordion type="single" collapsible className="space-y-3">
+              {(faqs || categoryMeta?.faqs || []).map((faq, idx) => (
+                <AccordionItem
+                  key={idx}
+                  value={`faq-${idx}`}
+                  className="border rounded-lg px-4"
+                >
+                  <AccordionTrigger className="text-left font-medium hover:no-underline py-4">
                     {faq.question}
                   </AccordionTrigger>
-                  <AccordionContent className="mt-2 text-gray-600">
+                  <AccordionContent className="text-gray-600 pb-4">
                     {faq.answer}
                   </AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
+
+            {/* FAQ Schema for SEO */}
+            {(faqs || categoryMeta?.faqs) && (
+              <FAQSchema faqs={faqs || categoryMeta?.faqs || []} />
+            )}
           </section>
         )}
       </div>

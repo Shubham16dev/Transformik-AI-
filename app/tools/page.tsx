@@ -1,22 +1,39 @@
 // app/tools/page.tsx
 import { supabaseServer } from "@/utils/supabaseServer";
 import { ToolsContent } from "./ToolsContent";
+
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "All AI Tools | Browse 10,000+ AI Tools - Transformik AI",
-  description:
-    "Browse and discover all AI tools in our comprehensive directory. Find AI tools for writing, coding, marketing, design, and more. Updated daily.",
-  alternates: {
-    canonical: "https://www.transformik.com/tools",
-  },
-  openGraph: {
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams?: Promise<{ [key: string]: string | string[] }>;
+}): Promise<Metadata> {
+  const sp = (await searchParams) || {};
+  const pageParam = sp.page;
+  const currentPage = parseInt(
+    Array.isArray(pageParam) ? pageParam[0] : pageParam || "1",
+    10
+  );
+  const canonicalUrl = `https://www.transformik.com/tools${
+    currentPage > 1 ? `?page=${currentPage}` : ""
+  }`;
+
+  return {
     title: "All AI Tools | Browse 10,000+ AI Tools - Transformik AI",
     description:
       "Browse and discover all AI tools in our comprehensive directory. Find AI tools for writing, coding, marketing, design, and more. Updated daily.",
-    url: "https://www.transformik.com/tools",
-  },
-};
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: "All AI Tools | Browse 10,000+ AI Tools - Transformik AI",
+      description:
+        "Browse and discover all AI tools in our comprehensive directory. Find AI tools for writing, coding, marketing, design, and more. Updated daily.",
+      url: canonicalUrl,
+    },
+  };
+}
 
 export const revalidate = 3600; // Revalidate every hour
 

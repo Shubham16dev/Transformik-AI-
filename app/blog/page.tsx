@@ -1,22 +1,39 @@
 import { supabaseServer } from "@/utils/supabaseServer";
 import { BlogListingContent } from "./BlogListingContent";
 import { BlogSchema } from "@/components/schema/BlogSchema";
+
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "AI Blog | Latest AI Insights and Tutorials - Transformik AI",
-  description:
-    "Stay updated with the latest AI insights, tutorials, and trends. Explore our comprehensive blog covering AI tools, techniques, and industry developments.",
-  alternates: {
-    canonical: "https://www.transformik.com/blog",
-  },
-  openGraph: {
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams?: Promise<{ [key: string]: string | string[] }>;
+}): Promise<Metadata> {
+  const sp = (await searchParams) || {};
+  const pageParam = sp.page;
+  const currentPage = parseInt(
+    Array.isArray(pageParam) ? pageParam[0] : pageParam || "1",
+    10
+  );
+  const canonicalUrl = `https://www.transformik.com/blog${
+    currentPage > 1 ? `?page=${currentPage}` : ""
+  }`;
+
+  return {
     title: "AI Blog | Latest AI Insights and Tutorials - Transformik AI",
     description:
       "Stay updated with the latest AI insights, tutorials, and trends. Explore our comprehensive blog covering AI tools, techniques, and industry developments.",
-    url: "https://www.transformik.com/blog",
-  },
-};
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: "AI Blog | Latest AI Insights and Tutorials - Transformik AI",
+      description:
+        "Stay updated with the latest AI insights, tutorials, and trends. Explore our comprehensive blog covering AI tools, techniques, and industry developments.",
+      url: canonicalUrl,
+    },
+  };
+}
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -53,16 +70,7 @@ async function getBlogs(): Promise<BlogSummary[]> {
 export default async function BlogListingPage() {
   const blogs = await getBlogs();
 
-  // Get current page from search params (for SSR)
-  // Next.js 13+ app router: use searchParams in page function
-  // Fallback to page 1 if not present
-  let currentPage = 1;
-  if (typeof window === "undefined") {
-    // On server, get from process.env or leave as 1 (for static export)
-  } else {
-    const urlParams = new URLSearchParams(window.location.search);
-    currentPage = parseInt(urlParams.get("page") || "1", 10);
-  }
+  // ...existing code...
 
   // FAQs for Blog Listing page - SEO optimized
   const blogFaqs = [
@@ -110,15 +118,6 @@ export default async function BlogListingPage() {
 
   return (
     <>
-      {/* Canonical tag for paginated pages */}
-      <head>
-        <link
-          rel="canonical"
-          href={`https://www.transformik.com/blog${
-            currentPage > 1 ? `?page=${currentPage}` : ""
-          }`}
-        />
-      </head>
       {/* Schema Markup */}
       <BlogSchema
         isListingPage={true}

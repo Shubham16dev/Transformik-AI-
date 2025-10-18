@@ -1,21 +1,38 @@
 import { supabaseServer } from "@/utils/supabaseServer";
 import { FreeToolsContent } from "./FreeToolsContent";
+
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Free AI Tools | Discover Best Free AI Tools - Transformik AI",
-  description:
-    "Explore our collection of completely free AI tools. Find free tools for writing, coding, design, marketing, and more. No credit card required.",
-  alternates: {
-    canonical: "https://www.transformik.com/free-tools",
-  },
-  openGraph: {
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams?: Promise<{ [key: string]: string | string[] }>;
+}): Promise<Metadata> {
+  const sp = (await searchParams) || {};
+  const pageParam = sp.page;
+  const currentPage = parseInt(
+    Array.isArray(pageParam) ? pageParam[0] : pageParam || "1",
+    10
+  );
+  const canonicalUrl = `https://www.transformik.com/free-tools${
+    currentPage > 1 ? `?page=${currentPage}` : ""
+  }`;
+
+  return {
     title: "Free AI Tools | Discover Best Free AI Tools - Transformik AI",
     description:
       "Explore our collection of completely free AI tools. Find free tools for writing, coding, design, marketing, and more. No credit card required.",
-    url: "https://www.transformik.com/free-tools",
-  },
-};
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: "Free AI Tools | Discover Best Free AI Tools - Transformik AI",
+      description:
+        "Explore our collection of completely free AI tools. Find free tools for writing, coding, design, marketing, and more. No credit card required.",
+      url: canonicalUrl,
+    },
+  };
+}
 
 export const revalidate = 3600; // Revalidate every hour
 

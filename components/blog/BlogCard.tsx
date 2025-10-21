@@ -17,7 +17,7 @@ interface BlogCardProps {
 }
 
 export function BlogCard({ blog }: BlogCardProps) {
-  // const authorName = blog.author || "Harsh Mistry";
+  
 
   return (
     <Card className="rounded-xl border border-gray-200 p-6 w-full flex flex-col h-full hover:shadow-lg transition-shadow duration-300">

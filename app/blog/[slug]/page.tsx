@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { supabaseServer } from "@/utils/supabaseServer";
+import { supabase } from "@/utils/supabase";
 import { Button } from "@/components/ui/button";
 import { FeaturedTools } from "@/components/tools/FeaturedTool";
 import { TopCategories } from "@/components/category/TopCategories";
@@ -9,24 +9,8 @@ import Image from "next/image";
 import parse from "html-react-parser";
 import type { Metadata } from "next";
 
-export const revalidate = 3600; // Revalidate every hour
-
 interface BlogDetailPageProps {
   params: Promise<{ slug: string }>;
-}
-
-// Generate static paths at build time
-export async function generateStaticParams() {
-  const { data: blogs } = await supabaseServer
-    .from("blogs_summary")
-    .select("slug")
-    .limit(500); // Limit to prevent too many builds, adjust as needed
-
-  return (
-    blogs?.map((blog) => ({
-      slug: blog.slug,
-    })) || []
-  );
 }
 
 // Dynamic metadata
@@ -35,7 +19,7 @@ export async function generateMetadata({
 }: BlogDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  const { data: blogSummary } = await supabaseServer
+  const { data: blogSummary } = await supabase
     .from("blogs_summary")
     .select("title, excerpt, featured_image, image, cover_image")
     .eq("slug", slug)
@@ -74,7 +58,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
   const { slug } = await params;
 
   // Fetch blog summary
-  const { data: summary, error: summaryError } = await supabaseServer
+  const { data: summary, error: summaryError } = await supabase
     .from("blogs_summary")
     .select("*")
     .eq("slug", slug)
@@ -83,13 +67,44 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
   if (summaryError || !summary) return notFound();
 
   // Fetch blog details
-  const { data: details, error: detailsError } = await supabaseServer
+  const { data: details, error: detailsError } = await supabase
     .from("blogs_details")
     .select("content")
     .eq("id", summary.id)
     .single();
 
   if (detailsError || !details) return notFound();
+
+  // Fetch featured tools (SSR)
+  const { data: featuredToolsData, error: featuredToolsError } = await supabase
+    .from("tools_summary")
+    .select(
+      "id, tool_name, slug, logo, one_line_description, pricing_model, url, category"
+    )
+    .limit(30);
+  const featuredTools =
+    featuredToolsData && featuredToolsData.length > 0
+      ? featuredToolsData.sort(() => Math.random() - 0.5).slice(0, 5)
+      : [];
+
+  // Fetch related blogs (SSR)
+  const { data: relatedBlogsData, error: relatedBlogsError } = await supabase
+    .from("blogs_summary")
+    .select("id, title, slug, excerpt, featured_image")
+    .neq("id", summary.id)
+    .limit(3);
+  const relatedBlogs =
+    relatedBlogsData && relatedBlogsData.length > 0
+      ? relatedBlogsData.map((blog) => ({
+          id: blog.id,
+          title: blog.title,
+          slug: blog.slug,
+          excerpt:
+            blog.excerpt || "Discover insights about AI tools and technology.",
+          featured_image: blog.featured_image,
+        }))
+      : [];
+
   // safe fallbacks for image/excerpt fields (DB column names may vary)
   const heroImage =
     summary.featured_image || summary.image || summary.cover_image || null;
@@ -137,10 +152,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
               )}
               {/* show created date and author if available */}
               {summary.created_at && (
-                <div
-                  className="mt-4 text-sm text-white/80"
-                  suppressHydrationWarning
-                >
+                <div className="mt-4 text-sm text-white/80">
                   {new Date(summary.created_at).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "long",
@@ -199,7 +211,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
 
           {/* Sidebar */}
           <div className="md:col-span-3 space-y-8">
-            <FeaturedTools limit={5} />
+            <FeaturedTools limit={5} initialTools={featuredTools} />
             <TopCategories limit={6} />
           </div>
         </div>
@@ -213,6 +225,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
                 currentBlogSlug={summary.slug}
                 category={summary.category}
                 limit={3}
+                initialBlogs={relatedBlogs}
               />
             </div>
           </div>

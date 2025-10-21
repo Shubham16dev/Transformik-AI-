@@ -19,7 +19,25 @@ export function Pagination({
 
   if (totalPages <= 1) return null; // no pagination needed
 
-  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+  // Windowed pagination logic: show up to 10 page numbers
+  let startPage = 1;
+  let endPage = totalPages;
+  if (totalPages > 10) {
+    if (currentPage <= 6) {
+      startPage = 1;
+      endPage = 10;
+    } else if (currentPage + 4 >= totalPages) {
+      startPage = totalPages - 9;
+      endPage = totalPages;
+    } else {
+      startPage = currentPage - 5;
+      endPage = currentPage + 4;
+    }
+  }
+  const pageNumbers = Array.from(
+    { length: endPage - startPage + 1 },
+    (_, i) => startPage + i
+  );
 
   return (
     <div className="flex justify-center items-center gap-2 mt-4 flex-wrap">
@@ -41,6 +59,7 @@ export function Pagination({
           {page}
         </Button>
       ))}
+      {endPage < totalPages && <span className="px-2">...</span>}
 
       <Button
         size="sm"

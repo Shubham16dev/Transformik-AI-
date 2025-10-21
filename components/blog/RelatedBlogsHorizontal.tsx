@@ -17,6 +17,7 @@ interface RelatedBlogsHorizontalProps {
   currentBlogSlug: string;
   category?: string;
   limit?: number;
+  initialBlogs?: RelatedBlog[];
 }
 
 export function RelatedBlogsHorizontal({
@@ -24,25 +25,24 @@ export function RelatedBlogsHorizontal({
   currentBlogSlug,
   category,
   limit = 3,
+  initialBlogs,
 }: RelatedBlogsHorizontalProps) {
-  const [relatedBlogs, setRelatedBlogs] = useState<RelatedBlog[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [relatedBlogs, setRelatedBlogs] = useState<RelatedBlog[]>(
+    initialBlogs ?? []
+  );
+  const [loading, setLoading] = useState(initialBlogs ? false : true);
 
   useEffect(() => {
+    if (initialBlogs) return;
     const fetchRelatedBlogs = async () => {
       try {
-        // Fetch related blogs excluding the current one
         const { data: allBlogs, error: allError } = await supabase
           .from("blogs_summary")
           .select("*")
           .neq("id", currentBlogId)
           .limit(limit);
-
         let finalBlogs: RelatedBlog[] = [];
-
-        // Use available blogs
         if (!allError && allBlogs && allBlogs.length > 0) {
-          // Transform the data to ensure consistent structure
           const transformedBlogs: RelatedBlog[] = allBlogs
             .slice(0, limit)
             .map((blog) => ({
@@ -56,14 +56,11 @@ export function RelatedBlogsHorizontal({
             }));
           finalBlogs = transformedBlogs;
         } else {
-          // Fallback: get any blogs from database
           const { data: emergencyBlogs } = await supabase
             .from("blogs_summary")
             .select("*")
             .limit(limit);
-
           if (emergencyBlogs && emergencyBlogs.length > 0) {
-            // Remove current blog if it exists in the results and transform
             const filteredBlogs = emergencyBlogs.filter(
               (blog) => blog.id !== currentBlogId
             );
@@ -81,7 +78,6 @@ export function RelatedBlogsHorizontal({
             finalBlogs = transformedBlogs;
           }
         }
-
         setRelatedBlogs(finalBlogs);
       } catch {
         setRelatedBlogs([]);
@@ -89,9 +85,8 @@ export function RelatedBlogsHorizontal({
         setLoading(false);
       }
     };
-
     fetchRelatedBlogs();
-  }, [currentBlogId, currentBlogSlug, category, limit]);
+  }, [currentBlogId, currentBlogSlug, category, limit, initialBlogs]);
 
   if (loading) {
     return (

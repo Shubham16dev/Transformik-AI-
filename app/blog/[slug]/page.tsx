@@ -76,7 +76,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
   if (detailsError || !details) return notFound();
 
   // Fetch featured tools (SSR)
-  const { data: featuredToolsData, error: featuredToolsError } = await supabase
+  const { data: featuredToolsData } = await supabase
     .from("tools_summary")
     .select(
       "id, tool_name, slug, logo, one_line_description, pricing_model, url, category"
@@ -88,7 +88,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
       : [];
 
   // Fetch related blogs (SSR)
-  const { data: relatedBlogsData, error: relatedBlogsError } = await supabase
+  const { data: relatedBlogsData } = await supabase
     .from("blogs_summary")
     .select("id, title, slug, excerpt, featured_image")
     .neq("id", summary.id)

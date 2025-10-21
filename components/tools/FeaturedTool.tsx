@@ -1,7 +1,3 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { supabase } from "@/utils/supabase";
 import { ToolCard } from "@/components/tools/ToolCard";
 import { getPublicImageUrl } from "@/utils/getPublicImageUrl";
 
@@ -21,42 +17,11 @@ interface Tool {
   category?: string | null;
 }
 
-// Simple shuffle function
-const shuffleArray = <T,>(array: T[]): T[] => {
-  return [...array].sort(() => Math.random() - 0.5);
-};
-
 export function FeaturedTools({ limit = 5, initialTools }: FeaturedToolsProps) {
-  const [tools, setTools] = useState<Tool[]>(initialTools ?? []);
-  const [loading, setLoading] = useState(initialTools ? false : true);
-
-  useEffect(() => {
-    if (initialTools) return;
-    const fetchFeaturedTools = async () => {
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from("tools_summary")
-          .select(
-            "id, tool_name, slug, logo, one_line_description, pricing_model, url, category"
-          )
-          .limit(30);
-        if (error) throw error;
-        const shuffled = shuffleArray(data ?? []);
-        setTools(shuffled.slice(0, limit));
-      } catch (err) {
-        console.error("Error fetching featured tools:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchFeaturedTools();
-  }, [limit, initialTools]);
-
-  if (loading)
-    return <p className="text-gray-500">Loading featured tools...</p>;
-  if (!tools.length)
+  const tools = initialTools ? initialTools.slice(0, limit) : [];
+  if (!tools.length) {
     return <p className="text-gray-500">No featured tools available.</p>;
+  }
 
   return (
     <div>

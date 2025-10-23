@@ -39,9 +39,18 @@ export async function generateMetadata({
   const description = blogSummary.excerpt || blogSummary.title;
   const imagePath =
     blogSummary.featured_image || blogSummary.image || blogSummary.cover_image;
-  const image = imagePath
-    ? getPublicImageUrl("Images", `BlogImages/${imagePath}`)
-    : undefined;
+  
+  let image = undefined;
+  if (imagePath) {
+    // Try different path structures
+    image = getPublicImageUrl("Images", `BlogImages/${imagePath}`);
+    if (!image) {
+      image = getPublicImageUrl("Images", imagePath);
+    }
+    if (!image && imagePath.startsWith('http')) {
+      image = imagePath;
+    }
+  }
 
   return {
     title,
@@ -109,12 +118,27 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
         }))
       : [];
 
-  // safe fallbacks for image/excerpt fields (DB column names may vary)
+    // safe fallbacks for image/excerpt fields (DB column names may vary)
   const heroImagePath =
     summary.featured_image || summary.image || summary.cover_image || null;
-  const heroImage = heroImagePath
-    ? getPublicImageUrl("Images", `BlogImages/${heroImagePath}`)
-    : null;
+  
+  // Try different path structures for images
+  let heroImage = null;
+  if (heroImagePath) {
+    // Check if it's already a full URL
+    if (heroImagePath.startsWith('http')) {
+      heroImage = heroImagePath;
+    } else {
+      // Try with BlogImages folder first
+      heroImage = getPublicImageUrl("Images", `BlogImages/${heroImagePath}`);
+      
+      // If that doesn't work, try direct path
+      if (!heroImage) {
+        heroImage = getPublicImageUrl("Images", heroImagePath);
+      }
+    }
+  }
+  
   const excerpt =
     summary.excerpt || summary.description || summary.summary || null;
 

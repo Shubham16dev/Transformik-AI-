@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { supabase } from "@/utils/supabase";
+import { getPublicImageUrl } from "@/utils/getPublicImageUrl";
 import { Button } from "@/components/ui/button";
 import { FeaturedTools } from "@/components/tools/FeaturedTool";
 import { TopCategories } from "@/components/category/TopCategories";
@@ -36,8 +37,11 @@ export async function generateMetadata({
 
   const title = `${blogSummary.title} | Transformik AI Blog`;
   const description = blogSummary.excerpt || blogSummary.title;
-  const image =
+  const imagePath =
     blogSummary.featured_image || blogSummary.image || blogSummary.cover_image;
+  const image = imagePath
+    ? getPublicImageUrl("Images", `BlogImages/${imagePath}`)
+    : undefined;
 
   return {
     title,
@@ -106,8 +110,11 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
       : [];
 
   // safe fallbacks for image/excerpt fields (DB column names may vary)
-  const heroImage =
+  const heroImagePath =
     summary.featured_image || summary.image || summary.cover_image || null;
+  const heroImage = heroImagePath
+    ? getPublicImageUrl("Images", `BlogImages/${heroImagePath}`)
+    : null;
   const excerpt =
     summary.excerpt || summary.description || summary.summary || null;
 
@@ -172,6 +179,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
                     height={480}
                     sizes="(max-width: 768px) 100vw, 360px"
                     className="object-cover w-full h-full"
+                    unoptimized
                   />
                 </div>
               ) : (

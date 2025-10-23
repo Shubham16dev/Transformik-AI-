@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { getPublicImageUrl } from "@/utils/getPublicImageUrl";
 import { ToolCard } from "@/components/tools/ToolCard";

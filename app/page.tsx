@@ -1,4 +1,4 @@
-import { supabaseServer } from "@/utils/supabaseServer";
+import { supabase } from "@/utils/supabase";
 import { ToolCard } from "@/components/tools/ToolCard";
 import { HomeBlogCard } from "@/components/blog/HomeBlogCard";
 import { SearchBar } from "@/components/layout/SearchBar";
@@ -20,8 +20,6 @@ export const metadata: Metadata = {
     url: "https://www.transformik.com",
   },
 };
-
-export const revalidate = 3600; // Revalidate every hour
 
 // ---------- Types ----------
 type PricingModel = "Free" | "Freemium" | "Paid" | "Free Trial";
@@ -60,7 +58,7 @@ interface Blog {
 
 // ---------- Data Fetchers ----------
 async function getLatestTools(): Promise<Tool[]> {
-  const { data, error } = await supabaseServer
+  const { data, error } = await supabase
     .from("tools_summary")
     .select(
       "id, tool_name, slug, one_line_description, pricing_model, url, logo, category"
@@ -89,7 +87,7 @@ async function getLatestTools(): Promise<Tool[]> {
 
 async function getBlogs(): Promise<Blog[]> {
   // Try blogs_summary table first
-  const { data, error } = await supabaseServer
+  const { data, error } = await supabase
     .from("blogs_summary")
     .select("id, title, slug, excerpt, featured_image")
     .order("created_at", { ascending: false })
@@ -97,7 +95,7 @@ async function getBlogs(): Promise<Blog[]> {
 
   if (error) {
     // Fallback: try 'blogs' table
-    const { data: blogsData, error: blogsError } = await supabaseServer
+    const { data: blogsData, error: blogsError } = await supabase
       .from("blogs")
       .select("id, title, slug, excerpt, featured_image")
       .order("created_at", { ascending: false })

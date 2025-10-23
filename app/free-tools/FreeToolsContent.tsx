@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { getPublicImageUrl } from "@/utils/getPublicImageUrl";
 import { ToolCard } from "@/components/tools/ToolCard";
@@ -104,7 +105,7 @@ export function FreeToolsContent({
       temp.sort((a, b) => b.tool_name.localeCompare(a.tool_name));
 
     setFilteredTools(temp);
-    setCurrentPage(1);
+    // Don't reset currentPage here - let the separate useEffect handle it
   }, [search, selectedCategory, sortMode, tools]);
 
   const paginatedTools = filteredTools.slice(
@@ -124,17 +125,18 @@ export function FreeToolsContent({
     router.push(`?${params.toString()}`, { scroll: false });
   };
 
-  // Reset to page 1 when filters change
+  // Reset to page 1 when filters change (but not on initial mount)
   useEffect(() => {
     if (isInitialMount) {
       setIsInitialMount(false);
       return;
     }
-    if (currentPage !== 1) {
-      handlePageChange(1);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, selectedCategory, sortMode]);
+    setCurrentPage(1);
+    // Update URL to remove page parameter when going back to page 1
+    const params = new URLSearchParams(window.location.search);
+    params.delete("page");
+    router.push(`?${params.toString()}`, { scroll: false });
+  }, [search, selectedCategory, sortMode, isInitialMount, router]);
 
   // Scroll to top when page changes
   useEffect(() => {
@@ -213,29 +215,30 @@ export function FreeToolsContent({
                 : undefined;
 
               return (
-                <ToolCard
-                  key={tool.id}
-                  tool={{
-                    tool_name: tool.tool_name,
-                    slug: tool.slug,
-                    one_line_description: tool.one_line_description,
-                    pricing_model: [
-                      "Free",
-                      "Freemium",
-                      "Paid",
-                      "Free Trial",
-                    ].includes(tool.pricing_model)
-                      ? (tool.pricing_model as
-                          | "Free"
-                          | "Freemium"
-                          | "Paid"
-                          | "Free Trial")
-                      : undefined,
-                    url: tool.url,
-                    logo: logoUrl,
-                    category: tool.category ?? "Other",
-                  }}
-                />
+                <div key={tool.id} className="flex flex-col">
+                  <ToolCard
+                    tool={{
+                      tool_name: tool.tool_name,
+                      slug: tool.slug,
+                      one_line_description: tool.one_line_description,
+                      pricing_model: [
+                        "Free",
+                        "Freemium",
+                        "Paid",
+                        "Free Trial",
+                      ].includes(tool.pricing_model)
+                        ? (tool.pricing_model as
+                            | "Free"
+                            | "Freemium"
+                            | "Paid"
+                            | "Free Trial")
+                        : undefined,
+                      url: tool.url,
+                      logo: logoUrl,
+                      category: tool.category ?? "Other",
+                    }}
+                  />
+                </div>
               );
             })}
           </div>

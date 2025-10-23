@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 
@@ -83,10 +81,10 @@ export const CategoryBadge: React.FC<CategoryBadgeProps> = ({ category }) => {
     <Link href={linkHref}>
       <Badge
         variant="secondary"
-        className={`px-3 py-1 text-sm cursor-pointer ${badgeClass}`}
+        className={`px-2 sm:px-3 py-1 text-xs sm:text-sm cursor-pointer whitespace-nowrap ${badgeClass}`}
       >
-        {category}{" "}
-      </Badge>{" "}
+        {category}
+      </Badge>
     </Link>
   );
 };

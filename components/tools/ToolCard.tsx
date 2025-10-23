@@ -34,14 +34,14 @@ export function ToolCard({ tool }: ToolCardProps) {
   return (
     <Card className="hover:shadow-lg transition-shadow duration-300 rounded-xl border p-4 flex flex-col justify-between w-auto">
       <div className="flex gap-4">
-        {/* Logo */}
+        {/* Logo - Keep on left */}
         <ToolLogo src={tool.logo} alt={`${tool.tool_name} logo`} />
 
         {/* Details */}
-        <div className="flex flex-col justify-between flex-grow">
+        <div className="flex flex-col justify-between flex-grow min-w-0">
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-lg hover:text-blue-600 transition-colors line-clamp-1 flex-grow">
+              <h3 className="font-semibold text-lg hover:text-blue-600 transition-colors line-clamp-1 flex-grow min-w-0">
                 <Link href={`/tools/${tool.slug}`}>{tool.tool_name}</Link>
               </h3>
               {tool.url && (
@@ -61,13 +61,13 @@ export function ToolCard({ tool }: ToolCardProps) {
             </p>
           </div>
 
-          {/* Categories */}
-          <div className="flex gap-2 mt-2 flex-wrap">
+          {/* Categories - Better spacing for mobile */}
+          <div className="flex gap-1 sm:gap-2 mt-2 flex-wrap items-start">
             {displayCategories.map((cat, idx) => (
               <CategoryBadge key={idx} category={cat} />
             ))}
             {remainingCount > 0 && (
-              <span className="inline-block text-xs font-medium px-2 py-1 bg-gray-100 text-gray-800 border border-gray-200 rounded-full">
+              <span className="inline-block text-xs font-medium px-2 py-1 bg-gray-100 text-gray-800 border border-gray-200 rounded-full whitespace-nowrap">
                 +{remainingCount}
               </span>
             )}

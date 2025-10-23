@@ -105,6 +105,15 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
 
   if (detailsError) console.error(detailsError);
 
+  // 3️⃣ Fetch featured tools for sidebar
+  const { data: featuredTools } = await supabaseServer
+    .from("tools_summary")
+    .select(
+      "id, tool_name, slug, one_line_description, pricing_model, url, logo, category"
+    )
+    .neq("id", toolSummary.id) // Exclude current tool
+    .limit(5);
+
   const logoUrl = getPublicImageUrl(
     "Images",
     toolSummary.logo ? `ToolLogos/${toolSummary.logo}` : undefined
@@ -265,7 +274,11 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
                     .split("\n")
                     .filter((step: string) => step.trim())
                     .map((step: string, idx: number) => {
-                      const cleanStep = step.replace(/^\s*[\d\.\•\-]+\s*/, ""); // remove leading numbers, bullets, or dashes
+                      // Enhanced cleaning: remove "Step X:", numbers, bullets, dashes, etc.
+                      const cleanStep = step
+                        .replace(/^\s*step\s*\d+\s*:?\s*/i, "") // Remove "Step 1:", "Step 2:", etc. (case insensitive)
+                        .replace(/^\s*[\d\.\•\-]+\s*/, "") // Remove leading numbers, bullets, or dashes
+                        .trim();
                       return (
                         <div key={idx} className="flex gap-2 items-start">
                           <span className="font-bold text-blue-600">
@@ -375,7 +388,43 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4 text-gray-700 leading-relaxed">
-                  {toolDetails.pricing}
+                  <div className="space-y-3">
+                    {toolDetails.pricing
+                      .split(
+                        /\.\s+(?=[A-Z])|(?:\n|\.)\s*(?=Free Plan:|Development Plan|Production Plan|Basic Plan:|Pro Plan:|Enterprise Plan:|Premium Plan:|Starter Plan:|Business Plan:|Team Plan:|Individual Plan:|Monthly Plan:|Annual Plan:|Trial:|Refund Policy:)/g
+                      )
+                      .filter((section: string) => section.trim())
+                      .map((section: string, idx: number) => {
+                        const trimmedSection = section.trim();
+
+                        // Check if it's a plan/section header
+                        const isPlanHeader =
+                          /^(Free Plan:|Development Plan|Production Plan|Basic Plan:|Pro Plan:|Enterprise Plan:|Premium Plan:|Starter Plan:|Business Plan:|Team Plan:|Individual Plan:|Monthly Plan:|Annual Plan:|Trial:|Refund Policy:)/i.test(
+                            trimmedSection
+                          );
+
+                        if (isPlanHeader) {
+                          return (
+                            <div
+                              key={idx}
+                              className="border-l-4 border-green-500 pl-4 py-2 bg-green-50 rounded-r-lg"
+                            >
+                              <div className="font-semibold text-gray-800">
+                                {trimmedSection}
+                              </div>
+                            </div>
+                          );
+                        } else {
+                          return (
+                            <div key={idx} className="pl-4 py-1">
+                              <div className="text-gray-700">
+                                {trimmedSection}
+                              </div>
+                            </div>
+                          );
+                        }
+                      })}
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -423,7 +472,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
 
         {/* Sidebar */}
         <aside className="md:col-span-3 space-y-8">
-          <FeaturedTools limit={5} />
+          <FeaturedTools limit={5} initialTools={featuredTools || []} />
           <TopCategories limit={6} />
         </aside>
       </div>

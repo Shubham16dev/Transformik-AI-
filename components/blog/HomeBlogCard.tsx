@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -19,12 +20,14 @@ export function HomeBlogCard({ blog }: HomeBlogCardProps) {
   return (
     <Card className="rounded-xl border border-gray-200 p-4 w-full flex flex-col md:flex-row gap-4">
       {/* Blog Thumbnail */}
-      <div className="w-full md:w-1/3 min-w-[120px] flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center aspect-[5/3]">
+      <div className="w-full md:w-1/3 min-w-[120px] flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center aspect-[5/3] relative">
         {blog.featured_image || blog.image ? (
-          <img
+          <Image
             src={blog.featured_image || blog.image || ""}
             alt={blog.title}
-            className="object-cover w-full h-full"
+            fill
+            className="object-cover"
+            unoptimized
           />
         ) : (
           <span className="text-gray-400 text-sm font-medium text-center">

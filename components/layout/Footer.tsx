@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { FaYoutube, FaInstagram, FaLinkedin } from "react-icons/fa6";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { supabase } from "@/utils/supabase";
 
@@ -62,12 +63,13 @@ export function Footer() {
           {" "}
           <div className="flex items-center gap-4">
             {" "}
-            <img
+            <Image
               src="/images/TransformikLogo.png"
               alt="Transformik AI"
               width={230}
               height={230}
               className="object-contain"
+              unoptimized
             />{" "}
           </div>{" "}
           <div className="flex gap-6 text-2xl">

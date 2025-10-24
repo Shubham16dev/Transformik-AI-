@@ -28,6 +28,7 @@ export function BlogCardVertical({ blog }: BlogCardVerticalProps) {
             width={400}
             height={225}
             className="object-cover w-full h-full"
+            unoptimized
           />
         ) : (
           <span className="text-gray-400 text-sm font-medium text-center">

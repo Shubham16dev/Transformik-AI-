@@ -253,6 +253,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
                         height={0}
                         sizes="100vw"
                         className="w-full h-auto object-contain"
+                        unoptimized
                       />
                     </div>
                   ))}

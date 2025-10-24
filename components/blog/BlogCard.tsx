@@ -17,13 +17,11 @@ interface BlogCardProps {
 }
 
 export function BlogCard({ blog }: BlogCardProps) {
-  
-
   return (
     <Card className="rounded-xl border border-gray-200 p-6 w-full flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
       {/* Blog Thumbnail */}
       <div className="w-full rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center aspect-[16/9] mb-4">
-          {blog.featured_image || blog.image ? (
+        {blog.featured_image || blog.image ? (
           <Image
             src={blog.featured_image || blog.image || ""}
             alt={blog.title}

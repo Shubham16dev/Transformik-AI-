@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -31,12 +30,11 @@ export function Navbar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between p-4">
         {/* Logo */}
         <Link href="/" className="flex items-center">
-          <Image
+          <img
             src="/images/TransformikLogo.png"
             alt="Transformik Logo"
             width={160}
             height={40}
-            priority
             className="object-contain"
           />
         </Link>
@@ -88,7 +86,7 @@ export function Navbar() {
                 >
                   <SheetHeader>
                     <SheetTitle className="text-white flex items-center">
-                      <Image
+                      <img
                         src="/images/TransformikLogo.png"
                         alt="Transformik Logo"
                         width={140}

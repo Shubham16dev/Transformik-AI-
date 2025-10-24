@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -22,11 +21,9 @@ export function HomeBlogCard({ blog }: HomeBlogCardProps) {
       {/* Blog Thumbnail */}
       <div className="w-full md:w-1/3 min-w-[120px] flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center aspect-[5/3]">
         {blog.featured_image || blog.image ? (
-          <Image
+          <img
             src={blog.featured_image || blog.image || ""}
             alt={blog.title}
-            width={400}
-            height={250}
             className="object-cover w-full h-full"
           />
         ) : (

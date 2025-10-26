@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from "react";
 import {
   CopyIcon,
   CheckIcon,
@@ -9,25 +9,22 @@ import {
   Instagram,
   Linkedin,
   Film,
-} from 'lucide-react';
+} from "lucide-react";
 // Import the action
-import {
-  generateSocialAssets,
-  type RepurposeResponse,
-} from './action';
+import { generateSocialAssets, type RepurposeResponse } from "./action";
 
 // --- Interfaces (Needed by the client for state) ---
 interface RepurposeResult {
   title: string;
   content: string;
-  platform: 'X' | 'Instagram' | 'LinkedIn' | 'TikTok';
+  platform: "X" | "Instagram" | "LinkedIn" | "TikTok";
 }
 
 const initialResults: RepurposeResponse = {
   twitter: [],
   instagram: [],
-  linkedin: { title: '', content: '', platform: 'LinkedIn' },
-  tiktok: { title: '', content: '', platform: 'TikTok' },
+  linkedin: { title: "", content: "", platform: "LinkedIn" },
+  tiktok: { title: "", content: "", platform: "TikTok" },
 };
 
 // --- (ToolLayout Component) ---
@@ -51,7 +48,7 @@ const ToolLayout: React.FC<{
 
 // --- (InputArea Component) ---
 const InputArea: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaElement>> = (
-  props,
+  props
 ) => (
   <textarea
     className="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-100 placeholder-gray-500 resize-none transition-colors"
@@ -67,8 +64,8 @@ const PrimaryButton: React.FC<
     className={`w-full py-3 px-4 text-lg font-semibold rounded-lg shadow-lg transition-all duration-200 
       ${
         loading || props.disabled
-          ? 'bg-indigo-700/50 cursor-not-allowed'
-          : 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-500/30'
+          ? "bg-indigo-700/50 cursor-not-allowed"
+          : "bg-indigo-600 hover:bg-indigo-500 shadow-indigo-500/30"
       }
     `}
     disabled={loading || props.disabled}
@@ -126,7 +123,7 @@ const OutputCard: React.FC<RepurposeResult> = ({
         </h4>
         <button
           className={`p-1 rounded-md transition-colors ${
-            copied ? 'text-green-400' : 'text-gray-400 hover:text-indigo-400'
+            copied ? "text-green-400" : "text-gray-400 hover:text-indigo-400"
           }`}
           onClick={handleCopy}
           title="Copy to Clipboard"
@@ -165,7 +162,7 @@ const ResultsSection: React.FC<{
 
 // --- (Main Page Component) ---
 export default function Page() {
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<RepurposeResponse>(initialResults);
 
@@ -180,7 +177,7 @@ export default function Page() {
       const response = await generateSocialAssets(content);
       setResults(response);
     } catch (error) {
-      console.error('Failed to generate content:', error);
+      console.error("Failed to generate content:", error);
       // You can add user-facing error state here
     } finally {
       setLoading(false);
@@ -212,7 +209,7 @@ export default function Page() {
             disabled={content.trim().length < 50}
             loading={loading}
           >
-            {loading ? 'AI Working...' : 'Generate 10+ Social Assets'}
+            {loading ? "AI Working..." : "Generate 10+ Social Assets"}
           </PrimaryButton>
         </div>
 
@@ -230,9 +227,11 @@ export default function Page() {
 
           {!hasResults && !loading && (
             <div className="text-center p-12 bg-gray-800 rounded-xl border border-dashed border-gray-600 text-gray-400">
-              <p className="text-lg">Your generated content will appear here.</p>
+              <p className="text-lg">
+                Your generated content will appear here.
+              </p>
               <p className="text-sm mt-2">
-                Paste your long-form text and hit 'Generate' to begin.
+                Paste your long-form text and hit &apos;Generate&apos; to begin.
               </p>
             </div>
           )}

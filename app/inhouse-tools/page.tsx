@@ -1,9 +1,8 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Image from 'next/image';
-import { Sparkles, DollarSign, Share2 } from 'lucide-react';
-import { Card, CardContent } from "@/components/ui/card";
+import React from "react";
+import Image from "next/image";
+import { Sparkles, DollarSign, Share2 } from "lucide-react";
 
 interface Tool {
   id: number;
@@ -20,7 +19,8 @@ const tools: Tool[] = [
     id: 1,
     name: "Content Repurposer",
     description: "Transform blog posts into 5 social media formats.",
-    imageUrl: "https://images.unsplash.com/photo-1628258334105-2a0b3d6efee1?auto=format&fit=crop&q=80&w=687",
+    imageUrl:
+      "https://images.unsplash.com/photo-1628258334105-2a0b3d6efee1?auto=format&fit=crop&q=80&w=687",
     icon: Share2,
     path: "/inhouse-tools/content-repurposer",
   },
@@ -28,7 +28,8 @@ const tools: Tool[] = [
     id: 2,
     name: "OpenAI API Price Calculator",
     description: "Compare API cost of popular LLM models.",
-    imageUrl: "https://images.unsplash.com/photo-1699004642562-63a26850d89f?auto=format&fit=crop&q=80&w=764",
+    imageUrl:
+      "https://images.unsplash.com/photo-1699004642562-63a26850d89f?auto=format&fit=crop&q=80&w=764",
     icon: DollarSign,
     path: "/inhouse-tools/api-price-calculator",
   },
@@ -36,7 +37,8 @@ const tools: Tool[] = [
     id: 3,
     name: "Formalizer",
     description: "Polish and reformat your content with AI assistance.",
-    imageUrl: "https://images.unsplash.com/photo-1628258334105-2a0b3d6efee1?auto=format&fit=crop&q=80&w=687",
+    imageUrl:
+      "https://images.unsplash.com/photo-1628258334105-2a0b3d6efee1?auto=format&fit=crop&q=80&w=687",
     icon: Sparkles,
     path: "/inhouse-tools/formalizer",
   },
@@ -45,7 +47,6 @@ const tools: Tool[] = [
 interface ToolCardProps {
   tool: Tool;
 }
-
 
 const ToolCard: React.FC<ToolCardProps> = ({ tool }) => {
   const Icon = tool.icon;
@@ -61,8 +62,12 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool }) => {
         <div className="flex items-center gap-2">
           <Icon className="w-5 sm:w-6 h-5 sm:h-6 text-indigo-500" />
         </div>
-        <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">{tool.name}</h2>
-        <p className="text-xs sm:text-sm md:text-base text-gray-600">{tool.description}</p>
+        <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
+          {tool.name}
+        </h2>
+        <p className="text-xs sm:text-sm md:text-base text-gray-600">
+          {tool.description}
+        </p>
       </div>
 
       {/* Bottom half: image */}
@@ -77,7 +82,6 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool }) => {
     </div>
   );
 };
-
 
 export default function DashboardPage() {
   return (

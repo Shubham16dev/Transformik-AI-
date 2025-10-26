@@ -145,7 +145,7 @@ export function FreeToolsContent({
   return (
     <>
       {/* Hero Section - Full Width */}
-      <section className="relative bg-[#181828] text-white py-16 w-screen -ml-[50vw] left-1/2 relative overflow-hidden mb-8">
+      <section className="relative bg-[#181828] text-white py-16 w-screen -ml-[50vw] left-1/2  overflow-hidden mb-8">
         {/* Background decorations */}
         <div className="absolute inset-0 bg-gradient-to-r from-gray-800/20 to-purple-600/20" />
         <div className="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full blur-xl" />

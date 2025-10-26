@@ -85,7 +85,7 @@ export function ToolsSchema({
           "Android",
         ],
         softwareVersion: "Latest",
-        datePublished: new Date().toISOString().split("T")[0],
+        datePublished: "2025-01-01", // Replace with a static date
         publisher: {
           "@type": "Organization",
           name: "Transformik AI",
@@ -96,9 +96,7 @@ export function ToolsSchema({
           price: getPriceFromModel(tool.pricing_model),
           priceCurrency: "USD",
           availability: "https://schema.org/InStock",
-          priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0],
+          priceValidUntil: "2026-01-01", // Replace with a static date
           category: tool.pricing_model,
         },
         ...(tool.logo && {
@@ -113,7 +111,7 @@ export function ToolsSchema({
         aggregateRating: {
           "@type": "AggregateRating",
           ratingValue: "4.5",
-          ratingCount: Math.floor(Math.random() * 200) + 50,
+          ratingCount: 100, // Replace with a static number
           bestRating: "5",
           worstRating: "1",
         },

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import {
   Select,
@@ -49,7 +49,6 @@ const sortOptions = [
 export function CategoriesContent({ categories }: CategoriesContentProps) {
   const [sortMode, setSortMode] = useState<string>("alpha-asc");
   const [search, setSearch] = useState<string>("");
-  const router = useRouter();
 
   // Memoize sorted categories
   const sortedCategories = useMemo(() => {
@@ -119,20 +118,22 @@ export function CategoriesContent({ categories }: CategoriesContentProps) {
       {sortedCategories.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {sortedCategories.map((category) => (
-            <Card
+            <Link
               key={category.slug}
-              className="hover:shadow-md transition-shadow border border-gray-200 p-4 rounded-xl cursor-pointer"
-              onClick={() => router.push(`/tools/category/${category.slug}`)}
+              href={`/tools/category/${category.slug}`}
+              className="block"
             >
-              <div className="flex justify-between items-center">
-                <h3 className="text-base font-medium text-gray-800">
-                  {category.name}
-                </h3>
-                <span className="text-purple-600 text-base font-semibold">
-                  {category.count}
-                </span>
-              </div>
-            </Card>
+              <Card className="hover:shadow-md transition-shadow border border-gray-200 p-4 rounded-xl cursor-pointer h-full">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-base font-medium text-gray-800">
+                    {category.name}
+                  </h3>
+                  <span className="text-purple-600 text-base font-semibold">
+                    {category.count}
+                  </span>
+                </div>
+              </Card>
+            </Link>
           ))}
         </div>
       ) : (

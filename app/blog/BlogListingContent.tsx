@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { HomeBlogCard } from "@/components/blog/HomeBlogCard";
 import { FAQSchema } from "@/components/schema/FAQSchema";
+import { PaginationSEO } from "@/components/PaginationSEO";
 import {
   Accordion,
   AccordionItem,
@@ -32,14 +34,20 @@ interface BlogSummary {
 interface BlogListingContentProps {
   initialBlogs: BlogSummary[];
   faqs?: { question: string; answer: string }[];
+  initialPage?: number;
+  showDescription?: boolean;
 }
 
 export function BlogListingContent({
   initialBlogs,
   faqs,
+  initialPage = 1,
+  showDescription = false,
 }: BlogListingContentProps) {
+  const router = useRouter();
   const [sortOption, setSortOption] = useState("date-desc");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [isInitialMount, setIsInitialMount] = useState(true);
 
   const pageSize = 8; // Blogs per page
 
@@ -66,42 +74,75 @@ export function BlogListingContent({
     currentPage * pageSize
   );
 
+  // Update URL when page changes
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    const params = new URLSearchParams(window.location.search);
+    if (page > 1) {
+      params.set("page", page.toString());
+    } else {
+      params.delete("page");
+    }
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
   const handleSortChange = (value: string) => {
     setSortOption(value);
-    setCurrentPage(1);
+    if (currentPage !== 1) {
+      handlePageChange(1);
+    } else {
+      setCurrentPage(1);
+    }
   };
+
+  // Reset to page 1 when sort changes (but not on initial mount)
+  useEffect(() => {
+    if (isInitialMount) {
+      setIsInitialMount(false);
+      return;
+    }
+  }, [isInitialMount]);
+
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentPage]);
 
   return (
     <>
-      {/* Hero Section - Full Width */}
-      <section className="relative bg-[#181828] text-white py-16 w-screen -ml-[50vw] left-1/2 relative overflow-hidden mb-8">
-        {/* Background decorations */}
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-800/20 to-purple-600/20" />
-        <div className="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full blur-xl" />
-        <div className="absolute bottom-10 left-10 w-24 h-24 bg-white/10 rounded-full blur-lg" />
+      {/* SEO Pagination Links */}
+      <PaginationSEO
+        currentPage={currentPage}
+        totalPages={totalPages}
+        baseUrl="https://www.transformik.com/blog"
+      />
 
-        <div className="relative w-full mx-auto text-center space-y-6 px-6">
-          {/* Top badge */}
-          <div className="inline-block bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 text-sm font-medium">
-            AI Insights & Tutorials
+      {/* Hero Section - Only on page 1 */}
+      {currentPage === 1 && (
+        <section className="relative bg-[#181828] text-white py-16 w-screen -ml-[50vw] left-1/2 relative overflow-hidden mb-8">
+          {/* Background decorations */}
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-800/20 to-purple-600/20" />
+          <div className="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full blur-xl" />
+          <div className="absolute bottom-10 left-10 w-24 h-24 bg-white/10 rounded-full blur-lg" />
+
+          <div className="relative w-full mx-auto text-center space-y-6 px-6">
+            {/* Top badge */}
+            <div className="inline-block bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 text-sm font-medium">
+              AI Insights & Tutorials
+            </div>
+
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+              AI Blog
+            </h1>
+
+            <p className="text-lg md:text-xl text-white/80 w-full mx-auto leading-relaxed">
+              {showDescription
+                ? "Discover comprehensive AI insights, expert tutorials, and the latest artificial intelligence trends. Our in-depth blog covers machine learning guides, AI tool reviews, automation strategies, and emerging technologies. From beginner-friendly AI tutorials to advanced implementation guides, we help businesses and professionals harness the power of artificial intelligence to drive innovation and growth."
+                : "Your ultimate resource for AI insights, tutorials, and industry expertise."}
+            </p>
           </div>
-
-          <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-            AI Blog
-          </h1>
-
-          <p className="text-lg md:text-xl text-white/80 w-full mx-auto leading-relaxed">
-            Welcome to the Transformik.ai blog, your trusted source for AI
-            insights, tutorials, and industry news. We cover everything from
-            practical AI tool guides and in-depth reviews to emerging trends in
-            artificial intelligence. Whether you&apos;re a beginner exploring AI
-            for the first time or an experienced professional staying ahead of
-            the curve, our expertly crafted articles provide valuable knowledge
-            to help you leverage AI technology effectively in your projects and
-            workflows.
-          </p>
-        </div>
-      </section>
+        </section>
+      )}
 
       <div className="space-y-6">
         {/* Sort Select */}
@@ -134,12 +175,12 @@ export function BlogListingContent({
             totalItems={sortedBlogs.length}
             pageSize={pageSize}
             currentPage={currentPage}
-            onPageChange={setCurrentPage}
+            onPageChange={handlePageChange}
           />
         )}
 
-        {/* FAQs Section */}
-        {faqs && faqs.length > 0 && (
+        {/* FAQs Section - Only on page 1 */}
+        {currentPage === 1 && faqs && faqs.length > 0 && (
           <section className="mt-12">
             <h2 className="text-2xl font-semibold mb-6">
               Frequently Asked Questions

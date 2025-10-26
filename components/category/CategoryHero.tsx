@@ -38,12 +38,11 @@ export function CategoryHero() {
           transition={{ duration: 0.7 }}
           className="text-lg md:text-xl text-white/80 w-full mx-auto leading-relaxed"
         >
-          Discover our comprehensive collection of AI tools categorized by use
-          case. From machine learning and natural language processing to
-          computer vision and automation, explore cutting-edge artificial
-          intelligence solutions designed to enhance productivity, streamline
-          workflows, and drive innovation across industries including
-          healthcare, finance, marketing, and technology.
+          Browse AI tools organized by category and functionality. Find machine 
+          learning platforms, natural language processing tools, computer vision 
+          applications, and automation software. Categories include business 
+          automation, data analysis, content creation, image processing, text 
+          analysis, and workflow optimization tools for various industries.
         </motion.p>
       </div>
     </section>

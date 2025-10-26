@@ -9,6 +9,7 @@ import { FilterCombobox } from "@/components/ui/FilterCombobox";
 import { getPublicImageUrl } from "@/utils/getPublicImageUrl";
 import { ToolsSchema } from "@/components/schema/ToolsSchema";
 import { FAQSchema } from "@/components/schema/FAQSchema";
+import { PaginationSEO } from "@/components/PaginationSEO";
 import {
   Accordion,
   AccordionItem,
@@ -153,8 +154,17 @@ export function ToolsContent({
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentPage]);
 
+  const totalPages = Math.ceil(filteredTools.length / pageSize);
+
   return (
     <>
+      {/* SEO Pagination Links */}
+      <PaginationSEO
+        currentPage={currentPage}
+        totalPages={totalPages}
+        baseUrl="https://www.transformik.com/tools"
+      />
+
       {/* Schema Markup */}
       <ToolsSchema
         tools={paginatedTools}
@@ -164,33 +174,33 @@ export function ToolsContent({
         totalTools={filteredTools.length}
       />
 
-      {/* Hero Section - Full Width */}
-      <section className="relative bg-[#181828] text-white py-16 w-screen -ml-[50vw] left-1/2 relative overflow-hidden">
-        {/* Background decorations */}
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-800/20 to-purple-600/20" />
-        <div className="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full blur-xl" />
-        <div className="absolute bottom-10 left-10 w-24 h-24 bg-white/10 rounded-full blur-lg" />
+      {/* Hero Section - Only on page 1 */}
+      {currentPage === 1 && (
+        <section className="relative bg-[#181828] text-white py-16 w-screen -ml-[50vw] left-1/2 relative overflow-hidden">
+          {/* Background decorations */}
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-800/20 to-purple-600/20" />
+          <div className="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full blur-xl" />
+          <div className="absolute bottom-10 left-10 w-24 h-24 bg-white/10 rounded-full blur-lg" />
 
-        <div className="relative w-full mx-auto text-center space-y-6 px-6">
-          {/* Top badge */}
-          {showDescription && (
+          <div className="relative w-full mx-auto text-center space-y-6 px-6">
+            {/* Top badge */}
             <div className="inline-block bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 text-sm font-medium">
               Discover AI Tools
             </div>
-          )}
 
-          <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-            {categoryMeta?.name || "All AI Tools"}
-          </h1>
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+              {categoryMeta?.name || "All AI Tools"}
+            </h1>
 
-          <p className="text-lg md:text-xl text-white/80 w-full mx-auto leading-relaxed">
-            {showDescription
-              ? "Welcome to Transformik.ai's comprehensive directory of AI tools. Our curated collection features cutting-edge artificial intelligence solutions across multiple categories, helping you discover the perfect AI tools for your projects. Whether you're looking for free AI tools, premium solutions, or specialized tools for specific use cases, our platform makes it easy to compare, filter, and find the best AI technology for your needs."
-              : categoryMeta?.description ||
-                "Explore our collection of AI tools."}
-          </p>
-        </div>
-      </section>
+            <p className="text-lg md:text-xl text-white/80 w-full mx-auto leading-relaxed">
+                {showDescription
+                  ? "Discover powerful AI tools to enhance productivity and innovation. Browse our comprehensive, curated collection of cutting-edge artificial intelligence solutions designed to streamline workflows, boost creativity, and transform how you work. From automation and data analysis to content generation and decision-making, find the perfect AI tools to revolutionize your business processes and unlock new possibilities."
+                  : categoryMeta?.description ||
+                    "Browse our extensive curated collection of AI tools and solutions. Explore hundreds of carefully selected artificial intelligence platforms, applications, and services that can transform your workflow, enhance productivity, and drive innovation across various industries and use cases."}
+            </p>
+          </div>
+        </section>
+      )}
 
       <div className="space-y-6 mt-8">
         {/* Filters */}
@@ -268,36 +278,37 @@ export function ToolsContent({
           onPageChange={handlePageChange}
         />
 
-        {/* FAQs section */}
-        {((faqs && faqs.length > 0) ||
-          (categoryMeta?.faqs && categoryMeta.faqs.length > 0)) && (
-          <section className="mt-12">
-            <h2 className="text-2xl font-semibold mb-6">
-              Frequently Asked Questions
-            </h2>
-            <Accordion type="single" collapsible className="space-y-3">
-              {(faqs || categoryMeta?.faqs || []).map((faq, idx) => (
-                <AccordionItem
-                  key={idx}
-                  value={`faq-${idx}`}
-                  className="border rounded-lg px-4"
-                >
-                  <AccordionTrigger className="text-left font-medium hover:no-underline py-4">
-                    {faq.question}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-gray-600 pb-4">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+        {/* FAQs section - Only on page 1 */}
+        {currentPage === 1 &&
+          ((faqs && faqs.length > 0) ||
+            (categoryMeta?.faqs && categoryMeta.faqs.length > 0)) && (
+            <section className="mt-12">
+              <h2 className="text-2xl font-semibold mb-6">
+                Frequently Asked Questions
+              </h2>
+              <Accordion type="single" collapsible className="space-y-3">
+                {(faqs || categoryMeta?.faqs || []).map((faq, idx) => (
+                  <AccordionItem
+                    key={idx}
+                    value={`faq-${idx}`}
+                    className="border rounded-lg px-4"
+                  >
+                    <AccordionTrigger className="text-left font-medium hover:no-underline py-4">
+                      {faq.question}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-gray-600 pb-4">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
 
-            {/* FAQ Schema for SEO */}
-            {(faqs || categoryMeta?.faqs) && (
-              <FAQSchema faqs={faqs || categoryMeta?.faqs || []} />
-            )}
-          </section>
-        )}
+              {/* FAQ Schema for SEO */}
+              {(faqs || categoryMeta?.faqs) && (
+                <FAQSchema faqs={faqs || categoryMeta?.faqs || []} />
+              )}
+            </section>
+          )}
       </div>
     </>
   );

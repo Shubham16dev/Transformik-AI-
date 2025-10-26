@@ -41,33 +41,54 @@ export function Pagination({
 
   return (
     <div className="flex justify-center items-center gap-2 mt-4 flex-wrap">
-      <Button
-        size="sm"
-        onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
-        disabled={currentPage === 1}
+      <a
+        href={`?page=${Math.max(currentPage - 1, 1)}`}
+        className={`px-4 py-2 border rounded ${
+          currentPage === 1
+            ? "cursor-not-allowed opacity-50 bg-gray-400 text-white"
+            : "bg-black text-white hover:bg-gray-700"
+        }`}
+        onClick={(e) => {
+          e.preventDefault();
+          onPageChange(Math.max(currentPage - 1, 1));
+        }}
       >
         Previous
-      </Button>
+      </a>
 
       {pageNumbers.map((page) => (
-        <Button
+        <a
           key={page}
-          size="sm"
-          variant={page === currentPage ? "default" : "outline"}
-          onClick={() => onPageChange(page)}
+          href={`?page=${page}`}
+          className={`px-4 py-2 border rounded ${
+            page === currentPage
+              ? "bg-black text-white"
+              : "bg-white text-black hover:bg-gray-200"
+          }`}
+          onClick={(e) => {
+            e.preventDefault();
+            onPageChange(page);
+          }}
         >
           {page}
-        </Button>
+        </a>
       ))}
-      {endPage < totalPages && <span className="px-2">...</span>}
+      {endPage < totalPages && <span className="px-2 text-black">...</span>}
 
-      <Button
-        size="sm"
-        onClick={() => onPageChange(Math.min(currentPage + 1, totalPages))}
-        disabled={currentPage === totalPages}
+      <a
+        href={`?page=${Math.min(currentPage + 1, totalPages)}`}
+        className={`px-4 py-2 border rounded ${
+          currentPage === totalPages
+            ? "cursor-not-allowed opacity-50 bg-gray-400 text-white"
+            : "bg-black text-white hover:bg-gray-700"
+        }`}
+        onClick={(e) => {
+          e.preventDefault();
+          onPageChange(Math.min(currentPage + 1, totalPages));
+        }}
       >
         Next
-      </Button>
+      </a>
     </div>
   );
 }

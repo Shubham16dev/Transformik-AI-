@@ -1,5 +1,6 @@
 import { ToolCard } from "@/components/tools/ToolCard";
 import { getPublicImageUrl } from "@/utils/getPublicImageUrl";
+import { supabaseServer } from "@/utils/supabaseServer";
 
 interface FeaturedToolsProps {
   limit?: number;
@@ -17,9 +18,16 @@ interface Tool {
   category?: string | null;
 }
 
-export function FeaturedTools({ limit = 5, initialTools }: FeaturedToolsProps) {
-  const tools = initialTools ? initialTools.slice(0, limit) : [];
-  if (!tools.length) {
+export async function FeaturedTools({ limit = 5 }: FeaturedToolsProps) {
+  const { data: tools, error } = await supabaseServer
+    .from("tools_summary")
+    .select(
+      "id, tool_name, slug, one_line_description, pricing_model, url, logo, category"
+    )
+    .order("tool_name", { ascending: true })
+    .limit(limit);
+
+  if (error || !tools?.length) {
     return <p className="text-gray-500">No featured tools available.</p>;
   }
 

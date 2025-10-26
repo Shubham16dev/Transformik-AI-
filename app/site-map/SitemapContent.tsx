@@ -8,12 +8,19 @@ interface BlogSummary {
   slug: string;
   created_at: string;
 }
+interface ToolSummary {
+  id: string;
+  tool_name: string;
+  slug: string;
+}
 
 interface SitemapContentProps {
   blogs: BlogSummary[];
+  tools: ToolSummary[];
 }
 
-export function SitemapContent({ blogs }: SitemapContentProps) {
+export function SitemapContent({ blogs, tools }: SitemapContentProps) {
+  
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <h1 className="text-4xl font-bold mb-8 text-center">Site Map</h1>
@@ -69,6 +76,36 @@ export function SitemapContent({ blogs }: SitemapContentProps) {
               </Link>
             </li>
           </ul>
+        </div>
+
+        {/* Tools */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-2xl font-semibold mb-4 text-purple-700">
+            AI Tools
+          </h2>
+          <ul className="space-y-2 max-h-96 overflow-y-auto">
+            {tools.map((tool) => (
+              <li key={tool.id}>
+                <Link
+                  href={`/tools/${tool.slug}`}
+                  className="text-blue-600 hover:text-purple-600 transition-colors text-sm line-clamp-2"
+                  title={tool.tool_name}
+                >
+                  {tool.tool_name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          {tools.length > 10 && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <Link
+                href="/tools"
+                className="text-purple-600 hover:text-purple-800 font-medium"
+              >
+                View All Tools →
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Blog Posts */}

@@ -19,17 +19,26 @@ export async function generateMetadata({
     currentPage > 1 ? `?page=${currentPage}` : ""
   }`;
 
+  const baseTitle = "All AI Tools | Browse 10,000+ AI Tools - Transformik AI";
+  const baseDescription =
+    "Browse and discover all AI tools in our comprehensive directory. Find AI tools for writing, coding, marketing, design, and more. Updated daily.";
+
+  const title =
+    currentPage > 1 ? `${baseTitle} - Page ${currentPage}` : baseTitle;
+  const description =
+    currentPage > 1
+      ? `Continue exploring AI tools for writing, coding, marketing, design, and more.`
+      : baseDescription;
+
   return {
-    title: "All AI Tools | Browse 10,000+ AI Tools - Transformik AI",
-    description:
-      "Browse and discover all AI tools in our comprehensive directory. Find AI tools for writing, coding, marketing, design, and more. Updated daily.",
+    title,
+    description,
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: "All AI Tools | Browse 10,000+ AI Tools - Transformik AI",
-      description:
-        "Browse and discover all AI tools in our comprehensive directory. Find AI tools for writing, coding, marketing, design, and more. Updated daily.",
+      title,
+      description,
       url: canonicalUrl,
     },
   };
@@ -51,44 +60,44 @@ interface Tool {
 // SEO-optimized FAQs for All AI Tools page
 const allToolsFaqs = [
   {
-    question: "What types of AI tools can I find on Transformik AI?",
+    question: "What makes AI tools essential for modern businesses?",
     answer:
-      "Transformik AI features over 10,000 AI tools across various categories including content writing, image generation, coding assistants, video editing, marketing automation, data analysis, chatbots, transcription, SEO tools, and more. We cover both free and premium tools to suit different needs and budgets.",
+      "AI tools have become crucial for businesses to stay competitive by automating repetitive tasks, enhancing decision-making with data insights, improving customer experiences, and scaling operations efficiently. They help reduce operational costs while increasing productivity across departments like marketing, sales, customer service, and content creation.",
   },
   {
-    question: "How do I choose the right AI tool for my needs?",
+    question: "How do I get started with AI tools if I'm a complete beginner?",
     answer:
-      "Start by using our category filters to narrow down tools by use case. Then, use the search function to find specific features you need. Each tool listing includes pricing information, key features, and user reviews to help you make an informed decision. You can also filter by pricing model (Free, Freemium, Premium) to match your budget.",
+      "Begin with user-friendly tools that have intuitive interfaces and clear tutorials. Start with simple tasks like content generation or image editing before moving to complex automation. Take advantage of free trials, watch tutorial videos, and join community forums. Focus on learning one tool thoroughly before exploring others.",
   },
   {
-    question: "Are all the AI tools listed on Transformik free to use?",
+    question: "What are the most popular categories of AI tools?",
     answer:
-      "No, we feature a mix of free, freemium, and premium AI tools. Use the pricing filter to show only free tools, or visit our dedicated Free Tools page. Many premium tools offer free trials or free tiers with limited features, allowing you to test them before committing.",
+      "The most sought-after categories include generative AI for content and images, chatbots and virtual assistants, data analytics and visualization, marketing automation, code generation, language translation, voice synthesis, video editing, and workflow automation tools. Each category serves different business functions and user needs.",
   },
   {
-    question: "How often is the AI tools directory updated?",
+    question: "How can AI tools improve my team's productivity?",
     answer:
-      "Our directory is updated daily with new AI tools and features. We continuously monitor the AI landscape to ensure you have access to the latest and most innovative tools. Tool information is automatically revalidated every hour to keep pricing and feature details current.",
+      "AI tools boost productivity by automating routine tasks, providing intelligent suggestions, streamlining workflows, and reducing time spent on manual processes. They enable teams to focus on strategic work while handling data processing, content creation, customer interactions, and project management more efficiently.",
   },
   {
-    question: "Can I suggest an AI tool to be added to the directory?",
+    question: "What security considerations should I have when using AI tools?",
     answer:
-      "Yes! We welcome tool submissions from developers and users. Visit our Contact page to suggest new AI tools. We review all submissions and add tools that meet our quality standards and provide value to our users.",
+      "Always review data privacy policies, ensure tools comply with relevant regulations (GDPR, CCPA), use tools with proper encryption and security certifications. Avoid sharing sensitive company data with untested tools, implement access controls, and regularly audit tool permissions and data handling practices.",
   },
   {
-    question: "How do I filter AI tools by category or pricing?",
+    question: "How do I measure the ROI of implementing AI tools?",
     answer:
-      "Use the filter options above the tools grid. You can filter by category to see tools for specific use cases (like 'AI Writing' or 'AI Image Generation'), by pricing model (Free, Freemium, Premium), and use the search bar to find tools by name or keyword.",
+      "Track metrics like time saved, increased output quality, reduced error rates, cost savings from automation, and improved customer satisfaction. Compare productivity before and after implementation, monitor tool usage analytics, and calculate the value generated versus subscription or implementation costs.",
   },
   {
-    question: "Do you provide reviews or ratings for AI tools?",
+    question: "Can AI tools replace human workers entirely?",
     answer:
-      "Yes, each tool page includes detailed information about features, pros and cons, use cases, and how to use the tool. We also publish in-depth blog posts reviewing popular AI tools and comparing similar options to help you make the best choice.",
+      "AI tools are designed to augment human capabilities rather than replace workers entirely. They excel at automating repetitive tasks and providing intelligent assistance, but human creativity, strategic thinking, emotional intelligence, and complex problem-solving remain irreplaceable. The goal is human-AI collaboration for enhanced productivity.",
   },
   {
-    question: "Can I use multiple AI tools together?",
+    question: "What trends should I watch in the AI tools landscape?",
     answer:
-      "Absolutely! Many users combine different AI tools to create powerful workflows. For example, using an AI writing tool with an SEO analyzer and image generator. Check our blog for workflow guides and tool integration tips.",
+      "Key trends include multimodal AI capabilities, improved integration ecosystems, industry-specific specialized tools, enhanced privacy and security features, no-code/low-code AI solutions, and more affordable pricing models. Stay updated on emerging technologies and how they might benefit your specific use cases.",
   },
 ];
 
@@ -135,7 +144,7 @@ export default async function ToolsPage({
       tools={tools}
       categories={categories}
       faqs={allToolsFaqs}
-      showDescription={true}
+      showDescription={initialPage === 1}
       initialPage={initialPage}
     />
   );

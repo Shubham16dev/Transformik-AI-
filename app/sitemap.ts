@@ -107,23 +107,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Fetch dynamic tool pages (if you have tools in database)
   // You can uncomment and modify this if you have tools stored in Supabase
-  /*
-  const { data: tools } = await supabase
-    .from('tools') // Replace with your actual tools table name
-    .select('slug, updated_at')
-    .order('updated_at', { ascending: false })
 
-  const toolPages = tools?.map((tool) => ({
-    url: `${baseUrl}/tools/${tool.slug}`,
-    lastModified: new Date(tool.updated_at),
-  })) || []
-  */
+  const { data: tools } = await supabase
+    .from("tools_summary")
+    .select("id, tool_name, slug, created_at")
+    .order("tool_name", { ascending: true });
+
+  const toolPages =
+    tools?.map((tool) => ({
+      url: `${baseUrl}/tools/${tool.slug}`,
+      lastModified: new Date(tool.created_at),
+    })) || [];
 
   // Combine all pages
   return [
     ...staticPages,
     ...categoryPages,
     ...blogPages,
-    // ...toolPages, // Uncomment when you have tools
+    ...toolPages, // Uncomment when you have tools
   ];
 }

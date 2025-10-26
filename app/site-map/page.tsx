@@ -20,6 +20,12 @@ interface BlogSummary {
   created_at: string;
 }
 
+interface ToolSummary {
+  id: string;
+  tool_name: string;
+  slug: string;
+}
+
 async function getBlogs(): Promise<BlogSummary[]> {
   try {
     const { data, error } = await supabaseServer
@@ -39,8 +45,32 @@ async function getBlogs(): Promise<BlogSummary[]> {
   }
 }
 
+async function getTools(): Promise<ToolSummary[]> {
+  try {
+    const { data, error } = await supabaseServer
+      .from("tools_summary")
+      .select("id, tool_name, slug")
+      .order("tool_name", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching tools:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (err) {
+    console.error("Error fetching tools:", err);
+    return [];
+  }
+}
+
 export default async function SitemapPage() {
   const blogs = await getBlogs();
+  const tools = await getTools();
 
-  return <SitemapContent blogs={blogs} />;
+  // Log the lengths of blogs and tools
+  console.log("Blogs fetched for sitemap.xml:", blogs.length);
+  console.log("Tools fetched for sitemap.xml:", tools.length);
+
+  return <SitemapContent blogs={blogs} tools={tools} />;
 }

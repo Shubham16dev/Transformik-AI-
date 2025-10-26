@@ -18,17 +18,28 @@ export async function generateMetadata({
     currentPage > 1 ? `?page=${currentPage}` : ""
   }`;
 
+  const baseTitle =
+    "Free AI Tools | Discover Best Free AI Tools - Transformik AI";
+  const baseDescription =
+    "Explore our collection of completely free AI tools. Find free tools for writing, coding, design, marketing, and more. No credit card required.";
+
+  const title = currentPage > 1 
+    ? `${baseTitle} | Page ${currentPage}` 
+    : baseTitle;
+
+  const description = currentPage > 1
+    ? `Browse page ${currentPage} of ${baseTitle.toLowerCase()}. Continue exploring our comprehensive collection of free AI tools and resources.`
+    : baseDescription;
+
   return {
-    title: "Free AI Tools | Discover Best Free AI Tools - Transformik AI",
-    description:
-      "Explore our collection of completely free AI tools. Find free tools for writing, coding, design, marketing, and more. No credit card required.",
+    title,
+    description,
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: "Free AI Tools | Discover Best Free AI Tools - Transformik AI",
-      description:
-        "Explore our collection of completely free AI tools. Find free tools for writing, coding, design, marketing, and more. No credit card required.",
+      title,
+      description,
       url: canonicalUrl,
     },
   };
@@ -114,42 +125,42 @@ export default async function FreeToolsPage({
     {
       question: "What are completely free AI tools?",
       answer:
-        "Completely free AI tools are artificial intelligence applications that require no payment, no credit card, and have no hidden charges. These tools offer core AI functionality at no cost, making advanced AI technology accessible to everyone from students to professionals.",
+        "Completely free AI tools are artificial intelligence applications that provide functionality without requiring payment, subscriptions, or credit card information. These tools leverage AI technologies like machine learning, natural language processing, and computer vision to help users accomplish various tasks across different domains.",
     },
     {
-      question: "Are free AI tools good quality?",
+      question: "How do free AI tools maintain quality without charging users?",
       answer:
-        "Yes, many free AI tools offer excellent quality and functionality. While some have limitations compared to paid versions, numerous free AI tools are developed by reputable companies and provide professional-grade features that are perfect for individual users, small projects, and learning purposes.",
+        "Free AI tools maintain quality through various business models including open-source development, freemium offerings where basic features remain free, research project initiatives, and community-driven development. Many are supported by larger organizations or funded through grants and partnerships.",
     },
     {
-      question: "What types of free AI tools are available?",
+      question: "What categories of free AI tools exist?",
       answer:
-        "Free AI tools span multiple categories including AI writing assistants, code generators, image creators, chatbots, content generators, data analysis tools, design assistants, marketing automation, SEO tools, and educational AI platforms. Each category offers specialized functionality for different use cases.",
+        "Free AI tools span numerous categories: text and content generation, code development and debugging, image creation and editing, data analysis and visualization, language translation, voice synthesis, chatbots and conversational AI, productivity automation, and educational learning assistants. Each category addresses specific user needs and workflows.",
     },
     {
-      question: "Do free AI tools have usage limits?",
+      question: "What limitations should I expect with free AI tools?",
       answer:
-        "While completely free AI tools don't require payment, some may have usage limits such as daily request quotas, file size restrictions, or feature limitations. However, these tools provide substantial value and functionality within their free tier, making them practical for regular use.",
+        "Free AI tools may have constraints such as daily usage quotas, processing time limits, file size restrictions, watermarks on outputs, limited customization options, or basic support. These limitations help manage server costs while still providing valuable functionality for most users' needs.",
     },
     {
-      question: "Can I use free AI tools for commercial projects?",
+      question: "Can free AI tools be used for professional and commercial work?",
       answer:
-        "Most free AI tools allow commercial use, but it's important to check each tool's terms of service. Many free AI platforms permit commercial applications with proper attribution or within certain usage limits. Always review the specific licensing terms before using any free AI tool for business purposes.",
+        "Usage rights vary by tool and license. Many free AI tools permit commercial use under specific conditions, while others may restrict commercial applications or require attribution. Always review the terms of service and licensing agreements to understand permitted uses and any requirements.",
     },
     {
-      question: "How do I choose the best free AI tool for my needs?",
+      question: "How should I evaluate and select free AI tools?",
       answer:
-        "To choose the best free AI tool, first identify your specific needs (writing, coding, design, etc.), then compare tools based on features, user reviews, ease of use, and output quality. Try multiple tools to find which one best fits your workflow and delivers results that meet your requirements.",
+        "Evaluate free AI tools based on your specific requirements: functionality alignment, output quality, ease of use, reliability, privacy policies, community support, and documentation quality. Test multiple options with your actual use cases to determine which tools best meet your needs and workflow preferences.",
     },
     {
-      question: "Are there free AI tools for developers and programmers?",
+      question: "Are there free AI development tools for programmers?",
       answer:
-        "Yes, there are numerous free AI tools for developers including code completion assistants, bug detectors, code generators, API testing tools, and documentation generators. These tools help programmers write better code faster and are completely free to use for development projects.",
+        "Yes, numerous free AI-powered development tools exist including code completion engines, automated testing frameworks, code review assistants, documentation generators, bug detection systems, and API development aids. These tools integrate into existing development environments to enhance productivity and code quality.",
     },
     {
-      question: "What's the catch with free AI tools?",
+      question: "What should I consider regarding data privacy with free AI tools?",
       answer:
-        "There's typically no catch with genuinely free AI tools. Companies offer free tools to build user base, showcase technology, or as marketing for premium versions. Free tools provide real value and functionality. Just be aware of data privacy policies and understand what limitations exist compared to paid alternatives.",
+        "When using free AI tools, review their privacy policies to understand data handling practices, storage duration, sharing policies, and security measures. Consider the sensitivity of your data, whether information is stored or processed locally versus in the cloud, and what rights you have over your data.",
     },
   ];
 
@@ -163,6 +174,7 @@ export default async function FreeToolsPage({
       categories={categories}
       faqs={freeToolsFaqs}
       initialPage={initialPage}
+      showDescription={initialPage === 1}
     />
   );
 }

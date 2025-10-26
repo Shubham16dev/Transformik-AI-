@@ -14,7 +14,13 @@ export const metadata: Metadata = {
   title: "Transformik AI - Discover 10,000+ AI Tools | AI Tools Hub",
   description:
     "Discover 10,000+ AI tools with blogs and reviews. Find the best AI tools for your needs across all categories.",
-  icons: [{ url: "/images/Logo_favicon.svg", type: "image/svg+xml" }],
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.ico",
+  },
   metadataBase: new URL("https://www.transformik.com"),
   alternates: {
     canonical: "https://www.transformik.com",
@@ -44,6 +50,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <OrganizationSchema />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="shortcut icon" href="/favicon.ico" />
       </head>
       <body className="min-h-screen flex flex-col bg-gray-50 text-gray-900">
         {/* Make sure these are client components if they have dynamic content */}

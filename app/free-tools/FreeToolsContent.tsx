@@ -7,6 +7,7 @@ import { ToolCard } from "@/components/tools/ToolCard";
 import { FilterCombobox } from "@/components/ui/FilterCombobox";
 import { Pagination } from "@/components/Pagination";
 import { FAQSchema } from "@/components/schema/FAQSchema";
+import { PaginationSEO } from "@/components/PaginationSEO";
 import {
   Accordion,
   AccordionItem,
@@ -36,6 +37,7 @@ interface FreeToolsContentProps {
   categories: CategoryOption[];
   faqs?: { question: string; answer: string }[];
   initialPage?: number;
+  showDescription?: boolean;
 }
 
 const ITEMS_PER_PAGE = 9;
@@ -57,6 +59,7 @@ export function FreeToolsContent({
   categories,
   faqs,
   initialPage = 1,
+  showDescription = false,
 }: FreeToolsContentProps) {
   const router = useRouter();
 
@@ -112,6 +115,8 @@ export function FreeToolsContent({
     currentPage * ITEMS_PER_PAGE
   );
 
+  const totalPages = Math.ceil(filteredTools.length / ITEMS_PER_PAGE);
+
   // Update URL when page changes
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -151,27 +156,24 @@ export function FreeToolsContent({
         <div className="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full blur-xl" />
         <div className="absolute bottom-10 left-10 w-24 h-24 bg-white/10 rounded-full blur-lg" />
 
-        <div className="relative w-full mx-auto text-center space-y-6 px-6">
-          {/* Top badge */}
-          <div className="inline-block bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 text-sm font-medium">
-            100% Free AI Tools
+          <div className="relative w-full mx-auto text-center space-y-6 px-6">
+            {/* Top badge */}
+            <div className="inline-block bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 text-sm font-medium">
+              100% Free AI Tools
+            </div>
+
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+              Free AI Tools
+            </h1>
+
+            <p className="text-lg md:text-xl text-white/80 w-full mx-auto leading-relaxed">
+              {showDescription
+                ? "Access completely free AI tools without any payment, subscription, or credit card requirements. This comprehensive directory includes AI-powered solutions for content creation, code generation, image editing, data analysis, marketing automation, and productivity enhancement. Every tool listed offers genuine free functionality - no trials or freemium limitations. Perfect for developers, marketers, students, and businesses seeking cost-effective AI solutions to streamline workflows and boost productivity."
+                : "Access 100+ free AI tools for content creation, coding, design, marketing, and productivity - no payment required."}
+            </p>
           </div>
-
-          <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-            Free AI Tools
-          </h1>
-
-          <p className="text-lg md:text-xl text-white/80 w-full mx-auto leading-relaxed">
-            Discover a curated collection of completely free AI tools that
-            require no payment or credit card. Our directory features the best
-            free AI solutions for writing, coding, design, marketing, data
-            analysis, and more. Each tool has been carefully selected to provide
-            genuine value without hidden costs, making advanced AI technology
-            accessible to everyone from students and hobbyists to professionals
-            and businesses looking to explore AI capabilities at zero cost.
-          </p>
-        </div>
-      </section>
+        </section>
+      )}
 
       <div className="space-y-8">
         {/* Filters */}
@@ -251,8 +253,8 @@ export function FreeToolsContent({
           onPageChange={handlePageChange}
         />
 
-        {/* FAQs Section */}
-        {faqs && faqs.length > 0 && (
+        {/* FAQs Section - Only on page 1 */}
+        {currentPage === 1 && faqs && faqs.length > 0 && (
           <section className="mt-12">
             <h2 className="text-2xl font-semibold mb-6">
               Frequently Asked Questions

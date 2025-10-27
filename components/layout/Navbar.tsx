@@ -20,6 +20,7 @@ const NAV_LINKS = [
   { href: "/tools", label: "All AI Tools" },
   { href: "/tools/category", label: "AI Tools Categories" },
   { href: "/free-tools", label: "Free AI Tools" },
+  { href: "/inhouse-tools", label: "Our AI Tools" },
   { href: "/blog", label: "Blogs" },
 ];
 

@@ -28,7 +28,7 @@ export function CategoryHero() {
           transition={{ duration: 0.6 }}
           className="text-4xl md:text-5xl font-bold leading-tight"
         >
-          AI Categories
+          AI Tools Categories
         </motion.h1>
 
         {/* Subtitle */}

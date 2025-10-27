@@ -84,15 +84,19 @@ Find up to 5 verified quotes that match this request.`;
     try {
       const parsed: Quote[] = JSON.parse(text);
       return { data: parsed };
-    } catch (err) {
-      console.error("JSON parse error:", text);
+    } catch (parseErr) {
+      console.error("JSON parse error:", parseErr, text);
       return {
         error:
           "The model returned invalid JSON. Try rephrasing your query or check the model output.",
       };
     }
-  } catch (error: any) {
-    console.error("Gemini API Error:", error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Gemini API Error:", error.message);
+    } else {
+      console.error("Gemini API Error:", error);
+    }
     return { error: "Failed to fetch quotes. Please try again later." };
   }
 }

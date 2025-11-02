@@ -22,7 +22,7 @@ export async function generateMetadata({
 
   const { data: blogSummary } = await supabase
     .from("blogs_summary")
-    .select("title, excerpt, featured_image, image, cover_image")
+    .select("title, excerpt, featured_image")
     .eq("slug", slug)
     .single();
 
@@ -38,7 +38,7 @@ export async function generateMetadata({
   const title = `${blogSummary.title} | Transformik AI Blog`;
   const description = blogSummary.excerpt || blogSummary.title;
   const imagePath =
-    blogSummary.featured_image || blogSummary.image || blogSummary.cover_image;
+    blogSummary.featured_image ;
 
   let image = undefined;
   if (imagePath) {

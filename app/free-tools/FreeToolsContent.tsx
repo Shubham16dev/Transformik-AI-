@@ -123,7 +123,11 @@ export function FreeToolsContent({
     } else {
       params.delete("page");
     }
-    router.push(`?${params.toString()}`, { scroll: false });
+
+    const pathname = window.location.pathname || "/free-tools";
+    const queryString = params.toString();
+    const target = queryString ? `${pathname}?${queryString}` : pathname;
+    router.push(target, { scroll: false });
   };
 
   // Reset to page 1 when filters change (but not on initial mount)
@@ -136,7 +140,10 @@ export function FreeToolsContent({
     // Update URL to remove page parameter when going back to page 1
     const params = new URLSearchParams(window.location.search);
     params.delete("page");
-    router.push(`?${params.toString()}`, { scroll: false });
+    const pathname = window.location.pathname || "/free-tools";
+    const queryString = params.toString();
+    const target = queryString ? `${pathname}?${queryString}` : pathname;
+    router.push(target, { scroll: false });
   }, [search, selectedCategory, sortMode, isInitialMount, router]);
 
   // Scroll to top when page changes

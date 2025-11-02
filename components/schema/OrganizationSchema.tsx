@@ -15,7 +15,7 @@ export function OrganizationSchema() {
     },
     description:
       "Discover the best AI tools and software for your needs. Comprehensive directory of 10,000+ AI tools with reviews, categories, and detailed information.",
-    foundingDate: "2024",
+    foundingDate: "2025",
     slogan: "Discover 10,000+ AI Tools",
     knowsAbout: [
       "Artificial Intelligence",

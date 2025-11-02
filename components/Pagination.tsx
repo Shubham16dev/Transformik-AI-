@@ -5,6 +5,7 @@ interface PaginationProps {
   pageSize: number;
   currentPage: number;
   onPageChange: (page: number) => void;
+  basePath?: string;
 }
 
 export function Pagination({
@@ -12,6 +13,7 @@ export function Pagination({
   pageSize,
   currentPage,
   onPageChange,
+  basePath,
 }: PaginationProps) {
   const totalPages = Math.ceil(totalItems / pageSize);
 
@@ -37,10 +39,18 @@ export function Pagination({
     (_, i) => startPage + i
   );
 
+  // Build hrefs so page 1 is the clean URL (no ?page=1).
+  // Use provided basePath or fall back to current pathname when available.
+  const effectiveBasePath =
+    basePath ??
+    (typeof window !== "undefined" ? window.location.pathname : "/");
+  const makeHref = (page: number) =>
+    page === 1 ? effectiveBasePath : `${effectiveBasePath}?page=${page}`;
+
   return (
     <div className="flex justify-center items-center gap-2 mt-4 flex-wrap">
       <a
-        href={`?page=${Math.max(currentPage - 1, 1)}`}
+        href={makeHref(Math.max(currentPage - 1, 1))}
         className={`px-4 py-2 border rounded ${
           currentPage === 1
             ? "cursor-not-allowed opacity-50 bg-gray-400 text-white"
@@ -57,7 +67,7 @@ export function Pagination({
       {pageNumbers.map((page) => (
         <a
           key={page}
-          href={`?page=${page}`}
+          href={makeHref(page)}
           className={`px-4 py-2 border rounded ${
             page === currentPage
               ? "bg-black text-white"
@@ -74,7 +84,7 @@ export function Pagination({
       {endPage < totalPages && <span className="px-2 text-black">...</span>}
 
       <a
-        href={`?page=${Math.min(currentPage + 1, totalPages)}`}
+        href={makeHref(Math.min(currentPage + 1, totalPages))}
         className={`px-4 py-2 border rounded ${
           currentPage === totalPages
             ? "cursor-not-allowed opacity-50 bg-gray-400 text-white"

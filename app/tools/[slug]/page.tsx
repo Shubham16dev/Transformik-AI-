@@ -25,6 +25,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { CategoryBadge } from "@/components/CategoryBadge";
+import { RelatedTools } from "@/components/tools/RelatedTools";
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -392,7 +393,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
                   <div className="space-y-3">
                     {toolDetails.pricing
                       .split(
-                        /\.\s+(?=[A-Z])|(?:\n|\.)\s*(?=Free Plan:|Development Plan|Production Plan|Basic Plan:|Pro Plan:|Enterprise Plan:|Premium Plan:|Starter Plan:|Business Plan:|Team Plan:|Individual Plan:|Monthly Plan:|Annual Plan:|Trial:|Refund Policy:)/g
+                        /\.\s+(?=[A-Z])|(?:\n|\.)\s*(?=Free Plan:|Development Plan|Production Plan|Basic Plan:|Pro Plan:|Enterprise Plan|Premium Plan:|Starter Plan:|Business Plan:|Team Plan:|Individual Plan:|Monthly Plan:|Annual Plan:|Trial:|Refund Policy:)/g
                       )
                       .filter((section: string) => section.trim())
                       .map((section: string, idx: number) => {
@@ -400,7 +401,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
 
                         // Check if it's a plan/section header
                         const isPlanHeader =
-                          /^(Free Plan:|Development Plan|Production Plan|Basic Plan:|Pro Plan:|Enterprise Plan:|Premium Plan:|Starter Plan:|Business Plan:|Team Plan:|Individual Plan:|Monthly Plan:|Annual Plan:|Trial:|Refund Policy:)/i.test(
+                          /^(Free Plan:|Development Plan|Production Plan|Basic Plan:|Pro Plan:|Enterprise Plan|Premium Plan:|Starter Plan:|Business Plan:|Team Plan:|Individual Plan:|Monthly Plan:|Annual Plan:|Trial:|Refund Policy:)/i.test(
                             trimmedSection
                           );
 
@@ -469,6 +470,12 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
               </Card>
             )}
           </div>
+
+          {/* Related Tools Section */}
+          <RelatedTools
+            currentToolId={toolSummary.id}
+            categories={toolSummary.category || []}
+          />
         </div>
 
         {/* Sidebar */}

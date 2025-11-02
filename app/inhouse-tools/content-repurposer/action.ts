@@ -1,17 +1,17 @@
-'use server';
+"use server";
 
 import {
   GoogleGenerativeAI,
   GenerationConfig,
   HarmCategory,
   HarmBlockThreshold,
-} from '@google/generative-ai';
+} from "@google/generative-ai";
 
 // --- Interfaces (Needed by the server) ---
 interface RepurposeResult {
   title: string;
   content: string;
-  platform: 'X' | 'Instagram' | 'LinkedIn' | 'TikTok';
+  platform: "X" | "Instagram" | "LinkedIn" | "TikTok";
 }
 
 export interface RepurposeResponse {
@@ -22,10 +22,10 @@ export interface RepurposeResponse {
 }
 
 // --- Gemini Configuration ---
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 const generationConfig: GenerationConfig = {
-  responseMimeType: 'application/json',
+  responseMimeType: "application/json",
   temperature: 0.7,
   topP: 1,
   topK: 1,
@@ -62,18 +62,18 @@ Guidelines:
 
 // --- The Exported Server Action ---
 export async function generateSocialAssets(
-  longFormContent: string,
+  longFormContent: string
 ): Promise<RepurposeResponse> {
   if (!process.env.GEMINI_API_KEY) {
-    throw new Error('GEMINI_API_KEY is not set');
+    throw new Error("GEMINI_API_KEY is not set");
   }
   if (!longFormContent) {
-    throw new Error('Missing longFormContent');
+    throw new Error("Missing longFormContent");
   }
 
   try {
     const model = genAI.getGenerativeModel({
-      model: 'models/gemini-2.5-pro',
+      model: "models/gemini-2.5-flash",
       systemInstruction: systemInstruction,
       generationConfig,
       safetySettings: [
@@ -90,7 +90,7 @@ export async function generateSocialAssets(
 
     return jsonResponse;
   } catch (error) {
-    console.error('Gemini API Error:', error);
-    throw new Error('Failed to generate content');
+    console.error("Gemini API Error:", error);
+    throw new Error("Failed to generate content");
   }
 }

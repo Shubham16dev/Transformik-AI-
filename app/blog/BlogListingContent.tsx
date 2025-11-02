@@ -83,7 +83,11 @@ export function BlogListingContent({
     } else {
       params.delete("page");
     }
-    router.push(`?${params.toString()}`, { scroll: false });
+
+    const pathname = window.location.pathname || "/blog";
+    const queryString = params.toString();
+    const target = queryString ? `${pathname}?${queryString}` : pathname;
+    router.push(target, { scroll: false });
   };
 
   const handleSortChange = (value: string) => {

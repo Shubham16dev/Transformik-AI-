@@ -134,7 +134,12 @@ export function ToolsContent({
     } else {
       params.delete("page");
     }
-    router.push(`?${params.toString()}`, { scroll: false });
+
+    // Build a proper path: when page is 1 we want to navigate to the clean pathname
+    const pathname = window.location.pathname || "/tools";
+    const queryString = params.toString();
+    const target = queryString ? `${pathname}?${queryString}` : pathname;
+    router.push(target, { scroll: false });
   };
 
   // Reset to page 1 when filters change
@@ -184,19 +189,19 @@ export function ToolsContent({
 
           <div className="relative w-full mx-auto text-center space-y-6 px-6">
             {/* Top badge */}
-            <div className="inline-block bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 text-sm font-medium">
+            {/* <div className="inline-block bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 text-sm font-medium">
               Discover AI Tools
-            </div>
+            </div> */}
 
             <h1 className="text-4xl md:text-5xl font-bold leading-tight">
               {categoryMeta?.name || "All AI Tools"}
             </h1>
 
             <p className="text-lg md:text-xl text-white/80 w-full mx-auto leading-relaxed">
-                {showDescription
-                  ? "Discover powerful AI tools to enhance productivity and innovation. Browse our comprehensive, curated collection of cutting-edge artificial intelligence solutions designed to streamline workflows, boost creativity, and transform how you work. From automation and data analysis to content generation and decision-making, find the perfect AI tools to revolutionize your business processes and unlock new possibilities."
-                  : categoryMeta?.description ||
-                    "Browse our extensive curated collection of AI tools and solutions. Explore hundreds of carefully selected artificial intelligence platforms, applications, and services that can transform your workflow, enhance productivity, and drive innovation across various industries and use cases."}
+              {showDescription
+                ? "Discover powerful AI tools to enhance productivity and innovation. Browse our comprehensive, curated collection of cutting-edge artificial intelligence solutions designed to streamline workflows, boost creativity, and transform how you work. From automation and data analysis to content generation and decision-making, find the perfect AI tools to revolutionize your business processes and unlock new possibilities."
+                : categoryMeta?.description ||
+                  "Browse our extensive curated collection of AI tools and solutions. Explore hundreds of carefully selected artificial intelligence platforms, applications, and services that can transform your workflow, enhance productivity, and drive innovation across various industries and use cases."}
             </p>
           </div>
         </section>

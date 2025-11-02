@@ -1,4 +1,5 @@
 "use client";
+import { getPublicImageUrl } from "@/utils/getPublicImageUrl";
 
 interface Tool {
   id: string;
@@ -63,65 +64,74 @@ export function ToolsSchema({
       : `${baseUrl}/tools`,
     numberOfItems: totalTools || tools.length,
     itemListOrder: "https://schema.org/ItemListOrderAscending",
-    itemListElement: tools.slice(0, 20).map((tool, index) => ({
-      "@type": "ListItem",
-      position: (currentPage - 1) * 15 + index + 1,
-      item: {
-        "@type": "SoftwareApplication",
-        "@id": `${baseUrl}/tools/${tool.slug}`,
-        name: tool.tool_name,
-        description: tool.one_line_description,
-        url: tool.url || `${baseUrl}/tools/${tool.slug}`,
-        applicationCategory: Array.isArray(tool.category)
-          ? tool.category.join(", ")
-          : tool.category || "Artificial Intelligence",
-        applicationSubCategory: "AI Tool",
-        operatingSystem: [
-          "Web Browser",
-          "Windows",
-          "macOS",
-          "Linux",
-          "iOS",
-          "Android",
-        ],
-        softwareVersion: "Latest",
-        datePublished: "2025-01-01", // Replace with a static date
-        publisher: {
-          "@type": "Organization",
-          name: "Transformik AI",
-          url: "https://www.transformik.com",
-        },
-        offers: {
-          "@type": "Offer",
-          price: getPriceFromModel(tool.pricing_model),
-          priceCurrency: "USD",
-          availability: "https://schema.org/InStock",
-          priceValidUntil: "2026-01-01", // Replace with a static date
-          category: tool.pricing_model,
-        },
-        ...(tool.logo && {
-          image: {
-            "@type": "ImageObject",
-            url: tool.logo,
-            width: 200,
-            height: 200,
-            caption: `${tool.tool_name} logo`,
+    itemListElement: tools.slice(0, 20).map((tool, index) => {
+      // normalize logo value to a public URL when possible
+      const logoUrl = tool.logo
+        ? tool.logo.startsWith("http") || tool.logo.startsWith("/")
+          ? tool.logo
+          : getPublicImageUrl("Images", `ToolLogos/${tool.logo}`)
+        : undefined;
+
+      return {
+        "@type": "ListItem",
+        position: (currentPage - 1) * 15 + index + 1,
+        item: {
+          "@type": "SoftwareApplication",
+          "@id": `${baseUrl}/tools/${tool.slug}`,
+          name: tool.tool_name,
+          description: tool.one_line_description,
+          url: tool.url || `${baseUrl}/tools/${tool.slug}`,
+          applicationCategory: Array.isArray(tool.category)
+            ? tool.category.join(", ")
+            : tool.category || "Artificial Intelligence",
+          applicationSubCategory: "AI Tool",
+          operatingSystem: [
+            "Web Browser",
+            "Windows",
+            "macOS",
+            "Linux",
+            "iOS",
+            "Android",
+          ],
+          softwareVersion: "Latest",
+          datePublished: "2025-01-01", // Replace with a static date
+          publisher: {
+            "@type": "Organization",
+            name: "Transformik AI",
+            url: "https://www.transformik.com",
           },
-        }),
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.5",
-          ratingCount: 100, // Replace with a static number
-          bestRating: "5",
-          worstRating: "1",
+          offers: {
+            "@type": "Offer",
+            price: getPriceFromModel(tool.pricing_model),
+            priceCurrency: "USD",
+            availability: "https://schema.org/InStock",
+            priceValidUntil: "2026-01-01", // Replace with a static date
+            category: tool.pricing_model,
+          },
+          ...(logoUrl && {
+            image: {
+              "@type": "ImageObject",
+              url: logoUrl,
+              width: 200,
+              height: 200,
+              caption: `${tool.tool_name} logo`,
+            },
+          }),
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: "4.5",
+            ratingCount: 100, // Replace with a static number
+            bestRating: "5",
+            worstRating: "1",
+          },
+          potentialAction: {
+            "@type": "UseAction",
+            target: tool.url || `${baseUrl}/tools/${tool.slug}`,
+            name: `Use ${tool.tool_name}`,
+          },
         },
-        potentialAction: {
-          "@type": "UseAction",
-          target: tool.url || `${baseUrl}/tools/${tool.slug}`,
-          name: `Use ${tool.tool_name}`,
-        },
-      },
-    })),
+      };
+    }),
   };
 
   // WebPage Schema

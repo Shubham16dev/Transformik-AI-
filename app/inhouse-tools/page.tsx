@@ -26,21 +26,21 @@ const tools: Tool[] = [
   },
   {
     id: 2,
-    name: "OpenAI API Price Calculator",
-    description: "Compare API cost of popular LLM models.",
+    name: "Quote Finder",
+    description: "Discover and organize authentic quotes instantly",
     imageUrl:
       "https://images.unsplash.com/photo-1699004642562-63a26850d89f?auto=format&fit=crop&q=80&w=764",
     icon: DollarSign,
-    path: "/inhouse-tools/api-price-calculator",
+    path: "/inhouse-tools/quote-finder",
   },
   {
     id: 3,
-    name: "Formalizer",
-    description: "Polish and reformat your content with AI assistance.",
+    name: "Content Calendar",
+    description: "Create and organize your social media content plan effortlessly",
     imageUrl:
       "https://images.unsplash.com/photo-1628258334105-2a0b3d6efee1?auto=format&fit=crop&q=80&w=687",
     icon: Sparkles,
-    path: "/inhouse-tools/formalizer",
+    path: "/inhouse-tools/content-calendar",
   },
 ];
 

@@ -202,9 +202,11 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
                 {toolSummary.category && toolSummary.category.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-2 font-semibold text-gray-700">
                     Categories:
-                    {toolSummary.category.map((cat: string, idx: number) => (
-                      <CategoryBadge key={idx} category={cat} />
-                    ))}
+                    {toolSummary.category
+                      .slice(0, 5)
+                      .map((cat: string, idx: number) => (
+                        <CategoryBadge key={idx} category={cat} />
+                      ))}
                   </div>
                 )}
               </div>

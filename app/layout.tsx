@@ -9,6 +9,7 @@ import "./globals.css";
 import BreadcrumbsClient from "@/components/layout/Breadcrumb";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import TopBanner from "@/components/layout/TopBanner";
 
 export const metadata: Metadata = {
   title: "Transformik AI - Discover 10,000+ AI Tools | AI Tools Hub",
@@ -56,6 +57,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col bg-gray-50 text-gray-900">
         {/* Make sure these are client components if they have dynamic content */}
+        <TopBanner />
         <Navbar />
         <HomeHeroWrapper />
         <CategoryHeroWrapper />

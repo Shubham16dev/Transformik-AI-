@@ -220,3 +220,13 @@ export default async function HomePage() {
     </main>
   );
 }
+
+export async function getServerSideProps(context: {
+  res: { setHeader: (name: string, value: string) => void };
+}) {
+  context.res.setHeader(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, proxy-revalidate"
+  );
+  return { props: {} };
+}

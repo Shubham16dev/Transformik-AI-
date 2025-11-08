@@ -90,8 +90,12 @@ export async function generateContentCalendar(
     }
 
     return { plan };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Gemini API Error:", err);
-    return { error: err.message || "Failed to generate content calendar." };
+    const errorMessage =
+      err instanceof Error
+        ? err.message
+        : "Failed to generate content calendar.";
+    return { error: errorMessage };
   }
 }

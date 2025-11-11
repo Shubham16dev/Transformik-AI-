@@ -42,7 +42,6 @@ export function OrganizationSchema() {
       addressCountry: "US",
     },
     areaServed: "Worldwide",
-    serviceType: "AI Tools Directory",
   };
 
   return (

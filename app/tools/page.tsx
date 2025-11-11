@@ -44,7 +44,7 @@ export async function generateMetadata({
   };
 }
 
-export const revalidate = 3600; // Revalidate every hour
+export const revalidate = 0; // Always fetch fresh content for tools
 
 interface Tool {
   id: string;
@@ -103,13 +103,35 @@ const allToolsFaqs = [
 
 async function getTools(): Promise<Tool[]> {
   try {
-    const { data, error } = await supabaseServer
-      .from("tools_summary")
-      .select("*")
-      .order("tool_name", { ascending: true });
+    let allTools: Tool[] = [];
+    let from = 0;
+    const batchSize = 1000; // Supabase default limit
+    let hasMore = true;
 
-    if (error) throw error;
-    return data ?? [];
+    // Fetch all tools in batches to handle large datasets
+    while (hasMore) {
+      const { data, error } = await supabaseServer
+        .from("tools_summary")
+        .select("*")
+        .order("tool_name", { ascending: true })
+        .range(from, from + batchSize - 1);
+
+      if (error) {
+        console.error("Supabase error fetching tools:", error);
+        throw error;
+      }
+
+      if (data && data.length > 0) {
+        allTools = [...allTools, ...data];
+        from += batchSize;
+        hasMore = data.length === batchSize;
+      } else {
+        hasMore = false;
+      }
+    }
+
+    console.log(`Successfully fetched ${allTools.length} tools from Supabase`);
+    return allTools;
   } catch (err) {
     console.error("Error fetching tools:", err);
     return [];

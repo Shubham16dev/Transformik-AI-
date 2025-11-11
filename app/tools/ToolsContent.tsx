@@ -64,8 +64,8 @@ export function ToolsContent({
 }: ToolsContentProps) {
   const router = useRouter();
 
-  // Compute initial category value once to prevent hydration mismatch
-  const initialCategory = useMemo(() => {
+  // Compute initial category value - moved outside of useMemo to prevent hydration issues
+  const getInitialCategory = () => {
     if (!categorySlug) return "all";
 
     const matchingCategory = categories.find(
@@ -75,14 +75,20 @@ export function ToolsContent({
     );
 
     return matchingCategory || "all";
-  }, [categorySlug, categories]);
+  };
 
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState(initialCategory);
+  const [category, setCategory] = useState(getInitialCategory);
   const [priceFilter, setPriceFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [isInitialMount, setIsInitialMount] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
   const pageSize = 15;
+
+  // Handle mounting to prevent hydration issues
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Filtering (memoized for performance)
   const filteredTools = useMemo(() => {
@@ -135,10 +141,12 @@ export function ToolsContent({
       params.delete("page");
     }
 
-    // Build a proper path: when page is 1 we want to navigate to the clean pathname
+    // Build a proper path: ensure we always use the correct pathname
     const pathname = window.location.pathname || "/tools";
+    // Make sure pathname starts with /tools for the tools page
+    const basePath = pathname.includes("/tools") ? pathname : "/tools";
     const queryString = params.toString();
-    const target = queryString ? `${pathname}?${queryString}` : pathname;
+    const target = queryString ? `${basePath}?${queryString}` : basePath;
     router.push(target, { scroll: false });
   };
 
@@ -209,7 +217,10 @@ export function ToolsContent({
 
       <div className="space-y-6 mt-8">
         {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4 items-center">
+        <div
+          className="flex flex-col md:flex-row gap-4 items-center"
+          suppressHydrationWarning
+        >
           <input
             type="text"
             aria-label="Search tools"
@@ -219,22 +230,26 @@ export function ToolsContent({
             className="w-full md:w-1/3 border border-gray-300 rounded-md px-3 py-2"
           />
 
-          <FilterCombobox
-            value={category}
-            onChange={setCategory}
-            options={[
-              { value: "all", label: "All Categories" },
-              ...categories.map((c) => ({ value: c, label: c })),
-            ]}
-            placeholder="Select Category"
-          />
+          {isMounted && (
+            <>
+              <FilterCombobox
+                value={category}
+                onChange={setCategory}
+                options={[
+                  { value: "all", label: "All Categories" },
+                  ...categories.map((c) => ({ value: c, label: c })),
+                ]}
+                placeholder="Select Category"
+              />
 
-          <FilterCombobox
-            value={priceFilter}
-            onChange={setPriceFilter}
-            options={PRICE_OPTIONS}
-            placeholder="Select Price"
-          />
+              <FilterCombobox
+                value={priceFilter}
+                onChange={setPriceFilter}
+                options={PRICE_OPTIONS}
+                placeholder="Select Price"
+              />
+            </>
+          )}
         </div>
 
         {/* Tools Grid */}

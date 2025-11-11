@@ -45,7 +45,7 @@ export async function generateMetadata({
   };
 }
 
-export const revalidate = 3600; // Revalidate every hour
+export const revalidate = 0; // Always fetch fresh content for blogs
 
 interface BlogSummary {
   id: string;
@@ -70,6 +70,9 @@ async function getBlogs(): Promise<BlogSummary[]> {
       return [];
     }
 
+    console.log(
+      `Successfully fetched ${data?.length || 0} blogs from Supabase`
+    );
     return data || [];
   } catch (err) {
     console.error("Error fetching blogs:", err);
@@ -112,7 +115,8 @@ export default async function BlogListingPage({
         "When comparing AI tools, evaluate factors such as ease of use, pricing models, feature sets, accuracy and performance, integration capabilities, customer support, documentation quality, community support, scalability, and specific use case suitability. Consider both current needs and future requirements when making decisions.",
     },
     {
-      question: "How can I find reliable information about AI tools and techniques?",
+      question:
+        "How can I find reliable information about AI tools and techniques?",
       answer:
         "Find reliable AI information through peer-reviewed research papers, established AI blogs and publications, official tool documentation, university courses, professional AI communities, expert reviews, and hands-on testing. Cross-reference multiple sources and prioritize content from recognized experts and institutions in the field.",
     },

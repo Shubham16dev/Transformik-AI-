@@ -1,8 +1,9 @@
-import { supabase } from "@/utils/supabase";
+import { supabaseServer } from "@/utils/supabaseServer";
 import { ToolCard } from "@/components/tools/ToolCard";
 import { HomeBlogCard } from "@/components/blog/HomeBlogCard";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { getPublicImageUrl } from "@/utils/getPublicImageUrl";
+import { HomePageSchema } from "@/components/schema/HomePageSchema";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 0; // Always fetch fresh content (ISR with no cache)
 
 // ---------- Types ----------
 type PricingModel = "Free" | "Freemium" | "Paid" | "Free Trial";
@@ -60,57 +61,80 @@ interface Blog {
 
 // ---------- Data Fetchers ----------
 async function getLatestTools(): Promise<Tool[]> {
-  const { data, error } = await supabase
-    .from("tools_summary")
-    .select(
-      "id, tool_name, slug, one_line_description, pricing_model, url, logo, category"
-    )
-    .order("created_at", { ascending: false })
-    .limit(6);
+  try {
+    const { data, error } = await supabaseServer
+      .from("tools_summary")
+      .select(
+        "id, tool_name, slug, one_line_description, pricing_model, url, logo, category"
+      )
+      .order("created_at", { ascending: false })
+      .limit(6);
 
-  if (error) {
-    console.error("Error fetching latest tools:", error.message);
+    if (error) {
+      console.error("Error fetching latest tools:", error.message);
+      return [];
+    }
+
+    console.log(`Fetched ${data?.length || 0} latest tools for homepage`);
+
+    return (
+      data?.map(
+        (tool: RawTool): Tool => ({
+          ...tool,
+          logo: getPublicImageUrl(
+            "Images",
+            tool.logo ? `ToolLogos/${tool.logo}` : undefined
+          ),
+          category: tool.category ?? undefined,
+        })
+      ) ?? []
+    );
+  } catch (err) {
+    console.error("Error fetching latest tools:", err);
     return [];
   }
-
-  return (
-    data?.map(
-      (tool: RawTool): Tool => ({
-        ...tool,
-        logo: getPublicImageUrl(
-          "Images",
-          tool.logo ? `ToolLogos/${tool.logo}` : undefined
-        ),
-        category: tool.category ?? undefined,
-      })
-    ) ?? []
-  );
 }
 
 async function getBlogs(): Promise<Blog[]> {
-  // Try blogs_summary table first
-  const { data, error } = await supabase
-    .from("blogs_summary")
-    .select("id, title, slug, excerpt, featured_image")
-    .order("created_at", { ascending: false })
-    .limit(5);
-
-  if (error) {
-    // Fallback: try 'blogs' table
-    const { data: blogsData, error: blogsError } = await supabase
-      .from("blogs")
+  try {
+    // Try blogs_summary table first
+    const { data, error } = await supabaseServer
+      .from("blogs_summary")
       .select("id, title, slug, excerpt, featured_image")
       .order("created_at", { ascending: false })
       .limit(5);
 
-    if (blogsError) {
-      return [];
+    if (error) {
+      console.error("Error fetching blogs from blogs_summary:", error.message);
+      // Fallback: try 'blogs' table
+      const { data: blogsData, error: blogsError } = await supabaseServer
+        .from("blogs")
+        .select("id, title, slug, excerpt, featured_image")
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      if (blogsError) {
+        console.error(
+          "Error fetching blogs from blogs table:",
+          blogsError.message
+        );
+        return [];
+      }
+
+      console.log(
+        `Fetched ${
+          blogsData?.length || 0
+        } latest blogs for homepage (from blogs table)`
+      );
+      return blogsData ?? [];
     }
 
-    return blogsData ?? [];
+    console.log(`Fetched ${data?.length || 0} latest blogs for homepage`);
+    return data ?? [];
+  } catch (err) {
+    console.error("Error fetching blogs:", err);
+    return [];
   }
-
-  return data ?? [];
 }
 
 // ---------- Helpers ----------
@@ -130,6 +154,36 @@ export default async function HomePage() {
 
   return (
     <main className="space-y-16">
+      {/* Structured Data Schema for SEO */}
+      <HomePageSchema latestTools={latestTools} latestBlogs={blogs} />
+      {/* SEO-friendly content for crawlers */}
+      <noscript>
+        <div style={{ display: "none" }}>
+          <h1>Transformik AI - Discover 10,000+ AI Tools</h1>
+          <section>
+            <h2>Latest AI Tools</h2>
+            <ul>
+              {latestTools.map((tool) => (
+                <li key={tool.id}>
+                  <a href={`/tools/${tool.slug}`}>{tool.tool_name}</a>
+                  <p>{tool.one_line_description}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+          <section>
+            <h2>Latest AI Blog Posts</h2>
+            <ul>
+              {blogs.map((blog) => (
+                <li key={blog.id}>
+                  <a href={`/blog/${blog.slug}`}>{blog.title}</a>
+                  <p>{blog.excerpt}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
+      </noscript>
       {/* Search Bar */} <SearchBar />
       <div className="px-6 py-8 max-w-7xl mx-auto space-y-16">
         {/* Featured + Latest Tools */}

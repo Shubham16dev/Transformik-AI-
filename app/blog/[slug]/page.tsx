@@ -2,12 +2,11 @@ import { notFound } from "next/navigation";
 import { supabase } from "@/utils/supabase";
 import { getPublicImageUrl } from "@/utils/getPublicImageUrl";
 import { Button } from "@/components/ui/button";
-import { FeaturedTools } from "@/components/tools/FeaturedTool";
-import { TopCategories } from "@/components/category/TopCategories";
 import { RelatedBlogsHorizontal } from "@/components/blog/RelatedBlogsHorizontal";
 import { BlogSchema } from "@/components/schema/BlogSchema";
+import { TableOfContents } from "@/components/blog/TableOfContents";
+import { BlogContent } from "@/components/blog/BlogContent";
 import Image from "next/image";
-import parse from "html-react-parser";
 import type { Metadata } from "next";
 
 interface BlogDetailPageProps {
@@ -37,8 +36,7 @@ export async function generateMetadata({
 
   const title = `${blogSummary.title} | Transformik AI Blog`;
   const description = blogSummary.excerpt || blogSummary.title;
-  const imagePath =
-    blogSummary.featured_image ;
+  const imagePath = blogSummary.featured_image;
 
   let image = undefined;
   if (imagePath) {
@@ -88,17 +86,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
 
   if (detailsError || !details) return notFound();
 
-  // Fetch featured tools (SSR)
-  const { data: featuredToolsData } = await supabase
-    .from("tools_summary")
-    .select(
-      "id, tool_name, slug, logo, one_line_description, pricing_model, url, category"
-    )
-    .limit(30);
-  const featuredTools =
-    featuredToolsData && featuredToolsData.length > 0
-      ? featuredToolsData.sort(() => Math.random() - 0.5).slice(0, 5)
-      : [];
+  // Note: Featured tools removed from blog page; data fetch skipped to avoid unused-vars.
 
   // Fetch related blogs (SSR)
   const { data: relatedBlogsData } = await supabase
@@ -215,14 +203,47 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
           </div>
         </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-10 gap-10 px-4 md:px-8 py-6">
+        <div className="grid grid-cols-1 xl:grid-cols-12 lg:grid-cols-10 gap-6 lg:gap-8 xl:gap-10 px-4 md:px-8 py-6">
+          {/* Table of Contents - Left Sidebar (Hidden on mobile, shows on large screens) */}
+          <div className="hidden lg:block xl:col-span-3 lg:col-span-3 order-2 lg:order-1">
+            <div
+              className="sticky top-24 max-h-[calc(100vh-6rem)] overflow-y-auto"
+              style={{ scrollbarGutter: "stable" }}
+            >
+              <TableOfContents content={details.content || ""} />
+            </div>
+          </div>
+
           {/* Main Content */}
-          <div className="md:col-span-7 space-y-8">
-            <div className="bg-white p-8 rounded-lg border border-gray-100 space-y-6">
-              {/* Blog Content */}
-              <div className="prose max-w-none mt-4">
-                {parse(details.content || "")}
+          <div className="xl:col-span-9 lg:col-span-7 order-1 lg:order-2 space-y-8">
+            <div className="bg-white p-6 lg:p-8 rounded-lg border border-gray-100 space-y-6">
+              {/* Show TOC on mobile as collapsible section */}
+              <div className="lg:hidden mb-6">
+                <details className="group">
+                  <summary className="flex items-center justify-between cursor-pointer text-lg font-semibold text-gray-900 mb-2">
+                    Table of Contents
+                    <svg
+                      className="w-5 h-5 transition-transform group-open:rotate-180"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </summary>
+                  <div className="mt-2 p-4 bg-gray-50 rounded-lg">
+                    <TableOfContents content={details.content || ""} />
+                  </div>
+                </details>
               </div>
+
+              {/* Blog Content */}
+              <BlogContent content={details.content || ""} />
 
               {/* Optional Action */}
               {summary.url && (
@@ -241,11 +262,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
             </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="md:col-span-3 space-y-8">
-            <FeaturedTools limit={5} initialTools={featuredTools} />
-            <TopCategories limit={6} />
-          </div>
+          {/* Right sidebar removed: Featured Tools and Top Categories intentionally omitted */}
         </div>
 
         {/* Related Articles Section - Full Width */}

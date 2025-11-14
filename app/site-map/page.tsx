@@ -69,8 +69,8 @@ export default async function SitemapPage() {
   const tools = await getTools();
 
   // Log the lengths of blogs and tools
-  console.log("Blogs fetched for sitemap.xml:", blogs.length);
-  console.log("Tools fetched for sitemap.xml:", tools.length);
+  // console.log("✓ Sitemap: Blogs fetched:", blogs.length);
+  // console.log("✓ Sitemap: Tools fetched:", tools.length);
 
   return <SitemapContent blogs={blogs} tools={tools} />;
 }

@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 3600; // Revalidate every hour
+export const revalidate = 0; // Always fetch fresh content
 
 interface Category {
   name: string;
@@ -78,18 +78,36 @@ const faqs = [
 
 async function getCategories(): Promise<Category[]> {
   try {
-    const { data: toolsData, error } = await supabaseServer
-      .from("tools_summary")
-      .select("category");
+    let allTools: { category?: string | string[] | null }[] = [];
+    let from = 0;
+    const batchSize = 1000;
+    let hasMore = true;
 
-    if (error) {
-      console.error("Error fetching categories:", error);
-      return [];
+    // Fetch all tools in batches to ensure we get complete data
+    while (hasMore) {
+      const { data, error } = await supabaseServer
+        .from("tools_summary")
+        .select("category")
+        .range(from, from + batchSize - 1);
+
+      if (error) {
+        console.error("Error fetching categories:", error);
+        throw error;
+      }
+
+      if (data && data.length > 0) {
+        allTools = [...allTools, ...data];
+        from += batchSize;
+        hasMore = data.length === batchSize;
+      } else {
+        hasMore = false;
+      }
     }
 
+    // Count tools per category
     const categoryCount: Record<string, number> = {};
 
-    toolsData?.forEach((tool) => {
+    allTools.forEach((tool) => {
       const categories = tool.category;
 
       if (Array.isArray(categories)) {
@@ -110,10 +128,14 @@ async function getCategories(): Promise<Category[]> {
       ([name, count]) => ({
         name,
         count,
-        slug: name.toLowerCase().replace(/\s+/g, "-"),
+        slug: name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, ""),
       })
     );
 
+    // console.log(`Processed ${categoryArray.length} categories from ${allTools.length} tools`);
     return categoryArray;
   } catch (err) {
     console.error("Error processing categories:", err);

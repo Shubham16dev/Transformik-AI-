@@ -19,8 +19,8 @@ export async function RelatedTools({
     .neq("id", currentToolId)
     .limit(4);
 
-  console.log("Categories passed:", categories);
-  console.log("Database response:", { relatedTools, error });
+  // console.log("Categories:", JSON.stringify(categories));
+  // console.log(`Related tools found: ${relatedTools?.length || 0}`);
 
   if (error) {
     console.error("Error fetching related tools:", error);

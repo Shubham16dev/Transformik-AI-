@@ -75,7 +75,7 @@ async function getLatestTools(): Promise<Tool[]> {
       return [];
     }
 
-    console.log(`Fetched ${data?.length || 0} latest tools for homepage`);
+    // console.log(`✓ Fetched ${data?.length || 0} latest tools for homepage`);
 
     return (
       data?.map(
@@ -121,15 +121,11 @@ async function getBlogs(): Promise<Blog[]> {
         return [];
       }
 
-      console.log(
-        `Fetched ${
-          blogsData?.length || 0
-        } latest blogs for homepage (from blogs table)`
-      );
+      // console.log(`✓ Fetched ${blogsData?.length || 0} latest blogs for homepage (from blogs table)`);
       return blogsData ?? [];
     }
 
-    console.log(`Fetched ${data?.length || 0} latest blogs for homepage`);
+    // console.log(`✓ Fetched ${data?.length || 0} latest blogs for homepage`);
     return data ?? [];
   } catch (err) {
     console.error("Error fetching blogs:", err);

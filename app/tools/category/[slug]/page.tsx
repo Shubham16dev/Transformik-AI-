@@ -3,7 +3,7 @@ import { supabaseServer } from "@/utils/supabaseServer";
 import { ToolsContent } from "@/app/tools/ToolsContent";
 import type { Metadata } from "next";
 
-export const revalidate = 3600; // Revalidate every hour
+export const revalidate = 0; // Always fetch fresh content
 
 interface Tool {
   id: string;
@@ -16,17 +16,201 @@ interface Tool {
   logo?: string | null;
 }
 
-async function getTools(): Promise<Tool[]> {
+async function getToolsByCategory(categoryName: string): Promise<Tool[]> {
   try {
+    let allTools: Tool[] = [];
+    let from = 0;
+    const batchSize = 1000;
+    let hasMore = true;
+
+    // Fetch all tools in batches to ensure we get complete data
+    while (hasMore) {
+      const { data, error } = await supabaseServer
+        .from("tools_summary")
+        .select("*")
+        .order("tool_name", { ascending: true })
+        .range(from, from + batchSize - 1);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        allTools = [...allTools, ...data];
+        from += batchSize;
+        hasMore = data.length === batchSize;
+      } else {
+        hasMore = false;
+      }
+    }
+
+    // Filter tools that have the category (exact match, case-insensitive)
+    const filteredTools = allTools.filter((tool) => {
+      const categories = tool.category;
+
+      if (Array.isArray(categories)) {
+        return categories.some(
+          (cat) =>
+            cat &&
+            cat.trim().toLowerCase() === categoryName.trim().toLowerCase()
+        );
+      } else if (typeof categories === "string" && categories) {
+        return (
+          categories.trim().toLowerCase() === categoryName.trim().toLowerCase()
+        );
+      }
+      return false;
+    });
+
+    console.log(
+      `Category searched: "${categoryName}" - Found ${filteredTools.length} tools (from ${allTools.length} total tools)`
+    );
+    return filteredTools;
+  } catch (err) {
+    console.error("Error fetching tools for category:", err);
+    return [];
+  }
+}
+
+// Helper function to get the actual category name from slug
+async function getCategoryNameFromSlug(slug: string): Promise<string> {
+  try {
+    // Fetch all unique categories from tools
     const { data, error } = await supabaseServer
       .from("tools_summary")
-      .select("*")
-      .order("tool_name", { ascending: true });
+      .select("category");
 
     if (error) throw error;
-    return data ?? [];
+
+    // Collect all unique category names
+    const allCategories = new Set<string>();
+    data?.forEach((tool) => {
+      const categories = tool.category;
+      if (Array.isArray(categories)) {
+        categories.forEach((cat) => {
+          if (cat && typeof cat === "string") {
+            allCategories.add(cat);
+          }
+        });
+      } else if (typeof categories === "string" && categories) {
+        allCategories.add(categories);
+      }
+    });
+
+    // Normalize slug for comparison (handle special characters)
+    const normalizeForComparison = (str: string) =>
+      str
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+
+    const normalizedSlug = normalizeForComparison(slug);
+
+    // Find the category that matches the slug
+    const matchingCategory = Array.from(allCategories).find(
+      (cat) => normalizeForComparison(cat) === normalizedSlug
+    );
+
+    console.log(
+      `Slug: "${slug}" - Normalized: "${normalizedSlug}" - Found: "${
+        matchingCategory || "NOT FOUND"
+      }"`
+    );
+
+    if (matchingCategory) {
+      return matchingCategory;
+    }
+
+    // If no match found, return a fallback
+    return slug
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
   } catch (err) {
-    console.error("Error fetching tools:", err);
+    console.error("Error finding category name from slug:", err);
+    return slug
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }
+}
+
+// Helper function to get random categories excluding the current category
+async function getRandomCategories(
+  excludeCategoryName: string,
+  limit: number = 6
+): Promise<{ name: string; slug: string; count: number }[]> {
+  try {
+    // Fetch all categories
+    const { data: allCategories, error } = await supabaseServer
+      .from("categories_details")
+      .select("name, slug");
+
+    if (error) throw error;
+
+    // Fetch all tools to count tools per category
+    // category can be string | string[] | null according to Tool definition
+    let allToolsData: { category?: string | string[] | null }[] = [];
+    let from = 0;
+    const batchSize = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { data: toolsData, error: toolsError } = await supabaseServer
+        .from("tools_summary")
+        .select("category")
+        .range(from, from + batchSize - 1);
+
+      if (toolsError) throw toolsError;
+
+      if (toolsData && toolsData.length > 0) {
+        allToolsData = [...allToolsData, ...toolsData];
+        from += batchSize;
+        hasMore = toolsData.length === batchSize;
+      } else {
+        hasMore = false;
+      }
+    }
+
+    // Count tools for each category
+    const categoryCountMap = new Map<string, number>();
+    allToolsData.forEach((tool) => {
+      const categories = tool.category;
+      if (Array.isArray(categories)) {
+        categories.forEach((cat) => {
+          if (cat && typeof cat === "string") {
+            const count = categoryCountMap.get(cat) || 0;
+            categoryCountMap.set(cat, count + 1);
+          }
+        });
+      } else if (typeof categories === "string" && categories) {
+        const count = categoryCountMap.get(categories) || 0;
+        categoryCountMap.set(categories, count + 1);
+      }
+    });
+
+    // Filter out the excluded category
+    const filteredCategories = allCategories.filter(
+      (category) => category.name !== excludeCategoryName
+    );
+
+    // Shuffle the filtered categories array
+    for (let i = filteredCategories.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [filteredCategories[i], filteredCategories[j]] = [
+        filteredCategories[j],
+        filteredCategories[i],
+      ];
+    }
+
+    // Add the actual count for each category
+    const categoriesWithCount = filteredCategories.map((category) => ({
+      ...category,
+      count: categoryCountMap.get(category.name) || 0,
+    }));
+
+    // Return the first `limit` categories
+    return categoriesWithCount.slice(0, limit);
+  } catch (err) {
+    console.error("Error fetching random categories:", err);
     return [];
   }
 }
@@ -103,12 +287,18 @@ export default async function ToolsByCategory({
     .eq("slug", slug)
     .single();
 
-  // Fetch all tools server-side
-  const tools = await getTools();
+  // Get the actual category name by matching slug with real category names
+  const categoryName = catMeta?.name || (await getCategoryNameFromSlug(slug));
+
+  // Fetch tools for this specific category only
+  const tools = await getToolsByCategory(categoryName);
+
+  // Get random categories excluding the current category
+  const randomCategories = await getRandomCategories(categoryName, 6);
 
   // Extract unique categories
   const allCategories: string[] = [];
-  tools.forEach((tool) => {
+  tools.forEach((tool: Tool) => {
     const toolCategories = tool.category;
     if (Array.isArray(toolCategories)) {
       toolCategories.forEach((cat) => cat && allCategories.push(cat));
@@ -129,6 +319,7 @@ export default async function ToolsByCategory({
       categorySlug={slug}
       categoryMeta={catMeta ?? null}
       initialPage={initialPage}
+      similarCategories={randomCategories}
     />
   );
 }

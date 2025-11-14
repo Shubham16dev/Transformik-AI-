@@ -70,9 +70,7 @@ async function getBlogs(): Promise<BlogSummary[]> {
       return [];
     }
 
-    console.log(
-      `Successfully fetched ${data?.length || 0} blogs from Supabase`
-    );
+    // console.log(`✓ Successfully fetched ${data?.length || 0} blogs from Supabase`);
     return data || [];
   } catch (err) {
     console.error("Error fetching blogs:", err);

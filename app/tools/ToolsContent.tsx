@@ -51,6 +51,7 @@ interface ToolsContentProps {
   faqs?: { question: string; answer: string }[];
   showDescription?: boolean;
   initialPage?: number;
+  similarCategories?: { name: string; count: number; slug: string }[];
 }
 
 export function ToolsContent({
@@ -61,6 +62,7 @@ export function ToolsContent({
   faqs,
   showDescription = false,
   initialPage = 1,
+  similarCategories = [],
 }: ToolsContentProps) {
   const router = useRouter();
 
@@ -297,6 +299,28 @@ export function ToolsContent({
           currentPage={currentPage}
           onPageChange={handlePageChange}
         />
+        {/* Similar Categories Section - Only show on category pages */}
+        {categorySlug && similarCategories && similarCategories.length > 0 && (
+          <section className="mt-12">
+            <h2 className="text-2xl font-semibold mb-6">Similar Categories</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {similarCategories.map((category) => (
+                <a
+                  key={category.slug}
+                  href={`/tools/category/${category.slug}`}
+                  className="flex justify-between items-center p-4 bg-white border border-gray-200 rounded-lg hover:shadow-md hover:border-purple-500 transition-all cursor-pointer group"
+                >
+                  <span className="text-lg font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">
+                    {category.name}
+                  </span>
+                  <span className="text-sm text-purple-600 font-bold">
+                    {category.count}
+                  </span>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* FAQs section - Only on page 1 */}
         {currentPage === 1 &&

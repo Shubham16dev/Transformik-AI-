@@ -130,7 +130,7 @@ async function getTools(): Promise<Tool[]> {
       }
     }
 
-    console.log(`Successfully fetched ${allTools.length} tools from Supabase`);
+    // console.log(`✓ Successfully fetched ${allTools.length} tools from Supabase`);
     return allTools;
   } catch (err) {
     console.error("Error fetching tools:", err);

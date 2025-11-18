@@ -66,21 +66,9 @@ export function ToolsContent({
 }: ToolsContentProps) {
   const router = useRouter();
 
-  // Compute initial category value - moved outside of useMemo to prevent hydration issues
-  const getInitialCategory = () => {
-    if (!categorySlug) return "all";
-
-    const matchingCategory = categories.find(
-      (cat) =>
-        cat.toLowerCase().trim().replace(/\s+/g, "-") ===
-        categorySlug.toLowerCase()
-    );
-
-    return matchingCategory || "all";
-  };
-
+  // Use static initial values to prevent hydration issues
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState(getInitialCategory);
+  const [category, setCategory] = useState("all"); // Always start with "all"
   const [priceFilter, setPriceFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [isInitialMount, setIsInitialMount] = useState(true);
@@ -90,7 +78,17 @@ export function ToolsContent({
   // Handle mounting to prevent hydration issues
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+
+    // Set the correct category after mounting to avoid hydration mismatch
+    if (categorySlug) {
+      const matchingCategory = categories.find(
+        (cat) =>
+          cat.toLowerCase().trim().replace(/\s+/g, "-") ===
+          categorySlug.toLowerCase()
+      );
+      setCategory(matchingCategory || "all");
+    }
+  }, [categorySlug, categories]);
 
   // Filtering (memoized for performance)
   const filteredTools = useMemo(() => {
@@ -255,8 +253,11 @@ export function ToolsContent({
         </div>
 
         {/* Tools Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {paginatedTools.length ? (
+        <div
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          suppressHydrationWarning
+        >
+          {isMounted && paginatedTools.length ? (
             paginatedTools.map((tool) => (
               <ToolCard
                 key={tool.id}
@@ -285,20 +286,27 @@ export function ToolsContent({
                 }}
               />
             ))
-          ) : (
+          ) : isMounted ? (
             <p className="text-gray-500">
               No tools found matching your filters.
             </p>
+          ) : (
+            // Show loading state during hydration
+            <div className="col-span-full text-center">
+              <p className="text-gray-500">Loading tools...</p>
+            </div>
           )}
         </div>
 
         {/* Pagination */}
-        <Pagination
-          totalItems={filteredTools.length}
-          pageSize={pageSize}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-        />
+        {isMounted && (
+          <Pagination
+            totalItems={filteredTools.length}
+            pageSize={pageSize}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+          />
+        )}
         {/* Similar Categories Section - Only show on category pages */}
         {categorySlug && similarCategories && similarCategories.length > 0 && (
           <section className="mt-12">

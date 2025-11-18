@@ -1,4 +1,4 @@
-import { supabaseServer } from "@/utils/supabaseServer";
+import { SupabaseCache } from "@/utils/supabaseOptimized";
 import { BlogListingContent } from "./BlogListingContent";
 import { BlogSchema } from "@/components/schema/BlogSchema";
 
@@ -45,7 +45,7 @@ export async function generateMetadata({
   };
 }
 
-export const revalidate = 0; // Always fetch fresh content for blogs
+export const revalidate = 1800; // Regenerate every 30 minutes (ISR)
 
 interface BlogSummary {
   id: string;
@@ -60,18 +60,12 @@ interface BlogSummary {
 
 async function getBlogs(): Promise<BlogSummary[]> {
   try {
-    const { data, error } = await supabaseServer
-      .from("blogs_summary")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Error fetching blogs:", error);
-      return [];
-    }
-
-    // console.log(`✓ Successfully fetched ${data?.length || 0} blogs from Supabase`);
-    return data || [];
+    // Use cached version instead of direct database query
+    const data = await SupabaseCache.getAllBlogs();
+    console.log(
+      `✓ Successfully loaded ${(data as BlogSummary[]).length} blogs from cache`
+    );
+    return (data as BlogSummary[]) || [];
   } catch (err) {
     console.error("Error fetching blogs:", err);
     return [];

@@ -36,7 +36,8 @@ export function SearchBar() {
   );
 
   useEffect(() => {
-    if (!query) {
+    if (!query || query.length < 2) {
+      // Only search if query is at least 2 characters
       setTools([]);
       setBlogs([]);
       return;
@@ -49,13 +50,13 @@ export function SearchBar() {
           .from("tools_summary")
           .select("id, tool_name, slug, one_line_description")
           .ilike("tool_name", `%${query}%`)
-          .limit(5);
+          .limit(3); // Reduced from 5 to 3
 
         const { data: blogData } = await supabase
           .from("blogs_summary")
           .select("id, title, slug, excerpt")
           .ilike("title", `%${query}%`)
-          .limit(5);
+          .limit(3); // Reduced from 5 to 3
 
         setTools(toolData || []);
         setBlogs(blogData || []);
@@ -66,7 +67,7 @@ export function SearchBar() {
       }
     };
 
-    const debounce = setTimeout(fetchData, 300);
+    const debounce = setTimeout(fetchData, 500); // Increased from 300ms to 500ms
     return () => clearTimeout(debounce);
   }, [query]);
 
@@ -118,7 +119,9 @@ export function SearchBar() {
                         className="block p-2 rounded hover:bg-purple-100 transition"
                         onClick={() => setQuery("")}
                       >
-                        <div className="font-medium text-gray-900">{tool.tool_name}</div>
+                        <div className="font-medium text-gray-900">
+                          {tool.tool_name}
+                        </div>
                         <div className="text-gray-600 text-sm truncate">
                           {tool.one_line_description || ""}
                         </div>
@@ -141,7 +144,9 @@ export function SearchBar() {
                         className="block p-2 rounded hover:bg-yellow-100 transition"
                         onClick={() => setQuery("")}
                       >
-                        <div className="font-medium text-gray-900">{blog.title}</div>
+                        <div className="font-medium text-gray-900">
+                          {blog.title}
+                        </div>
                         <div className="text-gray-600 text-sm truncate">
                           {blog.excerpt || ""}
                         </div>
@@ -152,7 +157,9 @@ export function SearchBar() {
               )}
 
               {filteredTools.length === 0 && filteredBlogs.length === 0 && (
-                <div className="text-gray-500 text-sm text-center">No results found.</div>
+                <div className="text-gray-500 text-sm text-center">
+                  No results found.
+                </div>
               )}
             </>
           )}

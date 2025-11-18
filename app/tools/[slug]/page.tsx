@@ -35,16 +35,50 @@ interface ToolDetailPageProps {
 
 // Generate static paths at build time
 export async function generateStaticParams() {
-  const { data: tools } = await supabaseServer
-    .from("tools_summary")
-    .select("slug")
-    .limit(1000); // Limit to prevent too many builds, adjust as needed
+  try {
+    let allTools: { slug: string }[] = [];
+    let from = 0;
+    const batchSize = 1000;
+    let hasMore = true;
 
-  return (
-    tools?.map((tool) => ({
+    console.log("Generating static params for all tools...");
+
+    // Fetch all tools in batches
+    while (hasMore) {
+      const { data, error } = await supabaseServer
+        .from("tools_summary")
+        .select("slug")
+        .not("slug", "is", null) // Ensure slug is not null
+        .range(from, from + batchSize - 1);
+
+      if (error) {
+        console.error(
+          `Error fetching tools batch ${from}-${from + batchSize - 1}:`,
+          error
+        );
+        break;
+      }
+
+      if (data && data.length > 0) {
+        // Filter out any tools with invalid slugs
+        const validTools = data.filter((tool) => tool.slug && tool.slug.trim());
+        allTools = [...allTools, ...validTools];
+        from += batchSize;
+        hasMore = data.length === batchSize;
+        console.log(`Fetched ${allTools.length} tool slugs so far...`);
+      } else {
+        hasMore = false;
+      }
+    }
+
+    console.log(`✓ Generated static params for ${allTools.length} tools`);
+    return allTools.map((tool) => ({
       slug: tool.slug,
-    })) || []
-  );
+    }));
+  } catch (err) {
+    console.error("Error generating static params for tools:", err);
+    return [];
+  }
 }
 
 // Dynamic metadata

@@ -1,7 +1,14 @@
 import { MetadataRoute } from "next";
-import { supabase } from "@/utils/supabase";
+import { SupabaseCache } from "@/utils/supabaseOptimized";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 3600; // Cache sitemap for 1 hour
+
+interface SitemapData {
+  categories: string[];
+  blogs: Array<{ slug: string; created_at: string }>;
+  tools: Array<{ slug: string; created_at: string }>;
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Base URL of your website (no trailing slash)
@@ -31,101 +38,40 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // Category pages
-  const categories = [
-    "text-to-video-tools",
-    "ai-agents",
-    "ai-animation-tools",
-    "ai-art-generators",
-    "ai-characters",
-    "ai-chatbots",
-    "ai-chrome-extensions",
-    "ai-code-review-tools",
-    "ai-coding-assistants",
-    "ai-copywriting-tools",
-    "ai-customer-service-bots",
-    "ai-customer-support",
-    "ai-data-analysis-tools",
-    "ai-data-visualization-tools",
-    "ai-deepfake-and-face-swap-tools",
-    "ai-fun-tools",
-    "ai-games-tools",
-    "ai-headshot-generators",
-    "ai-image-generators",
-    "ai-interior-design-tools",
-    "ai-lead-generation-tools",
-    "ai-logo-generators",
-    "ai-market-research-tools",
-    "ai-meeting-assistants",
-    "ai-music-generators",
-    "ai-paraphrasing-tools",
-    "ai-presentation-makers",
-    "ai-product-photography",
-    "ai-resume-builders",
-    "ai-search-engine-tools",
-    "ai-search-engines",
-    "ai-seo-tools",
-    "ai-social-media-management",
-    "ai-story-generators",
-    "ai-summarizers",
-    "ai-tools-for-architects",
-    "ai-tools-for-artists",
-    "ai-tools-for-marketers",
-    "ai-tools-for-musicians",
-    "ai-tools-for-students",
-    "ai-transcription-tools",
-    "ai-translation-tools",
-    "ai-video-editors",
-    "ai-video-generators",
-    "ai-video-upscaling",
-    "ai-voice-changers",
-    "ai-voice-cloning",
-    "ai-website-builders",
-    "ai-workflow-automation",
-    "ai-writing-assistants",
-    "free-ai-tools",
-    "future-ai-tools",
-    "most-useful-ai-tools",
-    "open-source-ai-tools",
-    "text-generators",
-  ];
+  // Use cached sitemap data to reduce egress usage
+  const sitemapData = (await SupabaseCache.getSitemapData()) as SitemapData;
+  const { categories, blogs, tools } = sitemapData;
 
-  const categoryPages = categories.map((category) => ({
+  console.log(
+    `✓ Sitemap using cached data: ${categories.length} categories, ${blogs.length} blogs, ${tools.length} tools`
+  );
+
+  const categoryPages = categories.map((category: string) => ({
     url: `${baseUrl}/tools/category/${category}`,
     lastModified: new Date(),
   }));
 
-  // Fetch dynamic blog pages
-  const { data: blogs } = await supabase
-    .from("blogs_summary")
-    .select("slug, created_at")
-    .order("created_at", { ascending: false });
+  const blogPages = blogs.map((blog: { slug: string; created_at: string }) => ({
+    url: `${baseUrl}/blog/${blog.slug}`,
+    lastModified: new Date(blog.created_at),
+  }));
 
-  const blogPages =
-    blogs?.map((blog) => ({
-      url: `${baseUrl}/blog/${blog.slug}`,
-      lastModified: new Date(blog.created_at),
-    })) || [];
-
-  // Fetch dynamic tool pages (if you have tools in database)
-  // You can uncomment and modify this if you have tools stored in Supabase
-
-  const { data: tools } = await supabase
-    .from("tools_summary")
-    .select("id, tool_name, slug, created_at")
-    .order("tool_name", { ascending: true });
-
-  const toolPages =
-    tools?.map((tool) => ({
-      url: `${baseUrl}/tools/${tool.slug}`,
-      lastModified: new Date(tool.created_at),
-    })) || [];
+  const toolPages = tools.map((tool: { slug: string; created_at: string }) => ({
+    url: `${baseUrl}/tools/${tool.slug}`,
+    lastModified: new Date(tool.created_at),
+  }));
 
   // Combine all pages
-  return [
-    ...staticPages,
-    ...categoryPages,
-    ...blogPages,
-    ...toolPages, // Uncomment when you have tools
-  ];
+  const totalPages =
+    staticPages.length +
+    categoryPages.length +
+    blogPages.length +
+    toolPages.length;
+  console.log(`✓ Sitemap generated with ${totalPages} total pages:`);
+  console.log(`  - Static pages: ${staticPages.length}`);
+  console.log(`  - Category pages: ${categoryPages.length}`);
+  console.log(`  - Blog pages: ${blogPages.length}`);
+  console.log(`  - Tool pages: ${toolPages.length}`);
+
+  return [...staticPages, ...categoryPages, ...blogPages, ...toolPages];
 }

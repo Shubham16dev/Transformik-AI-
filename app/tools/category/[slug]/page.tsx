@@ -3,7 +3,7 @@ import { supabaseServer } from "@/utils/supabaseServer";
 import { ToolsContent } from "@/app/tools/ToolsContent";
 import type { Metadata } from "next";
 
-export const revalidate = 0; // Always fetch fresh content
+export const revalidate = 3600; // Cache for 1 hour instead of always fresh
 
 interface Tool {
   id: string;
@@ -18,32 +18,21 @@ interface Tool {
 
 async function getToolsByCategory(categoryName: string): Promise<Tool[]> {
   try {
-    let allTools: Tool[] = [];
-    let from = 0;
-    const batchSize = 1000;
-    let hasMore = true;
+    // Use a more efficient query with direct filtering at database level
+    const { data, error } = await supabaseServer
+      .from("tools_summary")
+      .select("*")
+      .contains("category", [categoryName]) // Use contains for array matching
+      .order("tool_name", { ascending: true })
+      .limit(1000); // Add a reasonable limit
 
-    // Fetch all tools in batches to ensure we get complete data
-    while (hasMore) {
-      const { data, error } = await supabaseServer
-        .from("tools_summary")
-        .select("*")
-        .order("tool_name", { ascending: true })
-        .range(from, from + batchSize - 1);
-
-      if (error) throw error;
-
-      if (data && data.length > 0) {
-        allTools = [...allTools, ...data];
-        from += batchSize;
-        hasMore = data.length === batchSize;
-      } else {
-        hasMore = false;
-      }
+    if (error) {
+      console.error("Database error fetching tools for category:", error);
+      return [];
     }
 
-    // Filter tools that have the category (exact match, case-insensitive)
-    const filteredTools = allTools.filter((tool) => {
+    // Filter on the client side as well for exact matches
+    const filteredTools = (data || []).filter((tool) => {
       const categories = tool.category;
 
       if (Array.isArray(categories)) {
@@ -61,7 +50,9 @@ async function getToolsByCategory(categoryName: string): Promise<Tool[]> {
     });
 
     console.log(
-      `Category searched: "${categoryName}" - Found ${filteredTools.length} tools (from ${allTools.length} total tools)`
+      `Category searched: "${categoryName}" - Found ${
+        filteredTools.length
+      } tools (from ${data?.length || 0} database results)`
     );
     return filteredTools;
   } catch (err) {
@@ -73,14 +64,27 @@ async function getToolsByCategory(categoryName: string): Promise<Tool[]> {
 // Helper function to get the actual category name from slug
 async function getCategoryNameFromSlug(slug: string): Promise<string> {
   try {
-    // Fetch all unique categories from tools
+    // First try to get from categories_details table if it exists
+    const { data: categoryDetails } = await supabaseServer
+      .from("categories_details")
+      .select("name")
+      .eq("slug", slug)
+      .single();
+
+    if (categoryDetails?.name) {
+      return categoryDetails.name;
+    }
+
+    // Fallback: Fetch a sample of categories from tools (limit to reduce data transfer)
     const { data, error } = await supabaseServer
       .from("tools_summary")
-      .select("category");
+      .select("category")
+      .not("category", "is", null)
+      .limit(500); // Limit to reduce data transfer
 
     if (error) throw error;
 
-    // Collect all unique category names
+    // Collect unique category names
     const allCategories = new Set<string>();
     data?.forEach((tool) => {
       const categories = tool.category;
@@ -95,7 +99,7 @@ async function getCategoryNameFromSlug(slug: string): Promise<string> {
       }
     });
 
-    // Normalize slug for comparison (handle special characters)
+    // Normalize slug for comparison
     const normalizeForComparison = (str: string) =>
       str
         .toLowerCase()

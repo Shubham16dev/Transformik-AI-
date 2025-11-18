@@ -1,4 +1,4 @@
-import { supabaseServer } from "@/utils/supabaseServer";
+import { SupabaseCache } from "@/utils/supabaseOptimized";
 import { ToolCard } from "@/components/tools/ToolCard";
 import { HomeBlogCard } from "@/components/blog/HomeBlogCard";
 import { SearchBar } from "@/components/layout/SearchBar";
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 0; // Always fetch fresh content (ISR with no cache)
+export const revalidate = 1800; // Regenerate every 30 minutes (ISR)
 
 // ---------- Types ----------
 type PricingModel = "Free" | "Freemium" | "Paid" | "Free Trial";
@@ -62,23 +62,11 @@ interface Blog {
 // ---------- Data Fetchers ----------
 async function getLatestTools(): Promise<Tool[]> {
   try {
-    const { data, error } = await supabaseServer
-      .from("tools_summary")
-      .select(
-        "id, tool_name, slug, one_line_description, pricing_model, url, logo, category"
-      )
-      .order("created_at", { ascending: false })
-      .limit(6);
-
-    if (error) {
-      console.error("Error fetching latest tools:", error.message);
-      return [];
-    }
-
-    // console.log(`✓ Fetched ${data?.length || 0} latest tools for homepage`);
+    // Use cached version instead of direct database query
+    const data = await SupabaseCache.getLatestTools(6);
 
     return (
-      data?.map(
+      (data as RawTool[])?.map(
         (tool: RawTool): Tool => ({
           ...tool,
           logo: getPublicImageUrl(
@@ -97,36 +85,9 @@ async function getLatestTools(): Promise<Tool[]> {
 
 async function getBlogs(): Promise<Blog[]> {
   try {
-    // Try blogs_summary table first
-    const { data, error } = await supabaseServer
-      .from("blogs_summary")
-      .select("id, title, slug, excerpt, featured_image")
-      .order("created_at", { ascending: false })
-      .limit(5);
-
-    if (error) {
-      console.error("Error fetching blogs from blogs_summary:", error.message);
-      // Fallback: try 'blogs' table
-      const { data: blogsData, error: blogsError } = await supabaseServer
-        .from("blogs")
-        .select("id, title, slug, excerpt, featured_image")
-        .order("created_at", { ascending: false })
-        .limit(5);
-
-      if (blogsError) {
-        console.error(
-          "Error fetching blogs from blogs table:",
-          blogsError.message
-        );
-        return [];
-      }
-
-      // console.log(`✓ Fetched ${blogsData?.length || 0} latest blogs for homepage (from blogs table)`);
-      return blogsData ?? [];
-    }
-
-    // console.log(`✓ Fetched ${data?.length || 0} latest blogs for homepage`);
-    return data ?? [];
+    // Use cached version instead of direct database query
+    const data = await SupabaseCache.getLatestBlogs(5);
+    return (data as Blog[]) ?? [];
   } catch (err) {
     console.error("Error fetching blogs:", err);
     return [];

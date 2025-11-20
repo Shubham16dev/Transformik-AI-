@@ -417,55 +417,73 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
             )}
 
             {/* Pricing */}
-            {toolDetails?.pricing && (
-              <Card className="mt-6">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                    Pricing
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-4 text-gray-700 leading-relaxed">
-                  <div className="space-y-3">
-                    {toolDetails.pricing
-                      .split(
-                        /\.\s+(?=[A-Z])|(?:\n|\.)\s*(?=Free Plan:|Development Plan|Production Plan|Basic Plan:|Pro Plan:|Enterprise Plan|Premium Plan:|Starter Plan:|Business Plan:|Team Plan:|Individual Plan:|Monthly Plan:|Annual Plan:|Trial:|Refund Policy:)/g
-                      )
-                      .filter((section: string) => section.trim())
-                      .map((section: string, idx: number) => {
-                        const trimmedSection = section.trim();
+            {toolDetails?.pricing &&
+              String(toolDetails.pricing).trim().toLowerCase() !== "nan" &&
+              String(toolDetails.pricing).trim() !== "" && (
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      Pricing
+                    </CardTitle>
+                  </CardHeader>
 
-                        // Check if it's a plan/section header
-                        const isPlanHeader =
-                          /^(Free Plan:|Development Plan|Production Plan|Basic Plan:|Pro Plan:|Enterprise Plan|Premium Plan:|Starter Plan:|Business Plan:|Team Plan:|Individual Plan:|Monthly Plan:|Annual Plan:|Trial:|Refund Policy:)/i.test(
-                            trimmedSection
-                          );
+                  <CardContent className="pt-4 text-gray-700 leading-relaxed">
+                    {/* Check if pricing value is a URL */}
+                    {/^https?:\/\/[^\s]+$/i.test(toolDetails.pricing.trim()) ? (
+                      // 🔗 Case 1: Pricing is a URL
+                      <p className="text-gray-800">
+                        To check the pricing of{" "}
+                        <span className="font-semibold">
+                          {toolSummary.tool_name}
+                        </span>{" "}
+                        <a
+                          href={toolDetails.pricing.trim()}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-green-600 underline hover:text-blue-800"
+                        >
+                          click here
+                        </a>
+                      </p>
+                    ) : (
+                      // 📝 Case 2: Normal pricing text
+                      <div className="space-y-3">
+                        {toolDetails.pricing
+                          .split(
+                            /\.\s+(?=[A-Z])|(?:\n|\.)\s*(?=Free Plan:|Development Plan|Production Plan|Basic Plan:|Pro Plan:|Enterprise Plan|Premium Plan:|Starter Plan:|Business Plan:|Team Plan:|Individual Plan:|Monthly Plan:|Annual Plan:|Trial:|Refund Policy:)/g
+                          )
+                          .filter((section: string) => section.trim())
+                          .map((section: string, idx: number) => {
+                            const trimmedSection = section.trim();
 
-                        if (isPlanHeader) {
-                          return (
-                            <div
-                              key={idx}
-                              className="border-l-4 border-green-500 pl-4 py-2 bg-green-50 rounded-r-lg"
-                            >
-                              <div className="font-semibold text-gray-800">
-                                {trimmedSection}
+                            const isPlanHeader =
+                              /^(Free Plan:|Development Plan|Production Plan|Basic Plan:|Pro Plan:|Enterprise Plan:|Premium Plan:|Starter Plan:|Business Plan:|Team Plan:|Individual Plan:|Monthly Plan:|Annual Plan:|Trial:|Refund Policy:)/i.test(
+                                trimmedSection
+                              );
+
+                            return isPlanHeader ? (
+                              <div
+                                key={idx}
+                                className="border-l-4 border-green-500 pl-4 py-2 bg-green-50 rounded-r-lg"
+                              >
+                                <div className="font-semibold text-gray-800">
+                                  {trimmedSection}
+                                </div>
                               </div>
-                            </div>
-                          );
-                        } else {
-                          return (
-                            <div key={idx} className="pl-4 py-1">
-                              <div className="text-gray-700">
-                                {trimmedSection}
+                            ) : (
+                              <div key={idx} className="pl-4 py-1">
+                                <div className="text-gray-700">
+                                  {trimmedSection}
+                                </div>
                               </div>
-                            </div>
-                          );
-                        }
-                      })}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                            );
+                          })}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
             {/* FAQs */}
             {faqs.length > 0 && (

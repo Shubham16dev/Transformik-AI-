@@ -157,6 +157,11 @@ export default async function HomePage() {
                 "AI Writing Assistants",
                 "AI Coding Assistants",
                 "AI Tools for Marketers",
+                "AI Image Generators",
+                "AI Video Generators",
+                "AI Productivity Tools",
+                "AI Design Tools",
+                "AI Data Analysis Tools",
               ].map((category) => {
                 const slug = generateSlug(category);
                 return (

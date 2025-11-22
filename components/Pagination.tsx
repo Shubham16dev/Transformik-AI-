@@ -40,10 +40,8 @@ export function Pagination({
   );
 
   // Build hrefs so page 1 is the clean URL (no ?page=1).
-  // Use provided basePath or fall back to current pathname when available.
-  const effectiveBasePath =
-    basePath ??
-    (typeof window !== "undefined" ? window.location.pathname : "/");
+  // Use provided basePath (required to avoid hydration errors)
+  const effectiveBasePath = basePath ?? "/";
   const makeHref = (page: number) =>
     page === 1 ? effectiveBasePath : `${effectiveBasePath}?page=${page}`;
 

@@ -1,65 +1,10 @@
 // app/tools/category/[slug]/page.tsx
 import { supabaseServer } from "@/utils/supabaseServer";
+import { SupabaseCache } from "@/utils/supabaseOptimized";
 import { ToolsContent } from "@/app/tools/ToolsContent";
 import type { Metadata } from "next";
 
 export const revalidate = 3600; // Cache for 1 hour instead of always fresh
-
-interface Tool {
-  id: string;
-  tool_name: string;
-  slug: string;
-  one_line_description: string;
-  pricing_model: string;
-  url?: string;
-  category?: string | string[] | null;
-  logo?: string | null;
-}
-
-async function getToolsByCategory(categoryName: string): Promise<Tool[]> {
-  try {
-    // Use a more efficient query with direct filtering at database level
-    const { data, error } = await supabaseServer
-      .from("tools_summary")
-      .select("*")
-      .contains("category", [categoryName]) // Use contains for array matching
-      .order("tool_name", { ascending: true })
-      .limit(1000); // Add a reasonable limit
-
-    if (error) {
-      console.error("Database error fetching tools for category:", error);
-      return [];
-    }
-
-    // Filter on the client side as well for exact matches
-    const filteredTools = (data || []).filter((tool) => {
-      const categories = tool.category;
-
-      if (Array.isArray(categories)) {
-        return categories.some(
-          (cat) =>
-            cat &&
-            cat.trim().toLowerCase() === categoryName.trim().toLowerCase()
-        );
-      } else if (typeof categories === "string" && categories) {
-        return (
-          categories.trim().toLowerCase() === categoryName.trim().toLowerCase()
-        );
-      }
-      return false;
-    });
-
-    console.log(
-      `Category searched: "${categoryName}" - Found ${
-        filteredTools.length
-      } tools (from ${data?.length || 0} database results)`
-    );
-    return filteredTools;
-  } catch (err) {
-    console.error("Error fetching tools for category:", err);
-    return [];
-  }
-}
 
 // Helper function to get the actual category name from slug
 async function getCategoryNameFromSlug(slug: string): Promise<string> {
@@ -280,9 +225,23 @@ export default async function ToolsByCategory({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams?: Promise<{ page?: string | string[] }>;
+  searchParams?: Promise<{
+    page?: string | string[];
+    search?: string | string[];
+    price?: string | string[];
+  }>;
 }) {
   const { slug } = await params;
+  const sp = (await searchParams) || {};
+
+  // Extract query parameters
+  const rawPage = Array.isArray(sp.page) ? sp.page[0] : sp.page;
+  const rawSearch = Array.isArray(sp.search) ? sp.search[0] : sp.search;
+  const rawPrice = Array.isArray(sp.price) ? sp.price[0] : sp.price;
+
+  const currentPage = rawPage ? Math.max(parseInt(rawPage, 10) || 1, 1) : 1;
+  const searchQuery = rawSearch || "";
+  const priceFilter = rawPrice || "all";
 
   // Fetch category metadata (meta_title, description, faqs) server-side from categories_details
   const { data: catMeta } = await supabaseServer
@@ -294,36 +253,31 @@ export default async function ToolsByCategory({
   // Get the actual category name by matching slug with real category names
   const categoryName = catMeta?.name || (await getCategoryNameFromSlug(slug));
 
-  // Fetch tools for this specific category only
-  const tools = await getToolsByCategory(categoryName);
+  // Fetch tools for this specific category with pagination (15 per page)
+  const result = await SupabaseCache.getToolsByCategory({
+    categoryName,
+    page: currentPage,
+    pageSize: 15,
+  });
 
   // Get random categories excluding the current category
   const randomCategories = await getRandomCategories(categoryName, 6);
 
-  // Extract unique categories
-  const allCategories: string[] = [];
-  tools.forEach((tool: Tool) => {
-    const toolCategories = tool.category;
-    if (Array.isArray(toolCategories)) {
-      toolCategories.forEach((cat) => cat && allCategories.push(cat));
-    } else if (typeof toolCategories === "string" && toolCategories) {
-      allCategories.push(toolCategories);
-    }
-  });
-  const categories = Array.from(new Set(allCategories)).sort();
-
-  const sp = (await searchParams) || {};
-  const rawPage = Array.isArray(sp.page) ? sp.page[0] : sp.page;
-  const initialPage = rawPage ? Math.max(parseInt(rawPage, 10) || 1, 1) : 1;
+  // Get all categories for the filter
+  const categories = await SupabaseCache.getUniqueCategories();
 
   return (
     <ToolsContent
-      tools={tools}
+      tools={result.tools}
       categories={categories}
       categorySlug={slug}
       categoryMeta={catMeta ?? null}
-      initialPage={initialPage}
+      initialPage={currentPage}
       similarCategories={randomCategories}
+      totalPages={result.totalPages}
+      totalTools={result.total}
+      initialSearch={searchQuery}
+      initialPriceFilter={priceFilter}
     />
   );
 }

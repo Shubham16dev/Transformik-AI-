@@ -1,3 +1,4 @@
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
 
@@ -32,11 +33,27 @@ const nextConfig = {
     optimizePackageImports: ["@/components", "@/utils", "lucide-react"],
   },
 
+  // Remove the invalid Vercel-injected header from robots.txt
+  async headers() {
+    return [
+      {
+        source: "/robots.txt",
+        headers: [
+          {
+            key: "Content-Signal",
+            value: "",
+          },
+          {
+            key: "Content-Security-Policy",
+            value: "",
+          },
+        ],
+      },
+    ];
+  },
+
   // Production optimizations
   poweredByHeader: false,
-
-  // Output standalone for smaller Docker images (optional)
-  // output: 'standalone',
 };
 
 export default nextConfig;

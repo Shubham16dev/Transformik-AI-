@@ -120,13 +120,16 @@ export function ToolsContent({
     const finalPage = newFilters.page ?? currentPage;
 
     if (finalSearch) params.set("search", finalSearch);
-    if (finalCategory && finalCategory !== "all")
+    // Don't add category param if we're on a category page (categorySlug is set)
+    if (finalCategory && finalCategory !== "all" && !categorySlug)
       params.set("category", finalCategory);
     if (finalPrice && finalPrice !== "all") params.set("price", finalPrice);
     if (finalPage > 1) params.set("page", finalPage.toString());
 
     const queryString = params.toString();
-    const newUrl = queryString ? `/tools?${queryString}` : "/tools";
+    // Use category page URL if categorySlug is present, otherwise use /tools
+    const baseUrl = categorySlug ? `/tools/category/${categorySlug}` : "/tools";
+    const newUrl = queryString ? `${baseUrl}?${queryString}` : baseUrl;
     router.push(newUrl);
   };
 
@@ -167,7 +170,11 @@ export function ToolsContent({
       <PaginationSEO
         currentPage={currentPage}
         totalPages={totalPages}
-        baseUrl="https://www.transformik.com/tools"
+        baseUrl={
+          categorySlug
+            ? `https://www.transformik.com/tools/category/${categorySlug}`
+            : "https://www.transformik.com/tools"
+        }
       />
 
       {/* Schema Markup */}

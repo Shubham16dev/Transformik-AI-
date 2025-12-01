@@ -1,4 +1,4 @@
-import { supabaseServer } from "@/utils/supabaseServer";
+import { SupabaseCache } from "@/utils/supabaseOptimized";
 import { FreeToolsContent } from "./FreeToolsContent";
 
 import type { Metadata } from "next";
@@ -23,13 +23,13 @@ export async function generateMetadata({
   const baseDescription =
     "Explore our collection of completely free AI tools. Find free tools for writing, coding, design, marketing, and more. No credit card required.";
 
-  const title = currentPage > 1 
-    ? `${baseTitle} | Page ${currentPage}` 
-    : baseTitle;
+  const title =
+    currentPage > 1 ? `${baseTitle} | Page ${currentPage}` : baseTitle;
 
-  const description = currentPage > 1
-    ? `Browse page ${currentPage} of ${baseTitle.toLowerCase()}. Continue exploring our comprehensive collection of free AI tools and resources.`
-    : baseDescription;
+  const description =
+    currentPage > 1
+      ? `Browse page ${currentPage} of ${baseTitle.toLowerCase()}. Continue exploring our comprehensive collection of free AI tools and resources.`
+      : baseDescription;
 
   return {
     title,
@@ -47,78 +47,85 @@ export async function generateMetadata({
 
 export const revalidate = 3600; // Revalidate every hour
 
-interface Tool {
-  id: string;
-  tool_name: string;
-  slug: string;
-  one_line_description: string;
-  pricing_model: "Free" | "Freemium" | "Paid" | "Free Trial";
-  url: string;
-  logo?: string;
-  category?: string | string[];
-}
-
 interface CategoryOption {
   value: string;
   label: string;
 }
 
-async function getFreeTools(): Promise<{
-  tools: Tool[];
-  categories: CategoryOption[];
-}> {
+async function getFreeTools(
+  page: number = 1,
+  search: string = "",
+  category: string = "all",
+  sortMode: string = "alpha-asc"
+) {
   try {
-    const { data: toolsData, error: toolsError } = await supabaseServer
-      .from("tools_summary")
-      .select(
-        "id,tool_name,slug,one_line_description,pricing_model,url,logo,category"
-      )
-      .eq("pricing_model", "Free");
-
-    if (toolsError) throw toolsError;
-
-    const categorySet = new Set<string>();
-    toolsData?.forEach((tool) => {
-      const categories = tool.category;
-
-      if (Array.isArray(categories)) {
-        categories.forEach((cat) => {
-          if (cat && typeof cat === "string") {
-            categorySet.add(cat);
-          }
-        });
-      } else if (typeof categories === "string" && categories) {
-        categorySet.add(categories);
-      }
+    // Use optimized filtered query
+    const result = await SupabaseCache.getFilteredFreeTools({
+      page,
+      pageSize: 9,
+      search,
+      category,
+      sortMode,
     });
 
-    const categoryList: CategoryOption[] = [
+    console.log(
+      `✓ Successfully loaded ${result.tools.length} free tools (page ${page})`
+    );
+    return result;
+  } catch (err) {
+    console.error("Error fetching free tools:", err);
+    return {
+      tools: [],
+      total: 0,
+      page: 1,
+      pageSize: 9,
+      totalPages: 0,
+    };
+  }
+}
+
+async function getFreeToolCategories(): Promise<CategoryOption[]> {
+  try {
+    const categories = await SupabaseCache.getFreeToolCategories();
+    return [
       { value: "all", label: "All Categories" },
-      ...Array.from(categorySet).map((cat) => ({
+      ...categories.map((cat: string) => ({
         value: cat.toLowerCase().replace(/\s+/g, "-"),
         label: cat,
       })),
     ];
-
-    return {
-      tools: toolsData || [],
-      categories: categoryList,
-    };
   } catch (err) {
-    console.error("Error fetching tools or categories:", err);
-    return {
-      tools: [],
-      categories: [{ value: "all", label: "All Categories" }],
-    };
+    console.error("Error fetching categories:", err);
+    return [{ value: "all", label: "All Categories" }];
   }
 }
 
 export default async function FreeToolsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ page?: string | string[] }>;
+  searchParams?: Promise<{
+    page?: string | string[];
+    search?: string | string[];
+    category?: string | string[];
+    sort?: string | string[];
+  }>;
 }) {
-  const { tools, categories } = await getFreeTools();
+  const sp = (await searchParams) || {};
+
+  // Extract query parameters
+  const rawPage = Array.isArray(sp.page) ? sp.page[0] : sp.page;
+  const rawSearch = Array.isArray(sp.search) ? sp.search[0] : sp.search;
+  const rawCategory = Array.isArray(sp.category) ? sp.category[0] : sp.category;
+  const rawSort = Array.isArray(sp.sort) ? sp.sort[0] : sp.sort;
+
+  const currentPage = rawPage ? Math.max(parseInt(rawPage, 10) || 1, 1) : 1;
+  const search = rawSearch || "";
+  const category = rawCategory || "all";
+  const sortMode = rawSort || "alpha-asc";
+
+  // Fetch data with filters
+  const result = await getFreeTools(currentPage, search, category, sortMode);
+  const categories = await getFreeToolCategories();
 
   // FAQs for Free Tools page - SEO optimized
   const freeToolsFaqs = [
@@ -143,7 +150,8 @@ export default async function FreeToolsPage({
         "Free AI tools may have constraints such as daily usage quotas, processing time limits, file size restrictions, watermarks on outputs, limited customization options, or basic support. These limitations help manage server costs while still providing valuable functionality for most users' needs.",
     },
     {
-      question: "Can free AI tools be used for professional and commercial work?",
+      question:
+        "Can free AI tools be used for professional and commercial work?",
       answer:
         "Usage rights vary by tool and license. Many free AI tools permit commercial use under specific conditions, while others may restrict commercial applications or require attribution. Always review the terms of service and licensing agreements to understand permitted uses and any requirements.",
     },
@@ -158,23 +166,25 @@ export default async function FreeToolsPage({
         "Yes, numerous free AI-powered development tools exist including code completion engines, automated testing frameworks, code review assistants, documentation generators, bug detection systems, and API development aids. These tools integrate into existing development environments to enhance productivity and code quality.",
     },
     {
-      question: "What should I consider regarding data privacy with free AI tools?",
+      question:
+        "What should I consider regarding data privacy with free AI tools?",
       answer:
         "When using free AI tools, review their privacy policies to understand data handling practices, storage duration, sharing policies, and security measures. Consider the sensitivity of your data, whether information is stored or processed locally versus in the cloud, and what rights you have over your data.",
     },
   ];
 
-  const sp = (await searchParams) || {};
-  const rawPage = Array.isArray(sp.page) ? sp.page[0] : sp.page;
-  const initialPage = rawPage ? Math.max(parseInt(rawPage, 10) || 1, 1) : 1;
-
   return (
     <FreeToolsContent
-      tools={tools}
+      tools={result.tools}
       categories={categories}
       faqs={freeToolsFaqs}
-      initialPage={initialPage}
-      showDescription={initialPage === 1}
+      initialPage={currentPage}
+      totalPages={result.totalPages}
+      totalTools={result.total}
+      initialSearch={search}
+      initialCategory={category}
+      initialSortMode={sortMode}
+      showDescription={currentPage === 1}
     />
   );
 }

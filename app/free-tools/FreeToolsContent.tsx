@@ -36,10 +36,14 @@ interface FreeToolsContentProps {
   categories: CategoryOption[];
   faqs?: { question: string; answer: string }[];
   initialPage?: number;
+  totalPages?: number;
+  totalTools?: number;
+  initialSearch?: string;
+  initialCategory?: string;
+  initialSortMode?: string;
   showDescription?: boolean;
 }
 
-const ITEMS_PER_PAGE = 9;
 const sortOptions = [
   {
     value: "alpha-asc",
@@ -58,98 +62,79 @@ export function FreeToolsContent({
   categories,
   faqs,
   initialPage = 1,
+  totalPages: serverTotalPages = 1,
+  totalTools: serverTotalTools = 0,
+  initialSearch = "",
+  initialCategory = "all",
+  initialSortMode = "alpha-asc",
   showDescription = false,
 }: FreeToolsContentProps) {
   const router = useRouter();
 
-  const [filteredTools, setFilteredTools] = useState<Tool[]>(tools);
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [sortMode, setSortMode] = useState<string>("alpha-asc");
+  const [search, setSearch] = useState(initialSearch);
+  const [selectedCategory, setSelectedCategory] =
+    useState<string>(initialCategory);
+  const [sortMode, setSortMode] = useState<string>(initialSortMode);
   const [currentPage, setCurrentPage] = useState<number>(initialPage);
-  const [isInitialMount, setIsInitialMount] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Filter, search & sort
   useEffect(() => {
-    let temp = [...tools];
+    setIsMounted(true);
+  }, []);
 
-    if (selectedCategory && selectedCategory !== "all") {
-      temp = temp.filter((tool) => {
-        const categories = tool.category;
+  // Update URL when filters change - triggers server-side refetch
+  const updateURL = (newFilters: {
+    search?: string;
+    category?: string;
+    sort?: string;
+    page?: number;
+  }) => {
+    const params = new URLSearchParams();
 
-        if (Array.isArray(categories)) {
-          return categories.some(
-            (cat) =>
-              cat &&
-              typeof cat === "string" &&
-              cat.toLowerCase().replace(/\s+/g, "-") === selectedCategory
-          );
-        } else if (typeof categories === "string" && categories) {
-          return (
-            categories.toLowerCase().replace(/\s+/g, "-") === selectedCategory
-          );
-        }
+    const finalSearch = newFilters.search ?? search;
+    const finalCategory = newFilters.category ?? selectedCategory;
+    const finalSort = newFilters.sort ?? sortMode;
+    const finalPage = newFilters.page ?? currentPage;
 
-        return false;
-      });
-    }
+    if (finalSearch) params.set("search", finalSearch);
+    if (finalCategory && finalCategory !== "all")
+      params.set("category", finalCategory);
+    if (finalSort && finalSort !== "alpha-asc") params.set("sort", finalSort);
+    if (finalPage > 1) params.set("page", finalPage.toString());
 
-    if (search) {
-      temp = temp.filter((tool) =>
-        tool.tool_name.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-
-    if (sortMode === "alpha-asc")
-      temp.sort((a, b) => a.tool_name.localeCompare(b.tool_name));
-    if (sortMode === "alpha-desc")
-      temp.sort((a, b) => b.tool_name.localeCompare(a.tool_name));
-
-    setFilteredTools(temp);
-    // Don't reset currentPage here - let the separate useEffect handle it
-  }, [search, selectedCategory, sortMode, tools]);
-
-  const paginatedTools = filteredTools.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
-
-  // Update URL when page changes
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    const params = new URLSearchParams(window.location.search);
-    if (page > 1) {
-      params.set("page", page.toString());
-    } else {
-      params.delete("page");
-    }
-
-    const pathname = window.location.pathname || "/free-tools";
     const queryString = params.toString();
-    const target = queryString ? `${pathname}?${queryString}` : pathname;
-    router.push(target, { scroll: false });
+    const newUrl = queryString ? `/free-tools?${queryString}` : "/free-tools";
+    router.push(newUrl);
   };
 
-  // Reset to page 1 when filters change (but not on initial mount)
-  useEffect(() => {
-    if (isInitialMount) {
-      setIsInitialMount(false);
-      return;
-    }
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
     setCurrentPage(1);
-    // Update URL to remove page parameter when going back to page 1
-    const params = new URLSearchParams(window.location.search);
-    params.delete("page");
-    const pathname = window.location.pathname || "/free-tools";
-    const queryString = params.toString();
-    const target = queryString ? `${pathname}?${queryString}` : pathname;
-    router.push(target, { scroll: false });
-  }, [search, selectedCategory, sortMode, isInitialMount, router]);
+    updateURL({ search: value, page: 1 });
+  };
 
-  // Scroll to top when page changes
-  useEffect(() => {
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+    setCurrentPage(1);
+    updateURL({ category: value, page: 1 });
+  };
+
+  const handleSortChange = (value: string) => {
+    setSortMode(value);
+    setCurrentPage(1);
+    updateURL({ sort: value, page: 1 });
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    updateURL({ page });
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [currentPage]);
+  };
+
+  // Use server-provided data directly
+  const displayTools = tools;
+  const totalPages = serverTotalPages;
+  const totalItems = serverTotalTools;
 
   return (
     <>
@@ -185,76 +170,92 @@ export function FreeToolsContent({
             type="text"
             aria-label="Search free tools"
             placeholder="Search free tools..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            defaultValue={search}
+            onBlur={(e) => {
+              if (e.target.value !== search) {
+                handleSearchChange(e.target.value);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSearchChange(e.currentTarget.value);
+              }
+            }}
             className="w-full md:w-1/3 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-purple-600"
           />
 
-          <FilterCombobox
-            options={categories}
-            placeholder="Filter by category"
-            value={selectedCategory}
-            onChange={setSelectedCategory}
-          />
+          {isMounted && (
+            <>
+              <FilterCombobox
+                options={categories}
+                placeholder="Filter by category"
+                value={selectedCategory}
+                onChange={handleCategoryChange}
+              />
 
-          <FilterCombobox
-            options={sortOptions.map((o) => ({
-              value: o.value,
-              label: o.label,
-            }))}
-            placeholder="Sort tools"
-            value={sortMode}
-            onChange={setSortMode}
-          />
+              <FilterCombobox
+                options={sortOptions.map((o) => ({
+                  value: o.value,
+                  label: o.label,
+                }))}
+                placeholder="Sort tools"
+                value={sortMode}
+                onChange={handleSortChange}
+              />
+            </>
+          )}
         </div>
 
         {/* Tools Grid */}
-        {paginatedTools.length === 0 ? (
+        {isMounted && displayTools.length === 0 ? (
           <p className="text-gray-500">No free tools found.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {paginatedTools.map((tool) => {
-              const logoUrl = tool.logo
-                ? getPublicImageUrl("Images", `ToolLogos/${tool.logo}`)
-                : undefined;
+            {isMounted &&
+              displayTools.map((tool, index) => {
+                const logoUrl = tool.logo
+                  ? getPublicImageUrl("Images", `ToolLogos/${tool.logo}`)
+                  : undefined;
 
-              return (
-                <div key={tool.id} className="flex flex-col">
-                  <ToolCard
-                    tool={{
-                      tool_name: tool.tool_name,
-                      slug: tool.slug,
-                      one_line_description: tool.one_line_description,
-                      pricing_model: [
-                        "Free",
-                        "Freemium",
-                        "Paid",
-                        "Free Trial",
-                      ].includes(tool.pricing_model)
-                        ? (tool.pricing_model as
-                            | "Free"
-                            | "Freemium"
-                            | "Paid"
-                            | "Free Trial")
-                        : undefined,
-                      url: tool.url,
-                      logo: logoUrl,
-                      category: tool.category ?? "Other",
-                    }}
-                  />
-                </div>
-              );
-            })}
+                return (
+                  <div key={`${tool.id}-${index}`} className="flex flex-col">
+                    <ToolCard
+                      tool={{
+                        tool_name: tool.tool_name,
+                        slug: tool.slug,
+                        one_line_description: tool.one_line_description,
+                        pricing_model: [
+                          "Free",
+                          "Freemium",
+                          "Paid",
+                          "Free Trial",
+                        ].includes(tool.pricing_model)
+                          ? (tool.pricing_model as
+                              | "Free"
+                              | "Freemium"
+                              | "Paid"
+                              | "Free Trial")
+                          : undefined,
+                        url: tool.url,
+                        logo: logoUrl,
+                        category: tool.category ?? "Other",
+                      }}
+                    />
+                  </div>
+                );
+              })}
           </div>
         )}
 
         {/* Pagination */}
-        <Pagination
-          totalItems={filteredTools.length}
-          pageSize={ITEMS_PER_PAGE}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-        />
+        {isMounted && totalPages > 1 && (
+          <Pagination
+            totalItems={totalItems}
+            pageSize={9}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+          />
+        )}
 
         {/* FAQs Section - Only on page 1 */}
         {currentPage === 1 && faqs && faqs.length > 0 && (

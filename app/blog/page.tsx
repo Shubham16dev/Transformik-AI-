@@ -47,37 +47,50 @@ export async function generateMetadata({
 
 export const revalidate = 1800; // Regenerate every 30 minutes (ISR)
 
-interface BlogSummary {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string;
-  image?: string;
-  featured_image?: string;
-  author?: string;
-  created_at: string;
-}
-
-async function getBlogs(): Promise<BlogSummary[]> {
+async function getBlogs(page: number = 1, sortOption: string = "date-desc") {
   try {
-    // Use cached version instead of direct database query
-    const data = await SupabaseCache.getAllBlogs();
+    // Use optimized filtered query
+    const result = await SupabaseCache.getFilteredBlogs({
+      page,
+      pageSize: 8,
+      sortOption,
+    });
+
     console.log(
-      `✓ Successfully loaded ${(data as BlogSummary[]).length} blogs from cache`
+      `✓ Successfully loaded ${result.blogs.length} blogs (page ${page})`
     );
-    return (data as BlogSummary[]) || [];
+    return result;
   } catch (err) {
     console.error("Error fetching blogs:", err);
-    return [];
+    return {
+      blogs: [],
+      total: 0,
+      page: 1,
+      pageSize: 8,
+      totalPages: 0,
+    };
   }
 }
 
 export default async function BlogListingPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ page?: string | string[] }>;
+  searchParams?: Promise<{
+    page?: string | string[];
+    sort?: string | string[];
+  }>;
 }) {
-  const blogs = await getBlogs();
+  const sp = (await searchParams) || {};
+
+  // Extract query parameters
+  const rawPage = Array.isArray(sp.page) ? sp.page[0] : sp.page;
+  const rawSort = Array.isArray(sp.sort) ? sp.sort[0] : sp.sort;
+
+  const currentPage = rawPage ? Math.max(parseInt(rawPage, 10) || 1, 1) : 1;
+  const sortOption = rawSort || "date-desc";
+
+  // Fetch data with filters
+  const result = await getBlogs(currentPage, sortOption);
 
   // FAQs for Blog Listing page - SEO optimized
   const blogFaqs = [
@@ -129,7 +142,7 @@ export default async function BlogListingPage({
       {/* Schema Markup */}
       <BlogSchema
         isListingPage={true}
-        blogs={blogs}
+        blogs={result.blogs}
         blog={{
           id: "blog-listing",
           title: "AI Blog | Latest AI Insights and Tutorials",
@@ -141,20 +154,14 @@ export default async function BlogListingPage({
       />
 
       <BlogListingContent
-        initialBlogs={blogs}
+        initialBlogs={result.blogs}
         faqs={blogFaqs}
-        initialPage={await getInitialPage(searchParams)}
-        showDescription={(await getInitialPage(searchParams)) === 1}
+        initialPage={currentPage}
+        totalPages={result.totalPages}
+        totalBlogs={result.total}
+        initialSortOption={sortOption}
+        showDescription={currentPage === 1}
       />
     </>
   );
-}
-
-async function getInitialPage(
-  searchParams?: Promise<{ page?: string | string[] }>
-): Promise<number> {
-  if (!searchParams) return 1;
-  const sp = await searchParams;
-  const rawPage = Array.isArray(sp.page) ? sp.page[0] : sp.page;
-  return rawPage ? Math.max(parseInt(rawPage, 10) || 1, 1) : 1;
 }

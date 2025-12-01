@@ -124,16 +124,28 @@ async function getCategories(): Promise<Category[]> {
       }
     });
 
-    const categoryArray: Category[] = Object.entries(categoryCount).map(
-      ([name, count]) => ({
-        name,
-        count,
-        slug: name
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)/g, ""),
-      })
-    );
+    // Use Map to ensure unique slugs and merge duplicate slugs
+    const categoryMap = new Map<string, Category>();
+
+    Object.entries(categoryCount).forEach(([name, count]) => {
+      const slug = name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+
+      const existing = categoryMap.get(slug);
+      if (existing) {
+        // Merge counts for duplicate slugs, keep the longer name
+        existing.count += count;
+        if (name.length > existing.name.length) {
+          existing.name = name;
+        }
+      } else {
+        categoryMap.set(slug, { name, count, slug });
+      }
+    });
+
+    const categoryArray: Category[] = Array.from(categoryMap.values());
 
     // console.log(`Processed ${categoryArray.length} categories from ${allTools.length} tools`);
     return categoryArray;

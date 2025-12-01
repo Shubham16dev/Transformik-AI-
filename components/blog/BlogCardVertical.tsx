@@ -59,7 +59,12 @@ export function BlogCardVertical({ blog }: BlogCardVerticalProps) {
             variant="outline"
             className="w-full px-4 py-2 bg-gray-50 text-gray-800 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 transition-colors"
           >
-            <Link href={`/blog/${blog.slug}`}>Read More</Link>
+            <Link
+              href={`/blog/${blog.slug}`}
+              aria-label={`Read more about ${blog.title}`}
+            >
+              Read Full Article
+            </Link>
           </Button>
         </div>
       </div>

@@ -1,7 +1,7 @@
 // components/tools/ToolsContent.tsx
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ToolCard } from "@/components/tools/ToolCard";
 import { Pagination } from "@/components/Pagination";
@@ -51,6 +51,11 @@ interface ToolsContentProps {
   faqs?: { question: string; answer: string }[];
   showDescription?: boolean;
   initialPage?: number;
+  totalPages?: number;
+  totalTools?: number;
+  initialSearch?: string;
+  initialCategory?: string;
+  initialPriceFilter?: string;
   similarCategories?: { name: string; count: number; slug: string }[];
 }
 
@@ -62,112 +67,99 @@ export function ToolsContent({
   faqs,
   showDescription = false,
   initialPage = 1,
+  totalPages: serverTotalPages = 1,
+  totalTools: serverTotalTools = 0,
+  initialSearch = "",
+  initialCategory = "all",
+  initialPriceFilter = "all",
   similarCategories = [],
 }: ToolsContentProps) {
   const router = useRouter();
 
-  // Use static initial values to prevent hydration issues
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all"); // Always start with "all"
-  const [priceFilter, setPriceFilter] = useState("all");
+  // Use server-provided initial values
+  const [search, setSearch] = useState(initialSearch);
+  const [category, setCategory] = useState(initialCategory);
+  const [priceFilter, setPriceFilter] = useState(initialPriceFilter);
   const [currentPage, setCurrentPage] = useState(initialPage);
-  const [isInitialMount, setIsInitialMount] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
   const pageSize = 15;
 
-  // Handle mounting to prevent hydration issues
+  // Handle mounting
   useEffect(() => {
     setIsMounted(true);
+  }, []);
 
-    // Set the correct category after mounting to avoid hydration mismatch
-    if (categorySlug) {
-      const matchingCategory = categories.find(
-        (cat) =>
-          cat.toLowerCase().trim().replace(/\s+/g, "-") ===
-          categorySlug.toLowerCase()
-      );
-      setCategory(matchingCategory || "all");
-    }
-  }, [categorySlug, categories]);
+  // Sync URL params with state on mount
+  useEffect(() => {
+    if (!isMounted) return;
 
-  // Filtering (memoized for performance)
-  const filteredTools = useMemo(() => {
-    return tools.filter((tool) => {
-      const matchesSearch = tool.tool_name
-        .toLowerCase()
-        .includes(search.toLowerCase());
+    const params = new URLSearchParams(window.location.search);
+    const urlSearch = params.get("search") || "";
+    const urlCategory = params.get("category") || categorySlug || "all";
+    const urlPrice = params.get("price") || "all";
+    const urlPage = parseInt(params.get("page") || "1", 10);
 
-      let matchesCategory = category === "all";
+    if (urlSearch !== search) setSearch(urlSearch);
+    if (urlCategory !== category) setCategory(urlCategory);
+    if (urlPrice !== priceFilter) setPriceFilter(urlPrice);
+    if (urlPage !== currentPage) setCurrentPage(urlPage);
+  }, [isMounted, search, category, priceFilter, currentPage, categorySlug]); // Only run once on mount
 
-      if (!matchesCategory) {
-        const toolCategories = tool.category;
+  // Update URL when filters change - this will trigger a server-side refetch
+  const updateURL = (newFilters: {
+    search?: string;
+    category?: string;
+    price?: string;
+    page?: number;
+  }) => {
+    const params = new URLSearchParams();
 
-        if (Array.isArray(toolCategories)) {
-          // Check if any category in the array matches
-          matchesCategory = toolCategories.some(
-            (cat) =>
-              cat &&
-              typeof cat === "string" &&
-              cat.toLowerCase() === category.toLowerCase()
-          );
-        } else if (typeof toolCategories === "string" && toolCategories) {
-          // Check single category string
-          matchesCategory =
-            toolCategories.toLowerCase() === category.toLowerCase();
-        }
-      }
+    const finalSearch = newFilters.search ?? search;
+    const finalCategory = newFilters.category ?? category;
+    const finalPrice = newFilters.price ?? priceFilter;
+    const finalPage = newFilters.page ?? currentPage;
 
-      const matchesPrice =
-        priceFilter === "all" ||
-        tool.pricing_model?.toLowerCase() === priceFilter.toLowerCase();
+    if (finalSearch) params.set("search", finalSearch);
+    if (finalCategory && finalCategory !== "all")
+      params.set("category", finalCategory);
+    if (finalPrice && finalPrice !== "all") params.set("price", finalPrice);
+    if (finalPage > 1) params.set("page", finalPage.toString());
 
-      return matchesSearch && matchesCategory && matchesPrice;
-    });
-  }, [tools, search, category, priceFilter]);
+    const queryString = params.toString();
+    const newUrl = queryString ? `/tools?${queryString}` : "/tools";
+    router.push(newUrl);
+  };
 
-  // Pagination slice
-  const paginatedTools = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredTools.slice(start, start + pageSize);
-  }, [filteredTools, currentPage]);
+  // Handle filter changes
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setCurrentPage(1);
+    updateURL({ search: value, page: 1 });
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setCategory(value);
+    setCurrentPage(1);
+    updateURL({ category: value, page: 1 });
+  };
+
+  const handlePriceChange = (value: string) => {
+    setPriceFilter(value);
+    setCurrentPage(1);
+    updateURL({ price: value, page: 1 });
+  };
 
   // Update URL when page changes
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    const params = new URLSearchParams(window.location.search);
-    if (page > 1) {
-      params.set("page", page.toString());
-    } else {
-      params.delete("page");
-    }
-
-    // Build a proper path: ensure we always use the correct pathname
-    const pathname = window.location.pathname || "/tools";
-    // Make sure pathname starts with /tools for the tools page
-    const basePath = pathname.includes("/tools") ? pathname : "/tools";
-    const queryString = params.toString();
-    const target = queryString ? `${basePath}?${queryString}` : basePath;
-    router.push(target, { scroll: false });
+    updateURL({ page });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    if (isInitialMount) {
-      setIsInitialMount(false);
-      return;
-    }
-    if (currentPage !== 1) {
-      handlePageChange(1);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, category, priceFilter]);
-
-  // Scroll to top when page changes
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [currentPage]);
-
-  const totalPages = Math.ceil(filteredTools.length / pageSize);
+  // Use server-provided data directly (no client-side filtering)
+  const displayTools = tools;
+  const totalPages = serverTotalPages;
+  const totalItems = serverTotalTools;
 
   return (
     <>
@@ -180,11 +172,11 @@ export function ToolsContent({
 
       {/* Schema Markup */}
       <ToolsSchema
-        tools={paginatedTools}
+        tools={displayTools}
         categoryMeta={categoryMeta}
         categorySlug={categorySlug}
         currentPage={currentPage}
-        totalTools={filteredTools.length}
+        totalTools={totalItems}
       />
 
       {/* Hero Section - Only on page 1 */}
@@ -225,8 +217,17 @@ export function ToolsContent({
             type="text"
             aria-label="Search tools"
             placeholder="Search tools..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            defaultValue={search}
+            onBlur={(e) => {
+              if (e.target.value !== search) {
+                handleSearchChange(e.target.value);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSearchChange(e.currentTarget.value);
+              }
+            }}
             className="w-full md:w-1/3 border border-gray-300 rounded-md px-3 py-2"
           />
 
@@ -234,7 +235,7 @@ export function ToolsContent({
             <>
               <FilterCombobox
                 value={category}
-                onChange={setCategory}
+                onChange={handleCategoryChange}
                 options={[
                   { value: "all", label: "All Categories" },
                   ...categories.map((c) => ({ value: c, label: c })),
@@ -244,7 +245,7 @@ export function ToolsContent({
 
               <FilterCombobox
                 value={priceFilter}
-                onChange={setPriceFilter}
+                onChange={handlePriceChange}
                 options={PRICE_OPTIONS}
                 placeholder="Select Price"
               />
@@ -257,10 +258,10 @@ export function ToolsContent({
           className="grid grid-cols-1 md:grid-cols-3 gap-6"
           suppressHydrationWarning
         >
-          {isMounted && paginatedTools.length ? (
-            paginatedTools.map((tool) => (
+          {isMounted && displayTools.length ? (
+            displayTools.map((tool, index) => (
               <ToolCard
-                key={tool.id}
+                key={`${tool.id}-${tool.slug}-${index}`}
                 tool={{
                   tool_name: tool.tool_name,
                   slug: tool.slug,
@@ -299,9 +300,9 @@ export function ToolsContent({
         </div>
 
         {/* Pagination */}
-        {isMounted && (
+        {isMounted && totalPages > 1 && (
           <Pagination
-            totalItems={filteredTools.length}
+            totalItems={totalItems}
             pageSize={pageSize}
             currentPage={currentPage}
             onPageChange={handlePageChange}
@@ -312,9 +313,9 @@ export function ToolsContent({
           <section className="mt-12">
             <h2 className="text-2xl font-semibold mb-6">Similar Categories</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {similarCategories.map((category) => (
+              {similarCategories.map((category, index) => (
                 <a
-                  key={category.slug}
+                  key={`${category.slug}-${index}`}
                   href={`/tools/category/${category.slug}`}
                   className="flex justify-between items-center p-4 bg-white border border-gray-200 rounded-lg hover:shadow-md hover:border-purple-500 transition-all cursor-pointer group"
                 >

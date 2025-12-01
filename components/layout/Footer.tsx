@@ -19,18 +19,30 @@ export function Footer() {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const { data, error } = await supabase
-        .from("tools_summary")
-        .select("category");
-      if (!error && data) {
-        const allCategories: string[] = [];
-        data.forEach((tool) => {
-          const cat = tool.category;
-          if (Array.isArray(cat))
-            cat.forEach((c) => c && allCategories.push(c));
-          else if (typeof cat === "string" && cat) allCategories.push(cat);
-        });
-        setCategories(Array.from(new Set(allCategories))); // unique
+      try {
+        const { data, error } = await supabase
+          .from("tools_summary")
+          .select("category");
+        if (error) {
+          console.error("Error fetching categories:", error);
+          return;
+        }
+        if (data) {
+          const allCategories: string[] = [];
+          data.forEach((tool) => {
+            const cat = tool.category;
+            if (Array.isArray(cat)) {
+              cat.forEach((c) => c && allCategories.push(String(c).trim()));
+            } else if (typeof cat === "string" && cat.trim()) {
+              allCategories.push(cat.trim());
+            }
+          });
+          const unique = Array.from(new Set(allCategories));
+          // keep up to 15 categories for the footer
+          setCategories(unique.slice(0, 15));
+        }
+      } catch (err) {
+        console.error("Unexpected error fetching categories:", err);
       }
     };
     fetchCategories();
@@ -137,7 +149,7 @@ export function Footer() {
           <div className="md:pl-12">
             <h3 className="font-semibold text-xl mb-3">Top AI Categories</h3>
             <ul className="space-y-2 text-white">
-              {categories.slice(0, 4).map((category) => {
+              {categories.slice(0, 15).map((category) => {
                 const slug = generateSlug(category);
                 return (
                   <li key={category}>

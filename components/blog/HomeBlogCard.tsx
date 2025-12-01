@@ -58,7 +58,12 @@ export function HomeBlogCard({ blog }: HomeBlogCardProps) {
             variant="outline"
             className="px-4 py-1 bg-gray-200 text-gray-800 hover:bg-gray-300"
           >
-            <Link href={`/blog/${blog.slug}`}>Read More</Link>
+            <Link
+              href={`/blog/${blog.slug}`}
+              aria-label={`Read more about ${blog.title}`}
+            >
+              Read Full Article
+            </Link>
           </Button>
         </div>
       </div>

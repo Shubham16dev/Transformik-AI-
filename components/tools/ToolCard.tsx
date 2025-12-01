@@ -48,7 +48,7 @@ export function ToolCard({ tool }: ToolCardProps) {
                 <a
                   href={tool.url}
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="nofollow noopener noreferrer"
                   className="ml-2 p-1 text-gray-500 hover:text-blue-600 transition-colors flex-shrink-0"
                   title="Visit website"
                 >

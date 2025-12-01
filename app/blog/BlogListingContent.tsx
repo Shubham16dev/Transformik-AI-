@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { HomeBlogCard } from "@/components/blog/HomeBlogCard";
 import { FAQSchema } from "@/components/schema/FAQSchema";
@@ -35,6 +35,9 @@ interface BlogListingContentProps {
   initialBlogs: BlogSummary[];
   faqs?: { question: string; answer: string }[];
   initialPage?: number;
+  totalPages?: number;
+  totalBlogs?: number;
+  initialSortOption?: string;
   showDescription?: boolean;
 }
 
@@ -42,75 +45,53 @@ export function BlogListingContent({
   initialBlogs,
   faqs,
   initialPage = 1,
+  totalPages: serverTotalPages = 1,
+  totalBlogs: serverTotalBlogs = 0,
+  initialSortOption = "date-desc",
   showDescription = false,
 }: BlogListingContentProps) {
   const router = useRouter();
-  const [sortOption, setSortOption] = useState("date-desc");
+  const [sortOption, setSortOption] = useState(initialSortOption);
   const [currentPage, setCurrentPage] = useState(initialPage);
-  const [isInitialMount, setIsInitialMount] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
 
   const pageSize = 8; // Blogs per page
 
-  // Sort blogs using useMemo to prevent hydration issues
-  const sortedBlogs = useMemo(() => {
-    const sorted = [...initialBlogs];
-    if (sortOption === "date-desc") {
-      sorted.sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-    } else if (sortOption === "date-asc") {
-      sorted.sort(
-        (a, b) =>
-          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-      );
-    }
-    return sorted;
-  }, [sortOption, initialBlogs]);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
-  const totalPages = Math.ceil(sortedBlogs.length / pageSize);
-  const paginatedBlogs = sortedBlogs.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  // Update URL when filters change
+  const updateURL = (newFilters: { sort?: string; page?: number }) => {
+    const params = new URLSearchParams();
+
+    const finalSort = newFilters.sort ?? sortOption;
+    const finalPage = newFilters.page ?? currentPage;
+
+    if (finalSort && finalSort !== "date-desc") params.set("sort", finalSort);
+    if (finalPage > 1) params.set("page", finalPage.toString());
+
+    const queryString = params.toString();
+    const newUrl = queryString ? `/blog?${queryString}` : "/blog";
+    router.push(newUrl);
+  };
 
   // Update URL when page changes
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    const params = new URLSearchParams(window.location.search);
-    if (page > 1) {
-      params.set("page", page.toString());
-    } else {
-      params.delete("page");
-    }
-
-    const pathname = window.location.pathname || "/blog";
-    const queryString = params.toString();
-    const target = queryString ? `${pathname}?${queryString}` : pathname;
-    router.push(target, { scroll: false });
+    updateURL({ page });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleSortChange = (value: string) => {
     setSortOption(value);
-    if (currentPage !== 1) {
-      handlePageChange(1);
-    } else {
-      setCurrentPage(1);
-    }
+    setCurrentPage(1);
+    updateURL({ sort: value, page: 1 });
   };
 
-  // Reset to page 1 when sort changes (but not on initial mount)
-  useEffect(() => {
-    if (isInitialMount) {
-      setIsInitialMount(false);
-      return;
-    }
-  }, [isInitialMount]);
-
-  // Scroll to top when page changes
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [currentPage]);
+  // Use server-provided data directly
+  const displayBlogs = initialBlogs;
+  const totalPages = serverTotalPages;
 
   return (
     <>
@@ -162,21 +143,23 @@ export function BlogListingContent({
           </Select>
         </div>
 
-        {/* Blog Grid */}
+        {/* Blogs Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {paginatedBlogs.length > 0 ? (
-            paginatedBlogs.map((blog) => (
+          {isMounted && displayBlogs.length > 0 ? (
+            displayBlogs.map((blog) => (
               <HomeBlogCard key={blog.id} blog={blog} />
             ))
-          ) : (
+          ) : isMounted ? (
             <p className="text-gray-500">No blogs found.</p>
+          ) : (
+            <p className="text-gray-500">Loading...</p>
           )}
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {isMounted && totalPages > 1 && (
           <Pagination
-            totalItems={sortedBlogs.length}
+            totalItems={serverTotalBlogs}
             pageSize={pageSize}
             currentPage={currentPage}
             onPageChange={handlePageChange}

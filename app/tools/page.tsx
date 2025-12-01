@@ -46,17 +46,6 @@ export async function generateMetadata({
 
 export const revalidate = 3600; // Regenerate every hour (ISR)
 
-interface Tool {
-  id: string;
-  tool_name: string;
-  slug: string;
-  one_line_description: string;
-  pricing_model: string;
-  url?: string;
-  category?: string | string[] | null;
-  logo?: string | null;
-}
-
 // SEO-optimized FAQs for All AI Tools page
 const allToolsFaqs = [
   {
@@ -101,14 +90,44 @@ const allToolsFaqs = [
   },
 ];
 
-async function getTools(): Promise<Tool[]> {
+async function getTools(
+  page: number = 1,
+  search: string = "",
+  category: string = "all",
+  priceFilter: string = "all"
+) {
   try {
-    // Use cached version instead of fetching all tools directly
-    const allTools = (await SupabaseCache.getAllTools()) as Tool[];
-    console.log(`✓ Successfully loaded ${allTools.length} tools from cache`);
-    return allTools;
+    // Use optimized filtered query instead of fetching all tools
+    const result = await SupabaseCache.getFilteredTools({
+      page,
+      pageSize: 15,
+      search,
+      category,
+      priceFilter,
+    });
+
+    console.log(
+      `✓ Successfully loaded ${result.tools.length} tools (page ${page})`
+    );
+    return result;
   } catch (err) {
     console.error("Error fetching tools:", err);
+    return {
+      tools: [],
+      total: 0,
+      page: 1,
+      pageSize: 15,
+      totalPages: 0,
+    };
+  }
+}
+
+async function getCategories() {
+  try {
+    const categories = await SupabaseCache.getUniqueCategories();
+    return categories;
+  } catch (err) {
+    console.error("Error fetching categories:", err);
     return [];
   }
 }
@@ -116,33 +135,42 @@ async function getTools(): Promise<Tool[]> {
 export default async function ToolsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ page?: string | string[] }>;
+  searchParams?: Promise<{
+    page?: string | string[];
+    search?: string | string[];
+    category?: string | string[];
+    price?: string | string[];
+  }>;
 }) {
-  const tools = await getTools();
-
-  // Extract unique categories
-  const allCategories: string[] = [];
-  tools.forEach((tool) => {
-    const toolCategories = tool.category;
-    if (Array.isArray(toolCategories)) {
-      toolCategories.forEach((cat) => cat && allCategories.push(cat));
-    } else if (typeof toolCategories === "string" && toolCategories) {
-      allCategories.push(toolCategories);
-    }
-  });
-  const categories = Array.from(new Set(allCategories)).sort();
-
   const sp = (await searchParams) || {};
+
+  // Extract query parameters
   const rawPage = Array.isArray(sp.page) ? sp.page[0] : sp.page;
-  const initialPage = rawPage ? Math.max(parseInt(rawPage, 10) || 1, 1) : 1;
+  const rawSearch = Array.isArray(sp.search) ? sp.search[0] : sp.search;
+  const rawCategory = Array.isArray(sp.category) ? sp.category[0] : sp.category;
+  const rawPrice = Array.isArray(sp.price) ? sp.price[0] : sp.price;
+
+  const currentPage = rawPage ? Math.max(parseInt(rawPage, 10) || 1, 1) : 1;
+  const search = rawSearch || "";
+  const category = rawCategory || "all";
+  const priceFilter = rawPrice || "all";
+
+  // Fetch only the data needed for current page and filters
+  const result = await getTools(currentPage, search, category, priceFilter);
+  const categories = await getCategories();
 
   return (
     <ToolsContent
-      tools={tools}
+      tools={result.tools}
       categories={categories}
       faqs={allToolsFaqs}
-      showDescription={initialPage === 1}
-      initialPage={initialPage}
+      showDescription={currentPage === 1}
+      initialPage={currentPage}
+      totalPages={result.totalPages}
+      totalTools={result.total}
+      initialSearch={search}
+      initialCategory={category}
+      initialPriceFilter={priceFilter}
     />
   );
 }

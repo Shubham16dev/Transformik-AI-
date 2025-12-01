@@ -253,7 +253,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
                   <a
                     href={toolSummary.url}
                     target="_blank"
-                    rel="noopener noreferrer"
+                    rel="nofollow noopener noreferrer"
                   >
                     Visit Tool
                   </a>
@@ -440,7 +440,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
                         <a
                           href={toolDetails.pricing.trim()}
                           target="_blank"
-                          rel="noopener noreferrer"
+                          rel="nofollow noopener noreferrer"
                           className="text-green-600 underline hover:text-blue-800"
                         >
                           click here

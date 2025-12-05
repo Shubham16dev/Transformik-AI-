@@ -7,11 +7,22 @@ interface RelatedToolsProps {
   categories: string[];
 }
 
+interface RelatedTool {
+  id: number;
+  tool_name: string;
+  slug: string;
+  one_line_description: string;
+  logo?: string | null;
+  category?: string | string[] | null;
+  pricing_model?: string;
+  url?: string;
+}
+
 export async function RelatedTools({
   currentToolId,
   categories,
 }: RelatedToolsProps) {
-  let relatedTools: any[] = [];
+  let relatedTools: RelatedTool[] = [];
 
   // Strategy 1: Try to get tools that share at least one category
   if (categories && categories.length > 0) {
@@ -93,8 +104,13 @@ export async function RelatedTools({
                 tool_name: tool.tool_name,
                 slug: tool.slug,
                 one_line_description: tool.one_line_description,
-                category: tool.category,
-                pricing_model: tool.pricing_model,
+                category: tool.category ?? undefined,
+                pricing_model: tool.pricing_model as
+                  | "Free"
+                  | "Freemium"
+                  | "Paid"
+                  | "Free Trial"
+                  | undefined,
                 url: tool.url,
                 logo: logoUrl,
               }}

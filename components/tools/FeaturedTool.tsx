@@ -24,7 +24,7 @@ export async function FeaturedTools({ limit = 5 }: FeaturedToolsProps) {
     .select(
       "id, tool_name, slug, one_line_description, pricing_model, url, logo, category"
     )
-    .order("tool_name", { ascending: true })
+    .order("created_at", { ascending: false })
     .limit(limit);
 
   if (error || !tools?.length) {
@@ -33,9 +33,7 @@ export async function FeaturedTools({ limit = 5 }: FeaturedToolsProps) {
 
   return (
     <div>
-      <h3 className="text-lg font-semibold mb-4 text-gray-900">
-        Featured Tools
-      </h3>
+      <h3 className="text-lg font-semibold mb-4 text-gray-900">Latest Tools</h3>
       <div className="space-y-4">
         {tools.map((tool) => {
           const logoUrl = tool.logo

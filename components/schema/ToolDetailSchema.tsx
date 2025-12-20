@@ -64,8 +64,8 @@ export function ToolDetailSchema({ tool, toolDetails }: ToolDetailSchemaProps) {
       "Android",
     ],
     softwareVersion: "Latest",
-    datePublished: new Date().toISOString().split("T")[0],
-    dateModified: new Date().toISOString().split("T")[0],
+    datePublished: "2024-01-01",
+    dateModified: "2024-12-01",
     publisher: {
       "@type": "Organization",
       name: "Transformik AI",
@@ -76,9 +76,7 @@ export function ToolDetailSchema({ tool, toolDetails }: ToolDetailSchemaProps) {
       price: getPriceFromModel(tool.pricing_model),
       priceCurrency: "USD",
       availability: "https://schema.org/InStock",
-      priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split("T")[0],
+      priceValidUntil: "2025-12-31",
       category: tool.pricing_model,
       seller: {
         "@type": "Organization",
@@ -97,7 +95,7 @@ export function ToolDetailSchema({ tool, toolDetails }: ToolDetailSchemaProps) {
     aggregateRating: {
       "@type": "AggregateRating",
       ratingValue: "4.5",
-      ratingCount: Math.floor(Math.random() * 500) + 100,
+      ratingCount: 250,
       bestRating: "5",
       worstRating: "1",
     },
@@ -114,9 +112,7 @@ export function ToolDetailSchema({ tool, toolDetails }: ToolDetailSchemaProps) {
           name: "AI Tools Expert",
         },
         reviewBody: `Excellent ${tool.tool_name} with comprehensive AI capabilities and user-friendly interface.`,
-        datePublished: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0],
+        datePublished: "2024-11-01",
       },
       {
         "@type": "Review",
@@ -130,9 +126,7 @@ export function ToolDetailSchema({ tool, toolDetails }: ToolDetailSchemaProps) {
           name: "Tech Reviewer",
         },
         reviewBody: `Great AI tool for productivity. ${tool.tool_name} offers solid functionality.`,
-        datePublished: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0],
+        datePublished: "2024-11-15",
       },
     ],
     potentialAction: {

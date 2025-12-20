@@ -89,21 +89,12 @@ export function ToolsContent({
     setIsMounted(true);
   }, []);
 
-  // Sync URL params with state on mount
+  // Sync state with server-provided initial values when they change (after navigation)
   useEffect(() => {
-    if (!isMounted) return;
-
-    const params = new URLSearchParams(window.location.search);
-    const urlSearch = params.get("search") || "";
-    const urlCategory = params.get("category") || categorySlug || "all";
-    const urlPrice = params.get("price") || "all";
-    const urlPage = parseInt(params.get("page") || "1", 10);
-
-    if (urlSearch !== search) setSearch(urlSearch);
-    if (urlCategory !== category) setCategory(urlCategory);
-    if (urlPrice !== priceFilter) setPriceFilter(urlPrice);
-    if (urlPage !== currentPage) setCurrentPage(urlPage);
-  }, [isMounted, search, category, priceFilter, currentPage, categorySlug]); // Only run once on mount
+    setCurrentPage(initialPage);
+    setSearch(initialSearch);
+    setPriceFilter(initialPriceFilter);
+  }, [initialPage, initialSearch, initialPriceFilter]);
 
   // Update URL when filters change - this will trigger a server-side refetch
   const updateURL = (newFilters: {
@@ -313,6 +304,9 @@ export function ToolsContent({
             pageSize={pageSize}
             currentPage={currentPage}
             onPageChange={handlePageChange}
+            basePath={
+              categorySlug ? `/tools/category/${categorySlug}` : "/tools"
+            }
           />
         )}
         {/* Similar Categories Section - Only show on category pages */}

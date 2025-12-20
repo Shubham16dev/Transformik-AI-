@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 0; // Always fetch fresh content
+export const revalidate = 3600; // Cache for 1 hour
 
 interface Category {
   name: string;
@@ -145,7 +145,9 @@ async function getCategories(): Promise<Category[]> {
       }
     });
 
-    const categoryArray: Category[] = Array.from(categoryMap.values());
+    const categoryArray: Category[] = Array.from(categoryMap.values()).filter(
+      (category) => category.name !== "Uncategorized"
+    );
 
     // console.log(`Processed ${categoryArray.length} categories from ${allTools.length} tools`);
     return categoryArray;

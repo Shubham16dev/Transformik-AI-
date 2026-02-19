@@ -28,7 +28,9 @@ export function BlogCard({ blog }: BlogCardProps) {
             width={400}
             height={225}
             className="object-cover w-full h-full"
-            unoptimized
+            loading="lazy"
+            quality={85}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
           />
         ) : (
           <span className="text-gray-400 text-sm font-medium text-center">

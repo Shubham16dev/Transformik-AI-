@@ -18,16 +18,31 @@ interface Tool {
   category?: string | null;
 }
 
-export async function FeaturedTools({ limit = 5 }: FeaturedToolsProps) {
-  const { data: tools, error } = await supabaseServer
-    .from("tools_summary")
-    .select(
-      "id, tool_name, slug, one_line_description, pricing_model, url, logo, category"
-    )
-    .order("created_at", { ascending: false })
-    .limit(limit);
+export async function FeaturedTools({
+  limit = 5,
+  initialTools,
+}: FeaturedToolsProps) {
+  // 🚀 Use server-provided data if available (avoid redundant query)
+  let tools = initialTools;
 
-  if (error || !tools?.length) {
+  // Only fetch if no initialTools provided
+  if (!tools || tools.length === 0) {
+    const { data, error } = await supabaseServer
+      .from("tools_summary")
+      .select(
+        "id, tool_name, slug, one_line_description, pricing_model, url, logo, category",
+      )
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error || !data?.length) {
+      return <p className="text-gray-500">No featured tools available.</p>;
+    }
+
+    tools = data as unknown as Tool[];
+  }
+
+  if (!tools?.length) {
     return <p className="text-gray-500">No featured tools available.</p>;
   }
 

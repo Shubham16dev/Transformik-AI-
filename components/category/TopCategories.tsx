@@ -6,16 +6,29 @@ import Link from "next/link";
 
 interface TopCategoriesProps {
   limit?: number;
+  initialCategories?: string[]; // 🚀 Server-side data prop
 }
 
-export function TopCategories({ limit = 6 }: TopCategoriesProps) {
-  const [categories, setCategories] = useState<string[]>([]);
+export function TopCategories({
+  limit = 6,
+  initialCategories,
+}: TopCategoriesProps) {
+  const [categories, setCategories] = useState<string[]>(
+    initialCategories || [],
+  );
 
   useEffect(() => {
+    // 🚀 Skip fetch if server-side data provided
+    if (initialCategories && initialCategories.length > 0) {
+      return;
+    }
+
+    // Fallback: fetch on client (only if no initialCategories)
     const fetchCategories = async () => {
       const { data, error } = await supabase
         .from("tools_summary")
-        .select("category");
+        .select("category")
+        .limit(1000); // Limit to reduce data transfer
 
       if (!error && data) {
         const allCategories: string[] = [];
@@ -40,7 +53,7 @@ export function TopCategories({ limit = 6 }: TopCategoriesProps) {
     };
 
     fetchCategories();
-  }, []);
+  }, [initialCategories]);
 
   // Convert category names into URL-friendly slugs
   const generateSlug = (category: string) =>

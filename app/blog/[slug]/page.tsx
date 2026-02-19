@@ -9,6 +9,10 @@ import { BlogContent } from "@/components/blog/BlogContent";
 import Image from "next/image";
 import type { Metadata } from "next";
 
+// 🚀 ISR Configuration: Cache blog pages for 12 hours
+export const revalidate = 43200; // 12 hours (blogs don't change frequently)
+export const dynamicParams = true; // Generate new blogs on-demand
+
 interface BlogDetailPageProps {
   params: Promise<{ slug: string }>;
 }
@@ -68,7 +72,8 @@ export async function generateMetadata({
 export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
   const { slug } = await params;
 
-  // Fetch blog summary
+  // 🚀 Optimized: Fetch only required fields from blog summary
+  // Note: Using * to include all fields since the code relies on fallback fields that may vary
   const { data: summary, error: summaryError } = await supabase
     .from("blogs_summary")
     .select("*")
@@ -191,7 +196,8 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
                     height={480}
                     sizes="(max-width: 768px) 100vw, 360px"
                     className="object-cover w-full h-full"
-                    unoptimized
+                    priority
+                    quality={90}
                   />
                 </div>
               ) : (

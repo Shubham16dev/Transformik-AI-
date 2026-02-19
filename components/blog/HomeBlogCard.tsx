@@ -27,7 +27,9 @@ export function HomeBlogCard({ blog }: HomeBlogCardProps) {
             alt={blog.title}
             fill
             className="object-cover"
-            unoptimized
+            loading="lazy"
+            quality={85}
+            sizes="(max-width: 768px) 100vw, 33vw"
           />
         ) : (
           <span className="text-gray-400 text-sm font-medium text-center">

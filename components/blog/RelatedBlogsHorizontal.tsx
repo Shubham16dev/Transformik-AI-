@@ -28,7 +28,7 @@ export function RelatedBlogsHorizontal({
   initialBlogs,
 }: RelatedBlogsHorizontalProps) {
   const [relatedBlogs, setRelatedBlogs] = useState<RelatedBlog[]>(
-    initialBlogs ?? []
+    initialBlogs ?? [],
   );
   const [loading, setLoading] = useState(initialBlogs ? false : true);
 
@@ -36,9 +36,10 @@ export function RelatedBlogsHorizontal({
     if (initialBlogs) return;
     const fetchRelatedBlogs = async () => {
       try {
+        // 🚀 Optimized: Only fetch required fields
         const { data: allBlogs, error: allError } = await supabase
           .from("blogs_summary")
-          .select("*")
+          .select("id, title, slug, excerpt, featured_image")
           .neq("id", currentBlogId)
           .limit(limit);
         let finalBlogs: RelatedBlog[] = [];
@@ -56,13 +57,14 @@ export function RelatedBlogsHorizontal({
             }));
           finalBlogs = transformedBlogs;
         } else {
+          // 🚀 Optimized: Only fetch required fields for fallback
           const { data: emergencyBlogs } = await supabase
             .from("blogs_summary")
-            .select("*")
+            .select("id, title, slug, excerpt, featured_image")
             .limit(limit);
           if (emergencyBlogs && emergencyBlogs.length > 0) {
             const filteredBlogs = emergencyBlogs.filter(
-              (blog) => blog.id !== currentBlogId
+              (blog) => blog.id !== currentBlogId,
             );
             const transformedBlogs: RelatedBlog[] = filteredBlogs.map(
               (blog) => ({
@@ -73,7 +75,7 @@ export function RelatedBlogsHorizontal({
                   blog.excerpt ||
                   "Discover insights about AI tools and technology.",
                 featured_image: blog.featured_image,
-              })
+              }),
             );
             finalBlogs = transformedBlogs;
           }

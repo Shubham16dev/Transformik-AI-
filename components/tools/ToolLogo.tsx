@@ -18,7 +18,7 @@ export function ToolLogo({ src, alt, priority = false }: ToolLogoProps) {
           className="object-contain"
           loading={priority ? "eager" : "lazy"}
           sizes="80px"
-          unoptimized
+          quality={90}
         />
       ) : (
         <div className="w-full h-full bg-gray-100 flex items-center justify-center">

@@ -91,7 +91,7 @@ export class SupabaseCache {
       const { data, error } = await supabaseServer
         .from("tools_summary")
         .select(
-          "id, tool_name, slug, one_line_description, pricing_model, url, logo, category"
+          "id, tool_name, slug, one_line_description, pricing_model, url, logo, category",
         )
         .order("created_at", { ascending: false })
         .limit(limit);
@@ -133,6 +133,66 @@ export class SupabaseCache {
       return data || [];
     } catch (error) {
       console.error("Error fetching latest blogs:", error);
+      return [];
+    }
+  }
+
+  // 🚀 Get unique categories efficiently (OPTIMIZED - only fetches category field)
+  static async getTopCategories(limit = 20) {
+    const cacheKey = `top_categories_${limit}`;
+    const cached = cache.get<string[]>(cacheKey);
+
+    if (cached) {
+      console.log("✓ Categories served from cache");
+      return cached;
+    }
+
+    try {
+      // Only fetch category column instead of entire rows
+      const { data, error } = await supabaseServer
+        .from("tools_summary")
+        .select("category")
+        .not("category", "is", null)
+        .limit(1000); // Sample from first 1000 tools for speed
+
+      if (error) throw error;
+
+      const allCategories: string[] = [];
+
+      data?.forEach((tool) => {
+        const categories = tool.category;
+
+        if (Array.isArray(categories)) {
+          categories.forEach((cat) => {
+            if (cat && typeof cat === "string") {
+              allCategories.push(cat);
+            }
+          });
+        } else if (typeof categories === "string" && categories) {
+          allCategories.push(categories);
+        }
+      });
+
+      // Get unique categories and sort by frequency
+      const categoryCounts = allCategories.reduce(
+        (acc, cat) => {
+          acc[cat] = (acc[cat] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+
+      const uniqueCategories = Object.entries(categoryCounts)
+        .sort(([, a], [, b]) => b - a) // Sort by frequency
+        .slice(0, limit)
+        .map(([cat]) => cat);
+
+      // Cache for 6 hours (categories change infrequently)
+      cache.set(cacheKey, uniqueCategories, 360);
+      console.log(`✓ Cached ${uniqueCategories.length} categories`);
+      return uniqueCategories;
+    } catch (error) {
+      console.error("Error fetching categories:", error);
       return [];
     }
   }
@@ -192,7 +252,7 @@ export class SupabaseCache {
           category
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)+/g, "")
+            .replace(/(^-|-$)+/g, ""),
         );
 
       // Fetch blogs
@@ -235,7 +295,7 @@ export class SupabaseCache {
       console.log(
         `✓ Cached sitemap data: ${uniqueCategories.length} categories, ${
           blogs?.length || 0
-        } blogs, ${allTools.length} tools`
+        } blogs, ${allTools.length} tools`,
       );
 
       return sitemapData;
@@ -297,7 +357,7 @@ export class SupabaseCache {
         : [];
 
       console.log(
-        `✓ Fetched ${uniqueTools.length} tools (page ${page}, total: ${count})`
+        `✓ Fetched ${uniqueTools.length} tools (page ${page}, total: ${count})`,
       );
 
       return {
@@ -346,7 +406,7 @@ export class SupabaseCache {
       console.log(
         `✓ Fetched ${
           data?.length || 0
-        } tools for category "${categoryName}" (page ${page}, total: ${count})`
+        } tools for category "${categoryName}" (page ${page}, total: ${count})`,
       );
 
       return {
@@ -453,7 +513,7 @@ export class SupabaseCache {
         .from("tools_summary")
         .select(
           "id,tool_name,slug,one_line_description,pricing_model,url,logo,category",
-          { count: "exact" }
+          { count: "exact" },
         )
         .eq("pricing_model", "Free");
 
@@ -487,7 +547,7 @@ export class SupabaseCache {
         : [];
 
       console.log(
-        `✓ Fetched ${uniqueTools.length} free tools (page ${page}, total: ${count})`
+        `✓ Fetched ${uniqueTools.length} free tools (page ${page}, total: ${count})`,
       );
 
       return {
@@ -589,7 +649,7 @@ export class SupabaseCache {
       if (error) throw error;
 
       console.log(
-        `✓ Fetched ${data?.length || 0} blogs (page ${page}, total: ${count})`
+        `✓ Fetched ${data?.length || 0} blogs (page ${page}, total: ${count})`,
       );
 
       return {

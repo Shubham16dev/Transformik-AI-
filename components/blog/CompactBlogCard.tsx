@@ -27,7 +27,8 @@ export function CompactBlogCard({ blog }: CompactBlogCardProps) {
               width={80}
               height={64}
               className="object-cover w-full h-full"
-              unoptimized
+              loading="lazy"
+              quality={80}
             />
           ) : (
             <span className="text-gray-400 text-xs font-medium text-center">
